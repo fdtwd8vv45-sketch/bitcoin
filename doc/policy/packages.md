@@ -99,22 +99,6 @@ submitted as a package.
 transaction (i.e. in which a replacement transaction with a higher fee cannot be signed) being
 rejected from the mempool when transaction volume is high and the mempool minimum feerate rises.
 
-Note: Package feerate cannot be used to meet the minimum relay feerate (`-minrelaytxfee`)
-requirement. For example, if the mempool minimum feerate is 5sat/vB and the minimum relay feerate is
-set to 5sat/vB, a 1sat/vB parent transaction with a high-feerate child will not be accepted, even if
-submitted as a package. Note that this rule does not apply to
-[TRUC transactions](https://github.com/bitcoin/bips/blob/master/bip-0431.mediawiki) as an individual
-TRUC transaction is permitted to be below the mempool min relay feerate, assuming it is considered within
-a package that meets the mempool's feerate requirements.
-
-*Rationale*: Avoid situations in which the mempool contains non-bumped transactions below min relay
-feerate (which we consider to have pay 0 fees and thus receiving free relay). While package
-submission would ensure these transactions are bumped at the time of entry, it is not guaranteed
-that the transaction will always be bumped. For example, a later transaction could replace the
-fee-bumping child without still bumping the parent. These no-longer-bumped transactions should be
-removed during a replacement, but we do not have a DoS-resistant way of removing them or enforcing a
-limit on their quantity. Instead, prevent their entry into the mempool.
-
 Implementation Note: Transactions within a package are always validated individually first, and
 package validation is used for the transactions that failed. Since package feerate is only
 calculated using transactions that are not in the mempool, this implementation detail affects the

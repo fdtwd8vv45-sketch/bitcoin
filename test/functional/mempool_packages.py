@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2014-2022 The Bitcoin Core developers
+# Copyright (c) 2014-present The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test descendant package tracking code."""
@@ -239,7 +239,8 @@ class MempoolPackagesTest(BitcoinTestFramework):
         self.generate(self.nodes[0], 1)
         self.trigger_reorg(fork_blocks, self.nodes[0])
 
-        # Check if the txs are returned to the mempool
+        # Check that the txs are returned to the mempool, and that transaction ordering is
+        # unchanged, as it is deterministic.
         assert_equal(self.nodes[0].getrawmempool(), mempool0)
 
         # Clean-up the mempool

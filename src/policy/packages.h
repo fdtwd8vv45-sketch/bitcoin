@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2022 The Bitcoin Core developers
+// Copyright (c) 2021-present The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -71,7 +71,7 @@ bool IsConsistentPackage(const Package& txns);
  * 3. If any dependencies exist between transactions, parents must appear before children.
  * 4. Transactions cannot conflict, i.e., spend the same inputs.
  */
-bool IsWellFormedPackage(const Package& txns, PackageValidationState& state, bool require_sorted);
+bool IsWellFormedPackage(const Package& txns, PackageValidationState& state);
 
 /** Context-free check that a package is exactly one child and its parents; not all parents need to
  * be present, but the package must not contain any transactions that are not the child's parents.

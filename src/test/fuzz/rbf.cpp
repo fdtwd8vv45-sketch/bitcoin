@@ -11,6 +11,7 @@
 #include <test/fuzz/util.h>
 #include <test/fuzz/util/mempool.h>
 #include <test/util/setup_common.h>
+#include <test/util/time.h>
 #include <test/util/txmempool.h>
 #include <txmempool.h>
 #include <util/check.h>
@@ -53,7 +54,7 @@ FUZZ_TARGET(rbf, .init = initialize_rbf)
 {
     SeedRandomStateForTest(SeedRand::ZEROS);
     FuzzedDataProvider fuzzed_data_provider(buffer.data(), buffer.size());
-    SetMockTime(ConsumeTime(fuzzed_data_provider));
+    NodeClockContext clock_ctx{ConsumeTime(fuzzed_data_provider)};
     std::optional<CMutableTransaction> mtx = ConsumeDeserializable<CMutableTransaction>(fuzzed_data_provider, TX_WITH_WITNESS);
     if (!mtx) {
         return;
@@ -95,7 +96,7 @@ FUZZ_TARGET(package_rbf, .init = initialize_package_rbf)
 {
     SeedRandomStateForTest(SeedRand::ZEROS);
     FuzzedDataProvider fuzzed_data_provider(buffer.data(), buffer.size());
-    SetMockTime(ConsumeTime(fuzzed_data_provider));
+    NodeClockContext clock_ctx{ConsumeTime(fuzzed_data_provider)};
 
     // "Real" virtual size is not important for this test since ConsumeTxMemPoolEntry generates its own virtual size values
     // so we construct small transactions for performance reasons. Child simply needs an input for later to perhaps connect to parent.
@@ -121,6 +122,7 @@ FUZZ_TARGET(package_rbf, .init = initialize_package_rbf)
     CTransaction replacement_tx_final{*replacement_tx};
     auto replacement_entry = ConsumeTxMemPoolEntry(fuzzed_data_provider, replacement_tx_final);
     int32_t replacement_weight = replacement_entry.GetAdjustedWeight();
+    // Ensure that we don't hit FeeFrac limits, as we store TxGraph entries in terms of FeePerWeight
     int64_t running_vsize_total{replacement_entry.GetTxSize()};
 
     LOCK2(cs_main, pool.cs);
@@ -137,7 +139,7 @@ FUZZ_TARGET(package_rbf, .init = initialize_package_rbf)
         mempool_txs.emplace_back(parent);
         const auto parent_entry = ConsumeTxMemPoolEntry(fuzzed_data_provider, mempool_txs.back());
         running_vsize_total += parent_entry.GetTxSize();
-        if (running_vsize_total > std::numeric_limits<int32_t>::max()) {
+        if (running_vsize_total * WITNESS_SCALE_FACTOR > std::numeric_limits<int32_t>::max()) {
             // We aren't adding this final tx to mempool, so we don't want to conflict with it
             mempool_txs.pop_back();
             break;
@@ -156,7 +158,7 @@ FUZZ_TARGET(package_rbf, .init = initialize_package_rbf)
         mempool_txs.emplace_back(child);
         const auto child_entry = ConsumeTxMemPoolEntry(fuzzed_data_provider, mempool_txs.back());
         running_vsize_total += child_entry.GetTxSize();
-        if (running_vsize_total > std::numeric_limits<int32_t>::max()) {
+        if (running_vsize_total * WITNESS_SCALE_FACTOR > std::numeric_limits<int32_t>::max()) {
             // We aren't adding this final tx to mempool, so we don't want to conflict with it
             mempool_txs.pop_back();
             break;

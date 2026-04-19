@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2020-2021 The Bitcoin Core developers
+# Copyright (c) 2020-present The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test asmap config argument for ASN-based IP bucketing.
@@ -18,7 +18,7 @@ from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import assert_equal
 
 ASMAP = 'src/test/data/asmap.raw' # path to unit test skeleton asmap
-VERSION = 'fec61fa21a9f46f3b17bdcd660d7f4cd90b966aad3aec593c99b35f0aca15853'
+VERSION = 'bafc9da308f45179443bd1d22325400ac9104f741522d003e3fac86700f68895'
 
 def expected_messages(filename):
     return [f'Opened asmap file "{filename}" (59 bytes) from disk',
@@ -66,12 +66,19 @@ class AsmapTest(BitcoinTestFramework):
             self.start_node(0, [f'-asmap={name}'])
         os.remove(filename)
 
-    def test_unspecified_asmap(self):
-        msg = "Error: -asmap requires a file path. Use -asmap=<file>."
-        for arg in ['-asmap', '-asmap=']:
-            self.log.info(f'Test bitcoind {arg} (and no filename specified)')
-            self.stop_node(0)
-            self.node.assert_start_raises_init_error(extra_args=[arg], expected_msg=msg)
+    def test_embedded_asmap(self):
+        if self.is_embedded_asmap_compiled():
+            self.log.info('Test bitcoind -asmap (using embedded map data)')
+            for arg in ['-asmap', '-asmap=1']:
+                self.stop_node(0)
+                with self.node.assert_debug_log(["Opened asmap data", "from embedded byte array"]):
+                    self.start_node(0, [arg])
+        else:
+            self.log.info('Test bitcoind -asmap (compiled without embedded map data)')
+            for arg in ['-asmap', '-asmap=1']:
+                self.stop_node(0)
+                msg = "Error: Embedded asmap data not available"
+                self.node.assert_start_raises_init_error(extra_args=[arg], expected_msg=msg)
 
     def test_asmap_interaction_with_addrman_containing_entries(self):
         self.log.info("Test bitcoind -asmap restart with addrman containing new and tried entries")
@@ -97,7 +104,7 @@ class AsmapTest(BitcoinTestFramework):
         self.log.info('Test bitcoind -asmap with empty map file')
         self.stop_node(0)
         empty_asmap = os.path.join(self.datadir, "ip_asn.map")
-        with open(empty_asmap, "w", encoding="utf-8") as f:
+        with open(empty_asmap, "w") as f:
             f.write("")
         msg = f"Error: Could not parse asmap file \"{empty_asmap}\""
         self.node.assert_start_raises_init_error(extra_args=[f'-asmap={empty_asmap}'], expected_msg=msg)
@@ -127,7 +134,7 @@ class AsmapTest(BitcoinTestFramework):
         self.test_noasmap_arg()
         self.test_asmap_with_absolute_path()
         self.test_asmap_with_relative_path()
-        self.test_unspecified_asmap()
+        self.test_embedded_asmap()
         self.test_asmap_interaction_with_addrman_containing_entries()
         self.test_asmap_with_missing_file()
         self.test_empty_asmap()

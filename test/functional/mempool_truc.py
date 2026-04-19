@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2024 The Bitcoin Core developers
+# Copyright (c) 2024-present The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 from decimal import Decimal
@@ -294,7 +294,8 @@ class MempoolTRUC(BitcoinTestFramework):
         tx_v3_child = self.wallet.create_self_transfer(utxo_to_spend=tx_v3_parent["new_utxo"], version=3)
         tx_v3_grandchild = self.wallet.create_self_transfer(utxo_to_spend=tx_v3_child["new_utxo"], version=3)
         result = node.testmempoolaccept([tx_v3_parent["hex"], tx_v3_child["hex"], tx_v3_grandchild["hex"]])
-        assert all([txresult["package-error"] == f"TRUC-violation, tx {tx_v3_grandchild['txid']} (wtxid={tx_v3_grandchild['wtxid']}) would have too many ancestors" for txresult in result])
+        for txresult in result:
+            assert_equal(txresult["package-error"], f"TRUC-violation, tx {tx_v3_grandchild['txid']} (wtxid={tx_v3_grandchild['wtxid']}) would have too many ancestors")
 
     @cleanup(extra_args=None)
     def test_truc_ancestors_package_and_mempool(self):
@@ -440,11 +441,13 @@ class MempoolTRUC(BitcoinTestFramework):
 
         test_accept_v3_from_v2 = node.testmempoolaccept([tx_v2["hex"], tx_v3_from_v2["hex"]])
         expected_error_v3_from_v2 = f"TRUC-violation, version=3 tx {tx_v3_from_v2['txid']} (wtxid={tx_v3_from_v2['wtxid']}) cannot spend from non-version=3 tx {tx_v2['txid']} (wtxid={tx_v2['wtxid']})"
-        assert all([result["package-error"] == expected_error_v3_from_v2 for result in test_accept_v3_from_v2])
+        for result in test_accept_v3_from_v2:
+            assert_equal(result["package-error"], expected_error_v3_from_v2)
 
         test_accept_v2_from_v3 = node.testmempoolaccept([tx_v3["hex"], tx_v2_from_v3["hex"]])
         expected_error_v2_from_v3 = f"TRUC-violation, non-version=3 tx {tx_v2_from_v3['txid']} (wtxid={tx_v2_from_v3['wtxid']}) cannot spend from version=3 tx {tx_v3['txid']} (wtxid={tx_v3['wtxid']})"
-        assert all([result["package-error"] == expected_error_v2_from_v3 for result in test_accept_v2_from_v3])
+        for result in test_accept_v2_from_v3:
+            assert_equal(result["package-error"], expected_error_v2_from_v3)
 
         test_accept_pairs = node.testmempoolaccept([tx_v2["hex"], tx_v3["hex"], tx_v2_from_v2["hex"], tx_v3_from_v3["hex"]])
         assert all([result["allowed"] for result in test_accept_pairs])
@@ -456,7 +459,8 @@ class MempoolTRUC(BitcoinTestFramework):
         tx_v3_child_2 = self.wallet.create_self_transfer(utxo_to_spend=tx_v3_parent["new_utxos"][1], version=3)
         test_accept_2children = node.testmempoolaccept([tx_v3_parent["hex"], tx_v3_child_1["hex"], tx_v3_child_2["hex"]])
         expected_error_2children = f"TRUC-violation, tx {tx_v3_parent['txid']} (wtxid={tx_v3_parent['wtxid']}) would exceed descendant count limit"
-        assert all([result["package-error"] == expected_error_2children for result in test_accept_2children])
+        for result in test_accept_2children:
+            assert_equal(result["package-error"], expected_error_2children)
 
         # Extra TRUC transaction does not get incorrectly marked as extra descendant
         test_accept_1child_with_exra = node.testmempoolaccept([tx_v3_parent["hex"], tx_v3_child_1["hex"], tx_v3_independent["hex"]])
@@ -465,11 +469,13 @@ class MempoolTRUC(BitcoinTestFramework):
         # Extra TRUC transaction does not make us ignore the extra descendant
         test_accept_2children_with_exra = node.testmempoolaccept([tx_v3_parent["hex"], tx_v3_child_1["hex"], tx_v3_child_2["hex"], tx_v3_independent["hex"]])
         expected_error_extra = f"TRUC-violation, tx {tx_v3_parent['txid']} (wtxid={tx_v3_parent['wtxid']}) would exceed descendant count limit"
-        assert all([result["package-error"] == expected_error_extra for result in test_accept_2children_with_exra])
+        for result in test_accept_2children_with_exra:
+            assert_equal(result["package-error"], expected_error_extra)
         # Same result if the parent is already in mempool
         node.sendrawtransaction(tx_v3_parent["hex"])
         test_accept_2children_with_in_mempool_parent = node.testmempoolaccept([tx_v3_child_1["hex"], tx_v3_child_2["hex"]])
-        assert all([result["package-error"] == expected_error_extra for result in test_accept_2children_with_in_mempool_parent])
+        for result in test_accept_2children_with_in_mempool_parent:
+            assert_equal(result["package-error"], expected_error_extra)
 
     @cleanup(extra_args=None)
     def test_reorg_2child_rbf(self):
@@ -612,7 +618,7 @@ class MempoolTRUC(BitcoinTestFramework):
     @cleanup(extra_args=None)
     def test_minrelay_in_package_combos(self):
         node = self.nodes[0]
-        self.log.info("Test that only TRUC transactions can be under minrelaytxfee for various settings...")
+        self.log.info("Test that all transaction versions can be under minrelaytxfee for various settings...")
 
         for minrelay_setting in (0, 5, 10, 100, 500, 1000, 5000, 333333, 2500000):
             self.log.info(f"-> Test -minrelaytxfee={minrelay_setting}sat/kvB...")
@@ -649,14 +655,8 @@ class MempoolTRUC(BitcoinTestFramework):
             assert_equal(result_truc["package_msg"], "success")
 
             result_non_truc = node.submitpackage([tx_v2_0fee_parent["hex"], tx_v2_child["hex"]], maxfeerate=0)
-            if minrelayfeerate > 0:
-                assert_equal(result_non_truc["package_msg"], "transaction failed")
-                min_fee_parent = int(get_fee(tx_v2_0fee_parent["tx"].get_vsize(), minrelayfeerate) * COIN)
-                assert_equal(result_non_truc["tx-results"][tx_v2_0fee_parent["wtxid"]]["error"], f"min relay fee not met, 0 < {min_fee_parent}")
-                self.check_mempool([tx_v3_0fee_parent["txid"], tx_v3_child["txid"]])
-            else:
-                assert_equal(result_non_truc["package_msg"], "success")
-                self.check_mempool([tx_v2_0fee_parent["txid"], tx_v2_child["txid"], tx_v3_0fee_parent["txid"], tx_v3_child["txid"]])
+            assert_equal(result_non_truc["package_msg"], "success")
+            self.check_mempool([tx_v2_0fee_parent["txid"], tx_v2_child["txid"], tx_v3_0fee_parent["txid"], tx_v3_child["txid"]])
 
 
     def run_test(self):
