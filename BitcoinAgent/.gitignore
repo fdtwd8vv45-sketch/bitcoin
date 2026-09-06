@@ -1,0 +1,5 @@
+# Local AgentCore / Python / CDK artifacts not covered by nested gitignores
+**/.venv/
+**/node_modules/
+**/.env.local
+**/__pycache__/
