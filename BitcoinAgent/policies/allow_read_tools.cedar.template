@@ -1,0 +1,27 @@
+// Attach after the first deploy, once the gateway ARN exists:
+//   agentcore status --type gateway --json
+// Then:
+//   sed "s|GATEWAY_ARN|<arn>|" policies/allow_read_tools.cedar.template > /tmp/allow_read_tools.cedar
+//   agentcore add policy --name allow_read_tools --engine BitcoinPolicy --source /tmp/allow_read_tools.cedar
+// Switch BitcoinGateway to ENFORCE only after LOG_ONLY looks correct.
+
+permit (
+  principal is AgentCore::IamEntity,
+  action,
+  resource == AgentCore::Gateway::"GATEWAY_ARN"
+);
+
+forbid (
+  principal,
+  action == AgentCore::Action::"WebSearch___web_search",
+  resource == AgentCore::Gateway::"GATEWAY_ARN"
+)
+when {
+  context has input &&
+  context.input has query &&
+  (
+    context.input.query like "*seed phrase*" ||
+    context.input.query like "*private key*" ||
+    context.input.query like "*steal*"
+  )
+};

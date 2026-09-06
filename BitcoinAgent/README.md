@@ -1,11 +1,12 @@
 # BitcoinAgent
 
 A Strands agent on Amazon Bedrock AgentCore that answers Bitcoin Core questions
-from this repository: JSON-RPC methods, docs, and common developer workflows.
+from this repository: JSON-RPC methods, docs, developer workflow, and public
+chain status. After deploy it also remembers users and can search the web.
 
 It was scaffolded with the [AgentCore CLI](https://github.com/aws/agentcore-cli)
-(`Strands`, Bedrock, CodeZip, no memory) and given read-only tools that look up
-RPC help and search `doc/`.
+(`Strands`, Bedrock, CodeZip) and then given memory, a gateway, evals, and
+production hardening. See `PRODUCTION.md`.
 
 ## Tools
 
@@ -15,6 +16,20 @@ RPC help and search `doc/`.
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
 | `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent` |
+| `recommended_fees` | Live fee estimates from mempool.space |
+| `chain_tip_height` | Current Bitcoin tip height |
+| `difficulty_adjustment` | Difficulty-adjustment estimate |
+| `lookup_transaction` | Public tx lookup by 64-char hex txid |
+| Gateway `WebSearch` | After deploy: search BIPs and public discussion |
+
+## Memory, APIs, and production
+
+- **Memory** `BitcoinMemory`: SEMANTIC + USER_PREFERENCE + SUMMARIZATION (30-day expiry). Env var `MEMORY_BITCOINMEMORY_ID` is injected after deploy. Use UUID session IDs (33+ chars). Not available in `agentcore dev`.
+- **Gateway** `BitcoinGateway` (AWS_IAM + MCP) with a `WebSearch` connector. Env var `AGENTCORE_GATEWAY_BITCOINGATEWAY_URL` is injected after deploy.
+- **Policy** `BitcoinPolicy` in LOG_ONLY. Attach Cedar from `policies/allow_read_tools.cedar.template` after the first deploy, then consider ENFORCE.
+- **Evals** `BitcoinAccuracy` plus built-in Helpfulness, GoalSuccessRate, ToolSelectionAccuracy, Refusal. Online monitor `production_monitor` samples 5%. CI gate: `scripts/quality-gate.sh`.
+- **App clients**: `clients/python/invoke_agent.py` and `clients/typescript/invoke_agent.ts` (IAM SigV4). Reuse one session id per conversation.
+- **Hardening**: AWS_IAM inbound auth, prompt/userId validation, scoped IAM JSON, 900s idle / 2h max session, OTEL on.
 
 Refresh the bundled index after RPC changes:
 
@@ -22,7 +37,7 @@ Refresh the bundled index after RPC changes:
 cd BitcoinAgent/app/BitcoinAgent
 source .venv/bin/activate
 python generate_rpc_index.py
-python -m unittest tests.test_bitcoin_tools
+python -m unittest discover -s tests
 ```
 
 ## Local development

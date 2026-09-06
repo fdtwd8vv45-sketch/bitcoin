@@ -1,10 +1,16 @@
-from typing import Any
 from collections import OrderedDict
+from typing import Any
+
+from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from strands import Agent
 from strands.agent.conversation_manager.null_conversation_manager import NullConversationManager
-from bedrock_agentcore.runtime import BedrockAgentCoreApp
+
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
+from mcp_client.client import get_gateway_mcp_client
+from memory_session import MEMORY_ID, build_session_manager
 from model.load import load_model
+from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
+from payload import PayloadError, extract_prompt, sanitize_text, strip_trailing_tool_use, validate_actor_id
 
 app = BedrockAgentCoreApp()
 log = app.logger
@@ -12,104 +18,101 @@ log = app.logger
 DEFAULT_SYSTEM_PROMPT = """
 You are BitcoinAgent, a Bitcoin Core development assistant for this repository.
 
-Help with JSON-RPC methods, build and test workflow, coding style, and
-contributor process. Prefer the provided tools over guessing.
+Help with JSON-RPC methods, build and test workflow, coding style, contributor
+process, and public chain status (fees, tip height, difficulty, tx lookup).
 
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
 - Use developer_howto for common build/test/contribute/rpc/agent topics
+- Use recommended_fees, chain_tip_height, difficulty_adjustment, or
+  lookup_transaction for live public-network facts
+- After deploy, BitcoinGateway may add web-search tools — use them for BIPs
+  and recent public discussion, then verify against this repo when possible
+- Remember user preferences and facts when memory is available
 - Be concise and precise
 - If a tool returns no match, say so instead of inventing Bitcoin Core behavior
 - Do not give advice that would help steal funds, attack the network, or
   bypass wallet/security controls
+- Never ask for or handle seed phrases, private keys, or wallet passwords
 """
 
-tools = [lookup_rpc, list_rpc_methods, search_docs, developer_howto]
+LOCAL_TOOLS = [
+    lookup_rpc,
+    list_rpc_methods,
+    search_docs,
+    developer_howto,
+    recommended_fees,
+    chain_tip_height,
+    difficulty_adjustment,
+    lookup_transaction,
+]
 
-_INLINE_FUNCTION_NAMES = {tool_fn.__name__ for tool_fn in tools}
+_INLINE_FUNCTION_NAMES = {tool_fn.__name__ for tool_fn in LOCAL_TOOLS}
+
+
+def _header_map(context: Any) -> dict[str, str]:
+    headers = getattr(context, "request_headers", None) or getattr(context, "headers", None) or {}
+    if not isinstance(headers, dict):
+        return {}
+    return {str(key): str(value) for key, value in headers.items()}
+
+
+def _actor_id(payload: dict, context: Any) -> str:
+    headers = _header_map(context)
+    raw = (
+        payload.get("userId")
+        or headers.get("X-Amzn-Bedrock-AgentCore-Runtime-Custom-UserId")
+        or "default-user"
+    )
+    if not isinstance(raw, str):
+        raise PayloadError("Invalid userId.")
+    return validate_actor_id(sanitize_text(raw))
+
+
+def _tools_for_runtime() -> list:
+    tools = list(LOCAL_TOOLS)
+    gateway_client = get_gateway_mcp_client()
+    if gateway_client:
+        tools.append(gateway_client)
+    return tools
 
 
 def _make_conversation_manager():
     return NullConversationManager()
 
-# Reuses one Agent per session_id so each session keeps its own in-process
-# conversation history (best-effort; resets on cold start). The cache is bounded
-# to 128 sessions with LRU eviction (least-recently-used is dropped and its
-# history reset) so a single process serving many sessions cannot leak history
-# between them or grow without limit. For durable history, attach a session manager.
+
 def agent_factory():
-    cache = OrderedDict()
-    def get_or_create_agent(session_id):
-        if session_id in cache:
-            cache.move_to_end(session_id)
-            return cache[session_id]
+    cache: OrderedDict[tuple[str, str], Agent] = OrderedDict()
+
+    def get_or_create_agent(session_id: str, actor_id: str) -> Agent:
+        key = (actor_id, session_id)
+        if key in cache:
+            cache.move_to_end(key)
+            return cache[key]
         if len(cache) >= 128:
             cache.popitem(last=False)
-        cache[session_id] = Agent(
-            model=load_model(),
-            system_prompt=DEFAULT_SYSTEM_PROMPT,
-            tools=tools,
-            conversation_manager=_make_conversation_manager(),
-            hooks=[
-            ],
-        )
-        return cache[session_id]
+        session_manager = build_session_manager(actor_id, session_id)
+        kwargs: dict[str, Any] = {
+            "model": load_model(),
+            "system_prompt": DEFAULT_SYSTEM_PROMPT,
+            "tools": _tools_for_runtime(),
+            "hooks": [],
+        }
+        if session_manager is not None:
+            kwargs["session_manager"] = session_manager
+        else:
+            kwargs["conversation_manager"] = _make_conversation_manager()
+        cache[key] = Agent(**kwargs)
+        return cache[key]
+
     return get_or_create_agent
+
+
 get_or_create_agent = agent_factory()
 
 
-def strip_trailing_tool_use(messages: Any) -> list[dict]:
-    """Strip toolUse blocks from the tail until the last message has none."""
-    if not isinstance(messages, list):
-        raise ValueError("messages must be a list")
-
-    messages = list(messages)
-    while messages:
-        last = messages[-1]
-        if not isinstance(last, dict):
-            raise ValueError("each message must be an object")
-        original_content = last.get("content", [])
-        if not isinstance(original_content, list) or not all(isinstance(block, dict) for block in original_content):
-            raise ValueError("each message content value must be a list of content blocks")
-
-        content = [block for block in original_content if "toolUse" not in block]
-        if len(content) == len(original_content):
-            break
-        if content:
-            messages[-1] = {**last, "content": content}
-            break
-        messages.pop()
-
-    return messages
-
-
-def _extract_prompt(payload: dict):
-    """Accept validated harness messages, tool results, or a plain prompt string."""
-    if not isinstance(payload, dict):
-        raise ValueError("payload must be a JSON object")
-    if "messages" in payload:
-        return strip_trailing_tool_use(payload["messages"])
-    if "tool_results" in payload:
-        tool_results = payload["tool_results"]
-        if not isinstance(tool_results, list) or not all(
-            isinstance(tool_result, dict) and isinstance(tool_result.get("toolUseId"), str)
-            for tool_result in tool_results
-        ):
-            raise ValueError("tool_results must contain objects with a toolUseId string")
-        return [{"role": "user", "content": [{"toolResult": {
-            "toolUseId": tr["toolUseId"],
-            "status": tr.get("status", "success"),
-            "content": tr.get("content", []),
-        }} for tr in tool_results]}]
-    prompt = payload.get("prompt", "")
-    if not isinstance(prompt, str):
-        raise ValueError("prompt must be a string")
-    return prompt
-
-
 def _has_inline_function_call(messages) -> bool:
-    """Return True if messages contains an assistant toolUse for an inline function tool."""
     if not _INLINE_FUNCTION_NAMES or not isinstance(messages, list):
         return False
     for msg in messages:
@@ -121,7 +124,6 @@ def _has_inline_function_call(messages) -> bool:
 
 
 def _is_inline_function_call(event: dict) -> bool:
-    """Check if a contentBlockStart event is for an inline function tool."""
     if not _INLINE_FUNCTION_NAMES:
         return False
     cbs = event.get("contentBlockStart", {})
@@ -130,27 +132,33 @@ def _is_inline_function_call(event: dict) -> bool:
     return tool_use is not None and tool_use.get("name") in _INLINE_FUNCTION_NAMES
 
 
-
 @app.entrypoint
 async def invoke(payload, context):
-    log.info("Invoking Agent.....")
-
-
-    session_id = getattr(context, 'session_id', 'default-session')
-    agent = get_or_create_agent(session_id)
-
-    prompt = _extract_prompt(payload)
-
-
-    async for event in agent.stream_async(
-        prompt,
-    ):
-        if not isinstance(event, dict) or "event" not in event:
-            continue
-        cbs = event["event"].get("contentBlockStart")
-        if cbs is not None and not cbs.get("start"):
-            continue
-        yield event
+    try:
+        if not isinstance(payload, dict):
+            yield {"error": "Request body must be a JSON object."}
+            return
+        actor_id = _actor_id(payload, context)
+        session_id = getattr(context, "session_id", None) or payload.get("sessionId") or "default-session"
+        if not isinstance(session_id, str) or not session_id.strip():
+            yield {"error": "Invalid sessionId."}
+            return
+        if MEMORY_ID and len(session_id) < 33:
+            log.warning("Session id %r is shorter than 33 characters; long-term memory extraction may fail.", session_id)
+        prompt = extract_prompt(payload)
+        agent = get_or_create_agent(session_id, actor_id)
+        async for event in agent.stream_async(prompt):
+            if not isinstance(event, dict) or "event" not in event:
+                continue
+            cbs = event["event"].get("contentBlockStart")
+            if cbs is not None and not cbs.get("start"):
+                continue
+            yield event
+    except PayloadError as exc:
+        yield {"error": str(exc)}
+    except Exception as exc:
+        log.error("Agent error: %s", exc, exc_info=True)
+        yield {"error": "An error occurred. Please try again."}
 
 
 if __name__ == "__main__":

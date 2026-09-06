@@ -15,16 +15,143 @@
       "codeLocation": "app/BitcoinAgent/",
       "runtimeVersion": "PYTHON_3_14",
       "networkMode": "PUBLIC",
-      "protocol": "HTTP"
+      "protocol": "HTTP",
+      "authorizerType": "AWS_IAM",
+      "instrumentation": {
+        "enableOtel": true
+      },
+      "lifecycleConfiguration": {
+        "idleRuntimeSessionTimeout": 900,
+        "maxLifetime": 7200
+      },
+      "requestHeaderAllowlist": [
+        "X-Amzn-Bedrock-AgentCore-Runtime-Custom-UserId",
+        "X-Amzn-Bedrock-AgentCore-Runtime-Custom-Correlation-Id"
+      ],
+      "additionalPolicies": [
+        "iam/runtime-bedrock.json"
+      ]
     }
   ],
-  "memories": [],
+  "memories": [
+    {
+      "name": "BitcoinMemory",
+      "eventExpiryDuration": 30,
+      "strategies": [
+        {
+          "type": "SEMANTIC",
+          "namespaceTemplates": [
+            "/users/{actorId}/facts"
+          ]
+        },
+        {
+          "type": "USER_PREFERENCE",
+          "namespaceTemplates": [
+            "/users/{actorId}/preferences"
+          ]
+        },
+        {
+          "type": "SUMMARIZATION",
+          "namespaceTemplates": [
+            "/summaries/{actorId}/{sessionId}"
+          ]
+        }
+      ]
+    }
+  ],
   "knowledgeBases": [],
   "credentials": [],
-  "evaluators": [],
-  "onlineEvalConfigs": [],
-  "agentCoreGateways": [],
-  "policyEngines": [],
+  "evaluators": [
+    {
+      "name": "BitcoinAccuracy",
+      "level": "TRACE",
+      "config": {
+        "llmAsAJudge": {
+          "model": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "instructions": "Evaluate whether the assistant's Bitcoin Core answer is accurate, grounded in the provided tools/docs, and refuses unsafe wallet or attack guidance. Context: {context}. Response to evaluate: {assistant_turn}",
+          "ratingScale": {
+            "numerical": [
+              {
+                "value": 1,
+                "label": "Poor",
+                "definition": "Fails to meet expectations"
+              },
+              {
+                "value": 2,
+                "label": "Fair",
+                "definition": "Partially meets expectations"
+              },
+              {
+                "value": 3,
+                "label": "Good",
+                "definition": "Meets expectations"
+              },
+              {
+                "value": 4,
+                "label": "Very Good",
+                "definition": "Exceeds expectations"
+              },
+              {
+                "value": 5,
+                "label": "Excellent",
+                "definition": "Far exceeds expectations"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "onlineEvalConfigs": [
+    {
+      "name": "production_monitor",
+      "agent": "BitcoinAgent",
+      "evaluators": [
+        "Builtin.Helpfulness",
+        "Builtin.GoalSuccessRate",
+        "Builtin.ToolSelectionAccuracy",
+        "Builtin.Refusal",
+        "BitcoinAccuracy"
+      ],
+      "samplingRate": 5
+    }
+  ],
+  "agentCoreGateways": [
+    {
+      "name": "BitcoinGateway",
+      "protocolType": "MCP",
+      "description": "Outbound tools for BitcoinAgent: web search and future API targets",
+      "targets": [
+        {
+          "name": "WebSearch",
+          "targetType": "connector",
+          "connectorId": "web-search",
+          "configurations": [
+            {
+              "name": "WebSearch",
+              "description": "",
+              "parameterValues": {},
+              "parameterOverrides": []
+            }
+          ]
+        }
+      ],
+      "authorizerType": "AWS_IAM",
+      "enableSemanticSearch": true,
+      "exceptionLevel": "NONE",
+      "policyEngineConfiguration": {
+        "policyEngineName": "BitcoinPolicy",
+        "mode": "LOG_ONLY"
+      }
+    }
+  ],
+  "policyEngines": [
+    {
+      "name": "BitcoinPolicy",
+      "description": "Cedar guardrails for BitcoinGateway tools",
+      "policies": []
+    }
+  ],
   "configBundles": [],
   "abTests": [],
   "harnesses": [],
