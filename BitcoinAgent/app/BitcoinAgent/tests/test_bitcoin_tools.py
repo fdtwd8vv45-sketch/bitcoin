@@ -11,7 +11,7 @@ from bitcoin_tools import (
     repo_root,
     search_docs,
 )
-from main import strip_trailing_tool_use
+from payload import strip_trailing_tool_use
 
 
 class BitcoinToolsTests(unittest.TestCase):
@@ -28,6 +28,17 @@ class BitcoinToolsTests(unittest.TestCase):
         self.assertEqual(entry["category"], "blockchain")
         self.assertIn("height", entry["description"].lower())
         self.assertTrue(entry["source"].endswith("blockchain.cpp"))
+
+    def test_build_rpc_index_includes_wallet_methods(self) -> None:
+        index = build_rpc_index()
+        self.assertIn("getbalance", index)
+        self.assertIn("sendtoaddress", index)
+        self.assertIn("bumpfee", index)
+        self.assertEqual(index["getbalance"]["category"], "wallet")
+        self.assertEqual(index["sendtoaddress"]["category"], "wallet")
+        self.assertIn("available balance", index["getbalance"]["description"].lower())
+        self.assertIn("send an amount", index["sendtoaddress"]["description"].lower())
+        self.assertIn("bumps the fee", index["bumpfee"]["description"].lower())
 
     def test_lookup_rpc_exact_and_unknown(self) -> None:
         text = lookup_rpc("getblockcount")

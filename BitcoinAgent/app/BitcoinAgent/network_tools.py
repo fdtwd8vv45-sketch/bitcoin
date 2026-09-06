@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from strands import tool
+from optional_tool import tool
 
 _ALLOWED_HOSTS = {"mempool.space"}
 _HEX64 = re.compile(r"^[0-9a-fA-F]{64}$")

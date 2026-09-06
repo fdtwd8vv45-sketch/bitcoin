@@ -1,10 +1,24 @@
 {
+  "abandontransaction": {
+    "name": "abandontransaction",
+    "function": "abandontransaction",
+    "description": "Mark in-wallet transaction <txid> as abandoned",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
+  },
   "abortprivatebroadcast": {
     "name": "abortprivatebroadcast",
     "function": "abortprivatebroadcast",
     "description": "Abort private broadcast attempts for a transaction currently being privately broadcast.",
     "source": "src/rpc/mempool.cpp",
     "category": "rawtransactions"
+  },
+  "abortrescan": {
+    "name": "abortrescan",
+    "function": "abortrescan",
+    "description": "Stops current wallet rescan triggered by an RPC call, e.g. by a rescanblockchain call.",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
   },
   "addconnection": {
     "name": "addconnection",
@@ -33,6 +47,20 @@
     "description": "Analyzes and provides information about the current status of a PSBT and its inputs",
     "source": "src/rpc/rawtransaction.cpp",
     "category": "rawtransactions"
+  },
+  "backupwallet": {
+    "name": "backupwallet",
+    "function": "backupwallet",
+    "description": "Safely copies the current wallet file to the specified destination, which can either be a directory or a path with a filename.",
+    "source": "src/wallet/rpc/backup.cpp",
+    "category": "wallet"
+  },
+  "bumpfee": {
+    "name": "bumpfee",
+    "function": "bumpfee",
+    "description": "Bumps the fee of a transaction T, replacing it with a new transaction B.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
   },
   "clearbanned": {
     "name": "clearbanned",
@@ -125,6 +153,13 @@
     "source": "src/rpc/output_script.cpp",
     "category": "util"
   },
+  "descriptorprocesspsbt": {
+    "name": "descriptorprocesspsbt",
+    "function": "descriptorprocesspsbt",
+    "description": "Update all segwit inputs in a PSBT with information from output descriptors, the UTXO set or the mempool.",
+    "source": "src/rpc/rawtransaction.cpp",
+    "category": "rawtransactions"
+  },
   "disconnectnode": {
     "name": "disconnectnode",
     "function": "disconnectnode",
@@ -139,12 +174,33 @@
     "source": "src/rpc/blockchain.cpp",
     "category": "blockchain"
   },
+  "echo": {
+    "name": "echo",
+    "function": "echo",
+    "description": "Simply echo back the input arguments. This command is for testing.",
+    "source": "src/rpc/node.cpp",
+    "category": "hidden"
+  },
   "echoipc": {
     "name": "echoipc",
     "function": "echoipc",
     "description": "Echo back the input argument, passing it through a spawned process in a multiprocess build.",
     "source": "src/rpc/node.cpp",
     "category": "hidden"
+  },
+  "echojson": {
+    "name": "echojson",
+    "function": "echojson",
+    "description": "Simply echo back the input arguments. This command is for testing.",
+    "source": "src/rpc/node.cpp",
+    "category": "hidden"
+  },
+  "encryptwallet": {
+    "name": "encryptwallet",
+    "function": "encryptwallet",
+    "description": "Encrypts the wallet with 'passphrase'. This is for first time encryption.",
+    "source": "src/wallet/rpc/encrypt.cpp",
+    "category": "wallet"
   },
   "enumeratesigners": {
     "name": "enumeratesigners",
@@ -172,6 +228,13 @@
     "function": "finalizepsbt",
     "description": "Finalize the inputs of a PSBT. If the transaction is fully signed, it will produce a",
     "source": "src/rpc/rawtransaction.cpp",
+    "category": "rawtransactions"
+  },
+  "fundrawtransaction": {
+    "name": "fundrawtransaction",
+    "function": "fundrawtransaction",
+    "description": "If the transaction has no inputs, they will be automatically selected to meet its out value.",
+    "source": "src/wallet/rpc/spend.cpp",
     "category": "rawtransactions"
   },
   "generate": {
@@ -209,12 +272,40 @@
     "source": "src/rpc/net.cpp",
     "category": "network"
   },
+  "getaddressesbylabel": {
+    "name": "getaddressesbylabel",
+    "function": "getaddressesbylabel",
+    "description": "Returns the list of addresses assigned the specified label.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
+  "getaddressinfo": {
+    "name": "getaddressinfo",
+    "function": "getaddressinfo",
+    "description": "Return information about the given bitcoin address.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
   "getaddrmaninfo": {
     "name": "getaddrmaninfo",
     "function": "getaddrmaninfo",
     "description": "Provides information about the node's address manager by returning the number of",
     "source": "src/rpc/net.cpp",
     "category": "network"
+  },
+  "getbalance": {
+    "name": "getbalance",
+    "function": "getbalance",
+    "description": "Returns the total available balance.",
+    "source": "src/wallet/rpc/coins.cpp",
+    "category": "wallet"
+  },
+  "getbalances": {
+    "name": "getbalances",
+    "function": "getbalances",
+    "description": "Returns an object with all balances in",
+    "source": "src/wallet/rpc/coins.cpp",
+    "category": "wallet"
   },
   "getbestblockhash": {
     "name": "getbestblockhash",
@@ -227,6 +318,13 @@
     "name": "getblock",
     "function": "getblock",
     "description": "If verbosity is 0, returns a string that is serialized, hex-encoded data for block 'hash'.",
+    "source": "src/rpc/blockchain.cpp",
+    "category": "blockchain"
+  },
+  "getblockchaininfo": {
+    "name": "getblockchaininfo",
+    "function": "getblockchaininfo",
+    "description": "Returns an object containing various state info regarding blockchain processing.",
     "source": "src/rpc/blockchain.cpp",
     "category": "blockchain"
   },
@@ -307,6 +405,13 @@
     "source": "src/rpc/net.cpp",
     "category": "network"
   },
+  "getdeploymentinfo": {
+    "name": "getdeploymentinfo",
+    "function": "getdeploymentinfo",
+    "description": "Returns an object containing various state info regarding deployments of consensus changes.",
+    "source": "src/rpc/blockchain.cpp",
+    "category": "blockchain"
+  },
   "getdescriptoractivity": {
     "name": "getdescriptoractivity",
     "function": "getdescriptoractivity",
@@ -327,6 +432,13 @@
     "description": "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.",
     "source": "src/rpc/blockchain.cpp",
     "category": "blockchain"
+  },
+  "gethdkeys": {
+    "name": "gethdkeys",
+    "function": "gethdkeys",
+    "description": "List all BIP 32 HD keys in the wallet and which descriptors use them.",
+    "source": "src/wallet/rpc/wallet.cpp",
+    "category": "wallet"
   },
   "getindexinfo": {
     "name": "getindexinfo",
@@ -412,6 +524,13 @@
     "source": "src/rpc/net.cpp",
     "category": "network"
   },
+  "getnewaddress": {
+    "name": "getnewaddress",
+    "function": "getnewaddress",
+    "description": "Returns a new Bitcoin address for receiving payments.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
   "getnodeaddresses": {
     "name": "getnodeaddresses",
     "function": "getnodeaddresses",
@@ -454,6 +573,13 @@
     "source": "src/rpc/net.cpp",
     "category": "hidden"
   },
+  "getrawchangeaddress": {
+    "name": "getrawchangeaddress",
+    "function": "getrawchangeaddress",
+    "description": "Returns a new Bitcoin address, for receiving change.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
   "getrawmempool": {
     "name": "getrawmempool",
     "function": "getrawmempool",
@@ -468,12 +594,33 @@
     "source": "src/rpc/rawtransaction.cpp",
     "category": "rawtransactions"
   },
+  "getreceivedbyaddress": {
+    "name": "getreceivedbyaddress",
+    "function": "getreceivedbyaddress",
+    "description": "Returns the total amount received by the given address in transactions with at least minconf confirmations.",
+    "source": "src/wallet/rpc/coins.cpp",
+    "category": "wallet"
+  },
+  "getreceivedbylabel": {
+    "name": "getreceivedbylabel",
+    "function": "getreceivedbylabel",
+    "description": "Returns the total amount received by addresses with <label> in transactions with at least [minconf] confirmations.",
+    "source": "src/wallet/rpc/coins.cpp",
+    "category": "wallet"
+  },
   "getrpcinfo": {
     "name": "getrpcinfo",
     "function": "getrpcinfo",
     "description": "Returns details of the RPC server.",
     "source": "src/rpc/server.cpp",
     "category": "control"
+  },
+  "gettransaction": {
+    "name": "gettransaction",
+    "function": "gettransaction",
+    "description": "Get detailed information about in-wallet transaction <txid>",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
   },
   "gettxout": {
     "name": "gettxout",
@@ -524,12 +671,26 @@
     "source": "src/rpc/server.cpp",
     "category": "control"
   },
+  "importdescriptors": {
+    "name": "importdescriptors",
+    "function": "importdescriptors",
+    "description": "Import descriptors. This will trigger a rescan of the blockchain based on the earliest timestamp of all descriptors being imported. Requires a new wallet backup.",
+    "source": "src/wallet/rpc/backup.cpp",
+    "category": "wallet"
+  },
   "importmempool": {
     "name": "importmempool",
     "function": "importmempool",
     "description": "Import a mempool.dat file and attempt to add its contents to the mempool.",
     "source": "src/rpc/mempool.cpp",
     "category": "blockchain"
+  },
+  "importprunedfunds": {
+    "name": "importprunedfunds",
+    "function": "importprunedfunds",
+    "description": "Imports funds without rescan. Corresponding address or script must previously be included in wallet. Aimed towards pruned wallets. The end-user is responsible to import additional transactions that subsequently spend the imported outputs or rescan after the point in the blockchain the transaction is included.",
+    "source": "src/wallet/rpc/backup.cpp",
+    "category": "wallet"
   },
   "invalidateblock": {
     "name": "invalidateblock",
@@ -545,12 +706,82 @@
     "source": "src/rpc/rawtransaction.cpp",
     "category": "rawtransactions"
   },
+  "keypoolrefill": {
+    "name": "keypoolrefill",
+    "function": "keypoolrefill",
+    "description": "Refills each descriptor keypool in the wallet up to the specified number of new keys.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
+  "listaddressgroupings": {
+    "name": "listaddressgroupings",
+    "function": "listaddressgroupings",
+    "description": "Lists groups of addresses which have had their common ownership",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
   "listbanned": {
     "name": "listbanned",
     "function": "listbanned",
     "description": "List all manually banned IPs/Subnets.",
     "source": "src/rpc/net.cpp",
     "category": "network"
+  },
+  "listdescriptors": {
+    "name": "listdescriptors",
+    "function": "listdescriptors",
+    "description": "List all descriptors present in a wallet.",
+    "source": "src/wallet/rpc/backup.cpp",
+    "category": "wallet"
+  },
+  "listlabels": {
+    "name": "listlabels",
+    "function": "listlabels",
+    "description": "Returns the list of all labels, or labels that are assigned to addresses with a specific purpose.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
+  "listlockunspent": {
+    "name": "listlockunspent",
+    "function": "listlockunspent",
+    "description": "Returns list of temporarily unspendable outputs.",
+    "source": "src/wallet/rpc/coins.cpp",
+    "category": "wallet"
+  },
+  "listreceivedbyaddress": {
+    "name": "listreceivedbyaddress",
+    "function": "listreceivedbyaddress",
+    "description": "List balances by receiving address.",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
+  },
+  "listreceivedbylabel": {
+    "name": "listreceivedbylabel",
+    "function": "listreceivedbylabel",
+    "description": "List received transactions by label.",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
+  },
+  "listsinceblock": {
+    "name": "listsinceblock",
+    "function": "listsinceblock",
+    "description": "Get all transactions in blocks since block [blockhash], or all transactions if omitted.",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
+  },
+  "listtransactions": {
+    "name": "listtransactions",
+    "function": "listtransactions",
+    "description": "If a label name is provided, this will return only incoming transactions paying to addresses with the specified label.",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
+  },
+  "listunspent": {
+    "name": "listunspent",
+    "function": "listunspent",
+    "description": "Returns array of unspent transaction outputs",
+    "source": "src/wallet/rpc/coins.cpp",
+    "category": "wallet"
   },
   "listwalletdir": {
     "name": "listwalletdir",
@@ -578,6 +809,13 @@
     "function": "loadwallet",
     "description": "Loads a wallet from a wallet file or directory.",
     "source": "src/wallet/rpc/wallet.cpp",
+    "category": "wallet"
+  },
+  "lockunspent": {
+    "name": "lockunspent",
+    "function": "lockunspent",
+    "description": "Updates list of temporarily unspendable outputs.",
+    "source": "src/wallet/rpc/coins.cpp",
     "category": "wallet"
   },
   "logging": {
@@ -629,12 +867,40 @@
     "source": "src/rpc/blockchain.cpp",
     "category": "blockchain"
   },
+  "psbtbumpfee": {
+    "name": "psbtbumpfee",
+    "function": "psbtbumpfee",
+    "description": "Bumps the fee of a transaction T, replacing it with a new transaction B.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
   "reconsiderblock": {
     "name": "reconsiderblock",
     "function": "reconsiderblock",
     "description": "Removes invalidity status of a block, its ancestors and its descendants, reconsider them for activation.",
     "source": "src/rpc/blockchain.cpp",
     "category": "hidden"
+  },
+  "removeprunedfunds": {
+    "name": "removeprunedfunds",
+    "function": "removeprunedfunds",
+    "description": "Deletes the specified transaction from the wallet. Meant for use with pruned wallets and as a companion to importprunedfunds. This will affect wallet balances.",
+    "source": "src/wallet/rpc/backup.cpp",
+    "category": "wallet"
+  },
+  "rescanblockchain": {
+    "name": "rescanblockchain",
+    "function": "rescanblockchain",
+    "description": "Rescan the local blockchain for wallet related transactions.",
+    "source": "src/wallet/rpc/transactions.cpp",
+    "category": "wallet"
+  },
+  "restorewallet": {
+    "name": "restorewallet",
+    "function": "restorewallet",
+    "description": "Restores and loads a wallet from backup.",
+    "source": "src/wallet/rpc/backup.cpp",
+    "category": "wallet"
   },
   "rpcNestedTest": {
     "name": "rpcNestedTest",
@@ -664,6 +930,27 @@
     "source": "src/rpc/blockchain.cpp",
     "category": "blockchain"
   },
+  "send": {
+    "name": "send",
+    "function": "send",
+    "description": "EXPERIMENTAL warning: this call may be changed in future releases.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
+  "sendall": {
+    "name": "sendall",
+    "function": "sendall",
+    "description": "EXPERIMENTAL warning: this call may be changed in future releases.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
+  "sendmany": {
+    "name": "sendmany",
+    "function": "sendmany",
+    "description": "Send multiple times. Amounts are double-precision floating point numbers.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
   "sendmsgtopeer": {
     "name": "sendmsgtopeer",
     "function": "sendmsgtopeer",
@@ -678,12 +965,26 @@
     "source": "src/rpc/mempool.cpp",
     "category": "rawtransactions"
   },
+  "sendtoaddress": {
+    "name": "sendtoaddress",
+    "function": "sendtoaddress",
+    "description": "Send an amount to a given address.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
   "setban": {
     "name": "setban",
     "function": "setban",
     "description": "Attempts to add or remove an IP/Subnet from the banned list.",
     "source": "src/rpc/net.cpp",
     "category": "network"
+  },
+  "setlabel": {
+    "name": "setlabel",
+    "function": "setlabel",
+    "description": "Sets the label associated with the given address.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
   },
   "setmocktime": {
     "name": "setmocktime",
@@ -706,6 +1007,13 @@
     "source": "src/wallet/rpc/wallet.cpp",
     "category": "wallet"
   },
+  "signmessage": {
+    "name": "signmessage",
+    "function": "signmessage",
+    "description": "Sign a message with the private key of an address",
+    "source": "src/wallet/rpc/signmessage.cpp",
+    "category": "wallet"
+  },
   "signmessagewithprivkey": {
     "name": "signmessagewithprivkey",
     "function": "signmessagewithprivkey",
@@ -719,6 +1027,20 @@
     "description": "Sign inputs for raw transaction (serialized, hex-encoded).",
     "source": "src/rpc/rawtransaction.cpp",
     "category": "rawtransactions"
+  },
+  "signrawtransactionwithwallet": {
+    "name": "signrawtransactionwithwallet",
+    "function": "signrawtransactionwithwallet",
+    "description": "Sign inputs for raw transaction (serialized, hex-encoded).",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
+  "simulaterawtransaction": {
+    "name": "simulaterawtransaction",
+    "function": "simulaterawtransaction",
+    "description": "Calculate the balance change resulting in the signing and broadcasting of the given transaction(s).",
+    "source": "src/wallet/rpc/wallet.cpp",
+    "category": "wallet"
   },
   "stop": {
     "name": "stop",
@@ -831,5 +1153,47 @@
     "description": "Waits for any new block and returns useful info about it.",
     "source": "src/rpc/blockchain.cpp",
     "category": "blockchain"
+  },
+  "walletcreatefundedpsbt": {
+    "name": "walletcreatefundedpsbt",
+    "function": "walletcreatefundedpsbt",
+    "description": "Creates and funds a transaction in the Partially Signed Transaction format.",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
+  },
+  "walletdisplayaddress": {
+    "name": "walletdisplayaddress",
+    "function": "walletdisplayaddress",
+    "description": "Display address on an external signer for verification.",
+    "source": "src/wallet/rpc/addresses.cpp",
+    "category": "wallet"
+  },
+  "walletlock": {
+    "name": "walletlock",
+    "function": "walletlock",
+    "description": "Removes the wallet encryption key from memory, locking the wallet.",
+    "source": "src/wallet/rpc/encrypt.cpp",
+    "category": "wallet"
+  },
+  "walletpassphrase": {
+    "name": "walletpassphrase",
+    "function": "walletpassphrase",
+    "description": "Stores the wallet decryption key in memory for 'timeout' seconds.",
+    "source": "src/wallet/rpc/encrypt.cpp",
+    "category": "wallet"
+  },
+  "walletpassphrasechange": {
+    "name": "walletpassphrasechange",
+    "function": "walletpassphrasechange",
+    "description": "Changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'.",
+    "source": "src/wallet/rpc/encrypt.cpp",
+    "category": "wallet"
+  },
+  "walletprocesspsbt": {
+    "name": "walletprocesspsbt",
+    "function": "walletprocesspsbt",
+    "description": "Update a PSBT with input information from our wallet and then sign inputs",
+    "source": "src/wallet/rpc/spend.cpp",
+    "category": "wallet"
   }
 }
