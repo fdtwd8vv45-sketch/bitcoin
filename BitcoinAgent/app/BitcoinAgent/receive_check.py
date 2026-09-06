@@ -20,6 +20,17 @@ _BECH32 = re.compile(r"^bc1[qp][ac-hj-np-z02-9]{8,87}$")
 _ETH = re.compile(r"^0x[0-9a-fA-F]{40}$")
 _WIF = re.compile(r"^[5KL][1-9A-HJ-NP-Za-km-z]{50,51}$")
 
+# Famous public examples. Looking these up is not a check of the user's coins.
+_EXAMPLE_ADDRESSES = {
+    "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa": (
+        "This is the Bitcoin genesis address — a famous public example, "
+        "not your wallet. The balance here is not your money."
+    ),
+    "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4": (
+        "This is a public documentation example address, not your wallet."
+    ),
+}
+
 CHECKLIST = """Not receiving bitcoin is usually one of these — not "you broke it":
 
 1. It is still unconfirmed. Low-fee payments can sit in the mempool for hours.
@@ -32,16 +43,18 @@ CHECKLIST = """Not receiving bitcoin is usually one of these — not "you broke 
    address. Those will never show up in a Bitcoin mainnet wallet.
 5. The sender has not actually broadcast the transaction yet.
 
-What to paste here (these are public; they are not secrets):
-- the receive address, or
+To check YOUR payment (public, not a secret), paste:
+- the receive address from your wallet's Receive screen, or
 - the 64-character transaction id (txid) from the sender
+
+Example addresses used in docs are not your coins.
 
 Never paste a seed phrase, private key, or wallet password.
 
 Commands:
   receive
-  receive <address>
-  receive <txid>
+  receive <your-address>
+  receive <your-txid>
 """
 
 
@@ -98,6 +111,9 @@ def _address_report(address: str) -> str:
         f"Confirmed received: {_sats_to_btc(confirmed)} across {confirmed_count} transaction(s)",
         f"Unconfirmed (mempool): {_sats_to_btc(pending)} across {pending_count} transaction(s)",
     ]
+    example = _EXAMPLE_ADDRESSES.get(address)
+    if example:
+        lines.insert(1, f"Note: {example}")
     if confirmed == 0 and pending == 0:
         lines.append(
             "Nothing has reached this address yet. Either the sender has not "

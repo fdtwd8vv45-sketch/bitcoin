@@ -24,6 +24,17 @@ class ReceiveCheckTests(unittest.TestCase):
         text = check_receive()
         self.assertIn("still unconfirmed", text)
         self.assertIn("Never paste a seed phrase", text)
+        self.assertIn("YOUR payment", text)
+
+    def test_genesis_address_is_labeled_example(self) -> None:
+        empty = {
+            "chain_stats": {"funded_txo_sum": 0, "tx_count": 0},
+            "mempool_stats": {"funded_txo_sum": 0, "tx_count": 0},
+        }
+        with patch("receive_check._get_json", return_value=empty):
+            text = check_receive(address="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa")
+        self.assertIn("genesis address", text)
+        self.assertIn("not your money", text)
 
     def test_rejects_secret(self) -> None:
         text = check_receive(address="5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ")
