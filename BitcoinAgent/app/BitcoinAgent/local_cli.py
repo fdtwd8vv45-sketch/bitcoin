@@ -16,23 +16,25 @@ from collections.abc import Callable
 from bitcoin_tools import developer_howto, list_rpc_methods, load_rpc_index, lookup_rpc, search_docs
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
+from receive_check import check_receive, classify_payment_id
 
 _TXID = re.compile(r"\b([0-9a-fA-F]{64})\b")
 _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local
+  howto <topic>       build | test | contribute | rpc | agent | local | receive
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
   tx <txid>           Public transaction lookup
+  receive [addr|txid] Why a payment might not show up
   remember <text>     Save a short local note
   notes [query]       Show local notes
   help                This list
   quit                Exit the prompt
 
-Or type a question: "What does getbalance do?" / "how do I run tests"
+Or type a question: "What does getbalance do?" / "I didn't receive my bitcoin"
 """
 
 
@@ -46,6 +48,34 @@ def _first_rpc_in(text: str) -> str | None:
         if token.lower() in names:
             return token
     return None
+
+
+def _looks_like_receive(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(not receiving|wasn'?t receiving|isn'?t receiving|"
+            r"didn'?t receive|did not receive|haven'?t received|"
+            r"missing (payment|bitcoin|btc|crypto)|where is my|"
+            r"didn'?t get my|waiting (on|for) (my )?(payment|bitcoin|btc)|"
+            r"receiving my (crypto|bitcoin|btc))\b",
+            lower,
+        )
+    )
+
+
+def _receive_from_arg(text: str) -> str:
+    address = ""
+    txid = ""
+    for token in re.findall(r"[A-Za-z0-9]+", text or ""):
+        kind = classify_payment_id(token)
+        if kind == "txid" and not txid:
+            txid = token
+        elif kind in {"bitcoin", "lightning", "ethereum", "testnet", "secret", "unknown"} and not address:
+            if kind != "unknown":
+                address = token
+    if address and classify_payment_id(address) == "txid":
+        return check_receive(txid=address)
+    return check_receive(address=address, txid=txid)
 
 
 def route_query(text: str) -> str:
@@ -69,6 +99,7 @@ def route_query(text: str) -> str:
         "height": chain_tip_height,
         "difficulty": difficulty_adjustment,
         "tx": lambda: lookup_transaction(arg),
+        "receive": lambda: _receive_from_arg(arg),
         "remember": lambda: remember_note(arg),
         "notes": lambda: recall_notes(arg),
         "recall": lambda: recall_notes(arg),
@@ -80,6 +111,8 @@ def route_query(text: str) -> str:
 
     lower = raw.lower()
     txid = _TXID.search(raw)
+    if _looks_like_receive(lower):
+        return _receive_from_arg(raw)
     if txid and ("tx" in lower or "transaction" in lower or "txid" in lower):
         return lookup_transaction(txid.group(1))
     if lower in {"fees", "fee", "feerate", "recommended fees"} or "recommended fee" in lower:
@@ -109,6 +142,7 @@ def route_query(text: str) -> str:
         "bitcoin-cli": "rpc",
         "agent": "agent",
         "local": "local",
+        "receive": "receive",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):

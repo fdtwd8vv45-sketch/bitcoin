@@ -11,7 +11,8 @@ You do **not** need AWS to use the tools.
 ```bash
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "What does getblockcount do?"
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py rpc sendtoaddress
-python3 BitcoinAgent/app/BitcoinAgent/local_cli.py docs "functional tests"
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -38,6 +39,7 @@ hand-minted UUID session id, and Cedar needed a gateway ARN pasted by hand.
 | Session UUID ceremony | Clients reuse `~/.bitcoin-agent/session.json`; `--new-session` to rotate |
 | After-deploy ARN / Cedar steps | `scripts/after_deploy.sh` writes `.local/deploy.env` and a filled Cedar file |
 | Memory only after deploy | Local `remember` / `notes` (never store secrets). Same tools are attached in `agentcore dev` when memory is unset |
+| "Did I mess up a receive?" | `receive` / `check_receive` — checklist plus public address/txid lookup |
 
 Still requires **your** AWS account: live Claude, AgentCore Memory, gateway
 web search, online evals. This environment cannot deploy those.
@@ -49,11 +51,13 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
 | `lookup_transaction` | Public tx lookup by 64-char hex txid |
+| `lookup_address` | Public totals for a Bitcoin mainnet address |
+| `check_receive` | Tell a receive delay from a wrong address / network |
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 

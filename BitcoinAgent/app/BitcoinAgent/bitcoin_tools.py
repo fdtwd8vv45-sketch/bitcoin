@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local.
+    Supported topics: build, test, contribute, rpc, agent, local, receive.
     """
     key = topic.strip().lower()
     guides = {
@@ -285,15 +285,24 @@ def developer_howto(topic: str) -> str:
         "local": (
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
-            "2. Commands: rpc, list, docs, howto, fees, tip, tx, remember, notes\n"
+            "2. Commands: rpc, list, docs, howto, fees, tip, tx, receive, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
+        ),
+        "receive": (
+            "If a payment is missing, it is often a delay or the wrong wallet — "
+            "not a broken Bitcoin setup.\n"
+            "1. Ask the sender for the 64-character txid, or copy your receive address.\n"
+            "2. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>\n"
+            "3. Unconfirmed = wait. Wrong network (Lightning / testnet / 0x Ethereum) "
+            "will never appear in a mainnet Bitcoin wallet.\n"
+            "Never paste a seed phrase or private key."
         ),
     }
     if key in guides:
         return guides[key]
     return (
-        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local.\n"
+        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, receive.\n"
         "You can also call search_docs with a free-text query."
     )
 
