@@ -59,6 +59,8 @@ class BitcoinToolsTests(unittest.TestCase):
     def test_developer_howto_topics(self) -> None:
         self.assertIn("cmake", developer_howto("build").lower())
         self.assertIn("ctest", developer_howto("test").lower())
+        self.assertIn("Receive", developer_howto("receive"))
+        self.assertIn("getnewaddress", developer_howto("wallet"))
         self.assertIn("Unknown topic", developer_howto("spaceships"))
 
     def test_strip_trailing_tool_use(self) -> None:

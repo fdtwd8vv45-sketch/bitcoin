@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet.
     """
     key = topic.strip().lower()
     guides = {
@@ -290,19 +290,37 @@ def developer_howto(topic: str) -> str:
             "for agentcore dev / deploy."
         ),
         "receive": (
-            "If a payment is missing, it is often a delay or the wrong wallet — "
-            "not a broken Bitcoin setup.\n"
-            "1. Ask the sender for the 64-character txid, or copy your receive address.\n"
-            "2. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>\n"
-            "3. Unconfirmed = wait. Wrong network (Lightning / testnet / 0x Ethereum) "
-            "will never appear in a mainnet Bitcoin wallet.\n"
+            "Bitcoin only arrives in the wallet that created the address.\n"
+            "\n"
+            "1. Open that wallet app (or bitcoin-qt / bitcoin-cli).\n"
+            "2. Tap Receive (or run `bitcoin-cli getnewaddress`).\n"
+            "3. Copy the address or show the QR. It should start with bc1, 1, or 3 — "
+            "not 0x, not lnbc, not tb1.\n"
+            "4. The sender pays that exact address on Bitcoin mainnet.\n"
+            "5. The wallet shows it as unconfirmed first, then confirmed. "
+            "Exchanges often wait for 2–6 confirmations before they credit you.\n"
+            "\n"
+            "You cannot redirect a payment that already went to a different address "
+            "or a different coin.\n"
+            "Already sent? Paste the receive address or the sender's 64-character txid:\n"
+            "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>\n"
+            "Never paste a seed phrase or private key."
+        ),
+        "wallet": (
+            "Bitcoin only arrives in the wallet that created the address.\n"
+            "Phone/desktop app: Receive → copy address or QR → sender pays it → wait "
+            "for confirmations.\n"
+            "Bitcoin Core: `bitcoin-cli getnewaddress`, give that to the sender, then "
+            "`bitcoin-cli listunspent` or the Transactions tab.\n"
+            "This agent does not move coins or unlock a wallet. It only looks up public "
+            "addresses and txids.\n"
             "Never paste a seed phrase or private key."
         ),
     }
     if key in guides:
         return guides[key]
     return (
-        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, receive.\n"
+        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, receive, wallet.\n"
         "You can also call search_docs with a free-text query."
     )
 

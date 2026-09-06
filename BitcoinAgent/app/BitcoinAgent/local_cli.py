@@ -23,7 +23,8 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet
+  wallet              How a payment arrives in a wallet
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -63,6 +64,18 @@ def _looks_like_receive(lower: str) -> bool:
     )
 
 
+def _looks_like_into_wallet(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(get (it|them|the (bitcoin|btc|crypto|coins?)) to|"
+            r"into (the |my )?wallet|to the wallet|to my wallet|"
+            r"show up in (the |my )?wallet|"
+            r"how do (i|we) (get|receive|deposit))\b",
+            lower,
+        )
+    )
+
+
 def _receive_from_arg(text: str) -> str:
     address = ""
     txid = ""
@@ -94,6 +107,7 @@ def route_query(text: str) -> str:
         "docs": lambda: search_docs(arg or "JSON-RPC"),
         "search": lambda: search_docs(arg or "JSON-RPC"),
         "howto": lambda: developer_howto(arg or "local"),
+        "wallet": lambda: developer_howto("wallet"),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -111,6 +125,8 @@ def route_query(text: str) -> str:
 
     lower = raw.lower()
     txid = _TXID.search(raw)
+    if _looks_like_into_wallet(lower) and not _TXID.search(raw):
+        return developer_howto("receive")
     if _looks_like_receive(lower):
         return _receive_from_arg(raw)
     if txid and ("tx" in lower or "transaction" in lower or "txid" in lower):
@@ -143,6 +159,7 @@ def route_query(text: str) -> str:
         "agent": "agent",
         "local": "local",
         "receive": "receive",
+        "wallet": "wallet",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):

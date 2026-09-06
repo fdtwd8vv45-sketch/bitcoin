@@ -27,6 +27,7 @@ class LocalCliTests(unittest.TestCase):
     def test_help(self) -> None:
         text = route_query("help")
         self.assertIn("rpc <name>", text)
+        self.assertIn("wallet", text)
 
     def test_unknown_falls_back_to_docs(self) -> None:
         text = route_query("JSON-RPC endpoints")

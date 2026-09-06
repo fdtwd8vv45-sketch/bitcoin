@@ -102,7 +102,12 @@ class ReceiveRoutingTests(unittest.TestCase):
 
     def test_howto_receive(self) -> None:
         text = route_query("howto receive")
-        self.assertIn("txid", text.lower())
+        self.assertIn("Receive", text)
+
+    def test_how_to_get_it_to_the_wallet(self) -> None:
+        text = route_query("So how do we get it to the wallet")
+        self.assertIn("Receive", text)
+        self.assertIn("created the address", text)
 
 
 class LookupAddressTests(unittest.TestCase):
