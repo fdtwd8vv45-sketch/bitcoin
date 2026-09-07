@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from strands import tool
+from optional_tool import tool
 
 _ALLOWED_HOSTS = {"mempool.space"}
 _HEX64 = re.compile(r"^[0-9a-fA-F]{64}$")
@@ -77,3 +77,17 @@ def lookup_transaction(txid: str) -> str:
     if not _HEX64.match(txid):
         return "txid must be a 64-character hexadecimal transaction id."
     return _pretty(_get_json(f"https://mempool.space/api/tx/{txid}"))
+
+
+@tool
+def lookup_address(address: str) -> str:
+    """Look up public Bitcoin mainnet totals for an address on mempool.space.
+
+    Use a receive address, never a seed phrase or private key.
+    """
+    address = address.strip()
+    if not address or len(address) > 100:
+        return "Provide a Bitcoin mainnet receive address."
+    if any(token in address.lower() for token in ("seed", "xprv", "private")):
+        return "Do not paste seed phrases or private keys."
+    return _pretty(_get_json(f"https://mempool.space/api/address/{address}"))

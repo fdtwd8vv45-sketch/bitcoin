@@ -10,10 +10,14 @@ from bitcoin_tools import repo_root, write_rpc_index
 
 DOC_SNIPPET_FILES = [
     "doc/JSON-RPC-interface.md",
+    "doc/REST-interface.md",
     "doc/developer-notes.md",
+    "doc/bitcoin-conf.md",
+    "doc/build-unix.md",
     "CONTRIBUTING.md",
     "README.md",
     "INSTALL.md",
+    "test/README.md",
 ]
 
 

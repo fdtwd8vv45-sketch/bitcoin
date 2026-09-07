@@ -8,12 +8,15 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-from strands import tool
+from optional_tool import tool
 
 _THIS_DIR = Path(__file__).resolve().parent
 _INDEX_PATH = _THIS_DIR / "data" / "rpc_index.json"
 
-_RPC_METHOD_START = re.compile(r"static RPCMethod (\w+)\(\)\s*\{")
+# Wallet methods are often `RPCMethod name()` (no static). Helpers such as
+# bumpfee_helper take arguments and are wired through one-line wrappers.
+_RPC_METHOD_DEF = re.compile(r"(?:static\s+)?RPCMethod (\w+)\(([^)]*)\)\s*\{")
+_RPC_WRAPPER = re.compile(r'RPCMethod (\w+)\(\)\s*\{\s*return (\w+)\("([^"]+)"\)')
 _STRING_LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
 _REGISTER = re.compile(r'\{\s*"([^"]+)"\s*,\s*&(\w+)\s*\}')
 
@@ -36,26 +39,51 @@ def _unescape_cpp_string(value: str) -> str:
     return value.replace("\\n", "\n").replace("\\t", "\t").replace('\\"', '"').replace("\\\\", "\\")
 
 
-def _extract_rpc_methods(source: str, relpath: str) -> dict[str, dict]:
+def _extract_rpc_methods(source: str, relpath: str) -> tuple[dict[str, dict], dict[str, dict]]:
     methods: dict[str, dict] = {}
-    for match in _RPC_METHOD_START.finditer(source):
-        chunk = source[match.end() : match.end() + 4000]
+    helpers: dict[str, dict] = {}
+    for match in _RPC_METHOD_DEF.finditer(source):
+        fn_name = match.group(1)
+        params = match.group(2).strip()
+        chunk = source[match.end() : match.end() + 6000]
         method_start = chunk.find("return RPCMethod{")
         if method_start < 0:
             continue
+        after = chunk[method_start + len("return RPCMethod{") :].lstrip()
         literals = _STRING_LIT.findall(chunk[method_start:])
-        if len(literals) < 2:
+        if params:
+            if literals:
+                helpers[fn_name] = {
+                    "description": _unescape_cpp_string(literals[0]).strip(),
+                    "source": relpath,
+                    "function": fn_name,
+                }
+            continue
+        if not after.startswith('"') or len(literals) < 2:
             continue
         name = _unescape_cpp_string(literals[0])
         description = _unescape_cpp_string(literals[1]).strip()
         methods[name] = {
             "name": name,
-            "function": match.group(1),
+            "function": fn_name,
             "description": description,
             "source": relpath,
             "category": "",
         }
-    return methods
+
+    for match in _RPC_WRAPPER.finditer(source):
+        wrapper_fn, helper_fn, rpc_name = match.group(1), match.group(2), match.group(3)
+        if rpc_name in methods:
+            continue
+        template = helpers.get(helper_fn, {})
+        methods[rpc_name] = {
+            "name": rpc_name,
+            "function": wrapper_fn,
+            "description": template.get("description") or f"See {helper_fn} in {relpath}.",
+            "source": relpath,
+            "category": "",
+        }
+    return methods, helpers
 
 
 def _extract_categories(source: str) -> dict[str, str]:
@@ -75,7 +103,8 @@ def build_rpc_index(root: Path | None = None) -> dict[str, dict]:
         text = path.read_text(encoding="utf-8", errors="replace")
         relpath = str(path.relative_to(root))
         categories.update(_extract_categories(text))
-        index.update(_extract_rpc_methods(text, relpath))
+        methods, _helpers = _extract_rpc_methods(text, relpath)
+        index.update(methods)
 
     for name, entry in index.items():
         entry["category"] = categories.get(entry["function"], "") or categories.get(name, "")
@@ -218,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet.
     """
     key = topic.strip().lower()
     guides = {
@@ -247,15 +276,51 @@ def developer_howto(topic: str) -> str:
         ),
         "agent": (
             "This AgentCore project lives in BitcoinAgent/. "
-            "Local: `cd BitcoinAgent && agentcore dev` then "
+            "No AWS: `python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "\"What does getblockcount do?\"` or `./BitcoinAgent/scripts/doctor.sh`. "
+            "With AWS: `cd BitcoinAgent && agentcore dev` then "
             "`agentcore invoke --dev \"What does getblockcount do?\"`. "
-            "Deploy: configure AWS credentials and run `agentcore deploy`."
+            "Deploy: `agentcore deploy` then `./scripts/after_deploy.sh`."
+        ),
+        "local": (
+            "Use the tools without Bedrock or AWS:\n"
+            "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
+            "2. Commands: rpc, list, docs, howto, fees, tip, tx, receive, remember, notes\n"
+            "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
+            "for agentcore dev / deploy."
+        ),
+        "receive": (
+            "Bitcoin only arrives in the wallet that created the address.\n"
+            "\n"
+            "1. Open that wallet app (or bitcoin-qt / bitcoin-cli).\n"
+            "2. Tap Receive (or run `bitcoin-cli getnewaddress`).\n"
+            "3. Copy the address or show the QR. It should start with bc1, 1, or 3 — "
+            "not 0x, not lnbc, not tb1.\n"
+            "4. The sender pays that exact address on Bitcoin mainnet.\n"
+            "5. The wallet shows it as unconfirmed first, then confirmed. "
+            "Exchanges often wait for 2–6 confirmations before they credit you.\n"
+            "\n"
+            "You cannot redirect a payment that already went to a different address "
+            "or a different coin.\n"
+            "Already sent? Paste the receive address or the sender's 64-character txid:\n"
+            "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>\n"
+            "Never paste a seed phrase or private key."
+        ),
+        "wallet": (
+            "Bitcoin only arrives in the wallet that created the address.\n"
+            "Phone/desktop app: Receive → copy address or QR → sender pays it → wait "
+            "for confirmations.\n"
+            "Bitcoin Core: `bitcoin-cli getnewaddress`, give that to the sender, then "
+            "`bitcoin-cli listunspent` or the Transactions tab.\n"
+            "This agent does not move coins or unlock a wallet. It only looks up public "
+            "addresses and txids.\n"
+            "Never paste a seed phrase or private key."
         ),
     }
     if key in guides:
         return guides[key]
     return (
-        "Unknown topic. Use one of: build, test, contribute, rpc, agent.\n"
+        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, receive, wallet.\n"
         "You can also call search_docs with a free-text query."
     )
 

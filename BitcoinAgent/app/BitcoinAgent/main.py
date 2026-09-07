@@ -6,10 +6,12 @@ from strands import Agent
 from strands.agent.conversation_manager.null_conversation_manager import NullConversationManager
 
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
+from local_notes import recall_notes, remember_note
 from mcp_client.client import get_gateway_mcp_client
 from memory_session import MEMORY_ID, build_session_manager
 from model.load import load_model
-from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
+from network_tools import chain_tip_height, difficulty_adjustment, lookup_address, lookup_transaction, recommended_fees
+from receive_check import check_receive
 from payload import PayloadError, extract_prompt, sanitize_text, strip_trailing_tool_use, validate_actor_id
 
 app = BedrockAgentCoreApp()
@@ -20,16 +22,22 @@ You are BitcoinAgent, a Bitcoin Core development assistant for this repository.
 
 Help with JSON-RPC methods, build and test workflow, coding style, contributor
 process, and public chain status (fees, tip height, difficulty, tx lookup).
+If someone thinks they did not receive bitcoin, help them tell a delay
+from a real mistake using check_receive. Never ask for secrets.
 
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent topics
-- Use recommended_fees, chain_tip_height, difficulty_adjustment, or
-  lookup_transaction for live public-network facts
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive topics
+- Use check_receive when the user is waiting on a payment or worries they
+  copied the wrong address. Prefer an address or txid; never a seed phrase
+- Use recommended_fees, chain_tip_height, difficulty_adjustment,
+  lookup_transaction, or lookup_address for live public-network facts
 - After deploy, BitcoinGateway may add web-search tools — use them for BIPs
   and recent public discussion, then verify against this repo when possible
-- Remember user preferences and facts when memory is available
+- Remember user preferences and facts when AgentCore Memory is available
+- When memory is not available, use remember_note / recall_notes for short
+  local notes (never store secrets)
 - Be concise and precise
 - If a tool returns no match, say so instead of inventing Bitcoin Core behavior
 - Do not give advice that would help steal funds, attack the network, or
@@ -46,7 +54,11 @@ LOCAL_TOOLS = [
     chain_tip_height,
     difficulty_adjustment,
     lookup_transaction,
+    lookup_address,
+    check_receive,
 ]
+if not MEMORY_ID:
+    LOCAL_TOOLS.extend([remember_note, recall_notes])
 
 _INLINE_FUNCTION_NAMES = {tool_fn.__name__ for tool_fn in LOCAL_TOOLS}
 
