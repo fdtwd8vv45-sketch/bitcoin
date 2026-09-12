@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "etherscan": {
+      "url": "https://mcp.etherscan.io/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:ETHERSCAN_API_KEY}"
+      }
+    },
+    "etherscan-docs": {
+      "url": "https://docs.etherscan.io/mcp"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 This is BitcoinAgent, a Strands + AgentCore assistant for this Bitcoin Core
 tree. `main.py` exposes repo tools, public mempool.space lookups, optional
-AgentCore Memory, and BitcoinGateway web-search after deploy.
+AgentCore Memory, BitcoinGateway web-search after deploy, and optional
+official Etherscan MCP servers when `ETHERSCAN_API_KEY` is set.
 
 To use the tools with no AWS account:
 
@@ -36,6 +37,8 @@ invoking the agent.
 | Variable | Required | Description |
 | --- | --- | --- |
 | `LOCAL_DEV` | No | Set to `1` to use `.env.local` instead of AgentCore Identity |
+| `ETHERSCAN_API_KEY` | No | Enables official Etherscan data MCP (`mcp.etherscan.io`) and docs MCP |
+| `ETHERSCAN_DOCS_MCP` | No | Set to `1` to attach Etherscan docs MCP without a data API key |
 
 # Developing locally
 

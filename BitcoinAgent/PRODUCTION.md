@@ -31,6 +31,7 @@ do not have to mint session IDs by hand.
 - [x] No API keys in agent code
 - [x] Public mempool.space calls are allowlisted HTTPS GET only
 - [x] Local notes refuse seed phrases / private keys / wallet passwords
+- [x] Etherscan MCP uses `ETHERSCAN_API_KEY` in process env / Cursor `${env:…}` only (Gateway MCP targets cannot attach an API key)
 - [ ] Register any future private API keys with `agentcore add credential` (never runtime env vars)
 
 ### Code quality

@@ -60,6 +60,7 @@ web search, online evals. This environment cannot deploy those.
 | `check_receive` | Tell a receive delay from a wrong address / network |
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
+| Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 
 Refresh the bundled index after RPC changes:
 
@@ -90,6 +91,27 @@ agentcore invoke --dev "What does getblockcount do?"
 The local server defaults to port **8080**. AgentCore Memory and gateway URLs
 are not injected until you deploy. In that mode the agent falls back to
 local notes.
+
+## Etherscan MCP (optional)
+
+Official Etherscan MCP servers are configured for Cursor in
+[`.cursor/mcp.json`](../.cursor/mcp.json). Create a key at
+https://etherscan.io/apidashboard and export it before starting Cursor or
+the live agent:
+
+```bash
+export ETHERSCAN_API_KEY=your_key
+```
+
+| Server | URL | Auth |
+| --- | --- | --- |
+| `etherscan` | `https://mcp.etherscan.io/mcp` | `Authorization: Bearer $ETHERSCAN_API_KEY` |
+| `etherscan-docs` | `https://docs.etherscan.io/mcp` | none |
+
+BitcoinAgent attaches the same servers when `ETHERSCAN_API_KEY` is set
+(docs-only: `ETHERSCAN_DOCS_MCP=1`). AgentCore Gateway cannot send an API
+key to an MCP target, so the runtime talks to Etherscan directly. The
+tools are read-only and count against your Etherscan quota.
 
 ## Deploy
 
