@@ -97,6 +97,12 @@ else
   note "not deployed yet — after agentcore deploy run $ROOT/scripts/after_deploy.sh"
 fi
 
+if [[ -n "${ETHERSCAN_API_KEY:-}" ]]; then
+  pass "ETHERSCAN_API_KEY is set (Etherscan MCP enabled)"
+else
+  note "ETHERSCAN_API_KEY unset — Cursor/BitcoinAgent Etherscan data MCP stays off"
+fi
+
 say
 say "Summary: $ok ok, $warn optional/missing for AWS, $fail blocking"
 say "Next: python3 $APP/local_cli.py"

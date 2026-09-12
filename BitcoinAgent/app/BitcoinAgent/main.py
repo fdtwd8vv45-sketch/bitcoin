@@ -7,7 +7,11 @@ from strands.agent.conversation_manager.null_conversation_manager import NullCon
 
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
 from local_notes import recall_notes, remember_note
-from mcp_client.client import get_gateway_mcp_client
+from mcp_client.client import (
+    get_etherscan_docs_mcp_client,
+    get_etherscan_mcp_client,
+    get_gateway_mcp_client,
+)
 from memory_session import MEMORY_ID, build_session_manager
 from model.load import load_model
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_address, lookup_transaction, recommended_fees
@@ -35,6 +39,10 @@ Guidelines:
   lookup_transaction, or lookup_address for live public-network facts
 - After deploy, BitcoinGateway may add web-search tools — use them for BIPs
   and recent public discussion, then verify against this repo when possible
+- If Etherscan MCP is attached, use it only for public EVM-chain lookups
+  (balances, transactions, contracts, gas). It is read-only and counts
+  against the Etherscan API quota. Prefer repo tools for Bitcoin questions.
+- If Etherscan docs MCP is attached, use it for Etherscan API/docs questions
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -82,12 +90,21 @@ def _actor_id(payload: dict, context: Any) -> str:
     return validate_actor_id(sanitize_text(raw))
 
 
+def _optional_mcp_clients() -> list:
+    clients = []
+    for factory in (
+        get_gateway_mcp_client,
+        get_etherscan_mcp_client,
+        get_etherscan_docs_mcp_client,
+    ):
+        client = factory()
+        if client:
+            clients.append(client)
+    return clients
+
+
 def _tools_for_runtime() -> list:
-    tools = list(LOCAL_TOOLS)
-    gateway_client = get_gateway_mcp_client()
-    if gateway_client:
-        tools.append(gateway_client)
-    return tools
+    return [*LOCAL_TOOLS, *_optional_mcp_clients()]
 
 
 def _make_conversation_manager():
