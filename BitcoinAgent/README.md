@@ -13,6 +13,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "What does getblockcount do?"
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py rpc sendtoaddress
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -51,7 +53,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -59,6 +61,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_address` | Public totals for a Bitcoin mainnet address |
 | `check_receive` | Tell a receive delay from a wrong address / network |
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
+| `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 
@@ -112,6 +115,19 @@ BitcoinAgent attaches the same servers when `ETHERSCAN_API_KEY` is set
 (docs-only: `ETHERSCAN_DOCS_MCP=1`). AgentCore Gateway cannot send an API
 key to an MCP target, so the runtime talks to Etherscan directly. The
 tools are read-only and count against your Etherscan quota.
+
+## Agentic Wallet (optional)
+
+OKX Agentic Wallet keeps key generation, storage, and signing inside a TEE.
+Sign in with email, Google, or Apple. BitcoinAgent only explains the product
+and can run read-only `onchainos wallet status`. It does not send, swap, or
+sign. See [AGENTIC_WALLET.md](AGENTIC_WALLET.md).
+
+```bash
+npx -y @okxweb3/onchainos-installer install   # Node.js 18+
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
+```
 
 ## Deploy
 
@@ -195,6 +211,7 @@ agentcore deploy
 
 ## Documentation
 
+- [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)
 - [AgentCore CLI](https://github.com/aws/agentcore-cli)
 - [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)
 - [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/)

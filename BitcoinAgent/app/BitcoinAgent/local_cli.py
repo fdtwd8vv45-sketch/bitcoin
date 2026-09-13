@@ -3,6 +3,7 @@
 
     python3 local_cli.py "What does getblockcount do?"
     python3 local_cli.py rpc sendtoaddress
+    python3 local_cli.py agentic
     python3 local_cli.py          # interactive prompt
 """
 
@@ -13,6 +14,7 @@ import re
 import sys
 from collections.abc import Callable
 
+from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, load_rpc_index, lookup_rpc, search_docs
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
@@ -23,8 +25,9 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet
-  wallet              How a payment arrives in a wallet
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic
+  wallet              How a payment arrives in a Bitcoin wallet
+  agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -59,6 +62,16 @@ def _looks_like_receive(lower: str) -> bool:
             r"missing (payment|bitcoin|btc|crypto)|where is my|"
             r"didn'?t get my|waiting (on|for) (my )?(payment|bitcoin|btc)|"
             r"receiving my (crypto|bitcoin|btc))\b",
+            lower,
+        )
+    )
+
+
+def _looks_like_agentic(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(agentic wallet|okx wallet|onchainos|x402|"
+            r"agentic-wallet|okx agentic)\b",
             lower,
         )
     )
@@ -108,6 +121,8 @@ def route_query(text: str) -> str:
         "search": lambda: search_docs(arg or "JSON-RPC"),
         "howto": lambda: developer_howto(arg or "local"),
         "wallet": lambda: developer_howto("wallet"),
+        "agentic": lambda: agentic_wallet_status() if re.search(r"\b(status|cli)\b", arg.lower()) else agentic_wallet_overview(),
+        "agentic-wallet": lambda: agentic_wallet_status() if re.search(r"\b(status|cli)\b", arg.lower()) else agentic_wallet_overview(),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -125,6 +140,10 @@ def route_query(text: str) -> str:
 
     lower = raw.lower()
     txid = _TXID.search(raw)
+    if _looks_like_agentic(lower):
+        if re.search(r"\b(status|installed|logged[- ]in|am i signed)\b", lower):
+            return agentic_wallet_status()
+        return agentic_wallet_overview()
     if _looks_like_into_wallet(lower) and not _TXID.search(raw):
         return developer_howto("receive")
     if _looks_like_receive(lower):
@@ -160,6 +179,8 @@ def route_query(text: str) -> str:
         "local": "local",
         "receive": "receive",
         "wallet": "wallet",
+        "agentic": "agentic",
+        "okx": "agentic",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):

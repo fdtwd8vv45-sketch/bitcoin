@@ -103,6 +103,12 @@ else
   note "ETHERSCAN_API_KEY unset — Cursor/BitcoinAgent Etherscan data MCP stays off"
 fi
 
+if have onchainos; then
+  pass "onchainos CLI on PATH (Agentic Wallet status available)"
+else
+  note "onchainos CLI unset — Agentic Wallet overview still works; install with: npx -y @okxweb3/onchainos-installer install"
+fi
+
 say
 say "Summary: $ok ok, $warn optional/missing for AWS, $fail blocking"
 say "Next: python3 $APP/local_cli.py"

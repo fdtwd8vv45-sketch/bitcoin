@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic.
     """
     key = topic.strip().lower()
     guides = {
@@ -314,13 +314,30 @@ def developer_howto(topic: str) -> str:
             "`bitcoin-cli listunspent` or the Transactions tab.\n"
             "This agent does not move coins or unlock a wallet. It only looks up public "
             "addresses and txids.\n"
-            "Never paste a seed phrase or private key."
+            "Never paste a seed phrase or private key.\n"
+            "OKX Agentic Wallet (TEE, email login, x402) is a different product — "
+            "see howto topic `agentic`."
+        ),
+        "agentic": (
+            "OKX Agentic Wallet: keys stay in a TEE. Sign in with email, Google, or "
+            "Apple. No seed phrase in this chat.\n"
+            "Install (Node.js 18+): npx -y @okxweb3/onchainos-installer install\n"
+            "Then: Log in to Agentic Wallet with email (or Google / Apple). Open the "
+            "login URL in a browser.\n"
+            "This agent only explains the wallet and can run read-only "
+            "`onchainos wallet status`. It does not send, swap, trade, or sign.\n"
+            "Docs: BitcoinAgent/AGENTIC_WALLET.md and "
+            "https://web3.okx.com/onchainos/dev-docs/wallet/agentic-wallet\n"
+            "Not a Bitcoin Core wallet — coins sent to getnewaddress will not appear there."
         ),
     }
+    if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
+        key = "agentic"
     if key in guides:
         return guides[key]
     return (
-        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, receive, wallet.\n"
+        "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
+        "receive, wallet, agentic.\n"
         "You can also call search_docs with a free-text query."
     )
 
