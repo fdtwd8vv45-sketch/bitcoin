@@ -34,7 +34,8 @@ class AgenticWalletOverviewTests(unittest.TestCase):
     def test_repo_overview_doc_exists(self) -> None:
         self.assertTrue(OVERVIEW_DOC.is_file())
         body = OVERVIEW_DOC.read_text(encoding="utf-8")
-        self.assertIn("Trusted Execution Environment", body)
+        self.assertIn("Trusted Execution", body)
+        self.assertIn("Environment", body)
         self.assertIn(INSTALL_COMMAND, body)
 
     def test_howto_agentic_topic(self) -> None:

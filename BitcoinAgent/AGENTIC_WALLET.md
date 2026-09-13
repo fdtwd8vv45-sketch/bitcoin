@@ -1,9 +1,8 @@
 # Agentic Wallet
 
 OKX Agentic Wallet is a dedicated onchain wallet for AI agents. Key
-generation, storage, and signing stay inside a TEE (Trusted Execution
-Environment). This agent never sees the private key — and neither does
-the BitcoinAgent process.
+generation, storage, and signing stay inside a TEE (Trusted Execution Environment).
+This agent never sees the private key — and neither does the BitcoinAgent process.
 
 BitcoinAgent remains a Bitcoin Core assistant. It explains Agentic Wallet
 and can check whether the official `onchainos` CLI is installed or logged
