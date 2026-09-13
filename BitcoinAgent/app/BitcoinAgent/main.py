@@ -5,6 +5,7 @@ from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from strands import Agent
 from strands.agent.conversation_manager.null_conversation_manager import NullConversationManager
 
+from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
@@ -32,7 +33,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -43,6 +44,10 @@ Guidelines:
   (balances, transactions, contracts, gas). It is read-only and counts
   against the Etherscan API quota. Prefer repo tools for Bitcoin questions.
 - If Etherscan docs MCP is attached, use it for Etherscan API/docs questions
+- Use agentic_wallet_overview for OKX Agentic Wallet (TEE keys, email/Google/Apple
+  login, x402). Use agentic_wallet_status to see if the onchainos CLI is installed
+  or logged in. Do not send, swap, trade, or sign through this agent. Never store
+  OTP codes, API keys, or seed phrases.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -64,6 +69,8 @@ LOCAL_TOOLS = [
     lookup_transaction,
     lookup_address,
     check_receive,
+    agentic_wallet_overview,
+    agentic_wallet_status,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])

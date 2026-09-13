@@ -32,6 +32,7 @@ do not have to mint session IDs by hand.
 - [x] Public mempool.space calls are allowlisted HTTPS GET only
 - [x] Local notes refuse seed phrases / private keys / wallet passwords
 - [x] Etherscan MCP uses `ETHERSCAN_API_KEY` in process env / Cursor `${env:…}` only (Gateway MCP targets cannot attach an API key)
+- [x] Agentic Wallet status is read-only (`onchainos wallet status`); keys stay in OKX's TEE and this agent does not send, swap, or sign
 - [ ] Register any future private API keys with `agentcore add credential` (never runtime env vars)
 
 ### Code quality

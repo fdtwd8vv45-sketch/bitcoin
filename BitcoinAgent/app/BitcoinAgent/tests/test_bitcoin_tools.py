@@ -61,6 +61,7 @@ class BitcoinToolsTests(unittest.TestCase):
         self.assertIn("ctest", developer_howto("test").lower())
         self.assertIn("Receive", developer_howto("receive"))
         self.assertIn("getnewaddress", developer_howto("wallet"))
+        self.assertIn("npx -y @okxweb3/onchainos-installer install", developer_howto("agentic"))
         self.assertIn("Unknown topic", developer_howto("spaceships"))
 
     def test_strip_trailing_tool_use(self) -> None:
