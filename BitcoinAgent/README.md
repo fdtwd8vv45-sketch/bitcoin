@@ -13,6 +13,7 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "What does getblockcount do?"
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py rpc sendtoaddress
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
@@ -59,6 +60,7 @@ web search, online evals. This environment cannot deploy those.
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
 | `lookup_transaction` | Public tx lookup by 64-char hex txid |
 | `lookup_address` | Public totals for a Bitcoin mainnet address |
+| `lookup_contract_source` | Verified EVM contract source, ABI, and compiler settings (Etherscan `getsourcecode`) |
 | `check_receive` | Tell a receive delay from a wrong address / network |
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
@@ -98,13 +100,23 @@ local notes.
 ## Etherscan MCP (optional)
 
 Official Etherscan MCP servers are configured for Cursor in
-[`.cursor/mcp.json`](../.cursor/mcp.json). Create a key at
-https://etherscan.io/apidashboard and export it before starting Cursor or
-the live agent:
+[`.cursor/mcp.json`](../.cursor/mcp.json). The same key also enables the
+local `source` / `lookup_contract_source` tool, which calls Etherscan API
+v2 `module=contract&action=getsourcecode` on `api.etherscan.io` (allowlisted
+HTTPS GET). Create a key at https://etherscan.io/apidashboard and export it
+before starting Cursor, the local CLI, or the live agent:
 
 ```bash
 export ETHERSCAN_API_KEY=your_key
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py source 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 arbitrum
 ```
+
+Pass a numeric `chainid` or a name such as `ethereum`, `arbitrum`, or `base`
+(default: Ethereum `1`). Unverified addresses are reported as unverified
+instead of guessed. Proxy metadata is returned; fetch the implementation
+address separately for the logic contract. The tool never executes source
+and never prints the API key.
 
 | Server | URL | Auth |
 | --- | --- | --- |
@@ -114,7 +126,8 @@ export ETHERSCAN_API_KEY=your_key
 BitcoinAgent attaches the same servers when `ETHERSCAN_API_KEY` is set
 (docs-only: `ETHERSCAN_DOCS_MCP=1`). AgentCore Gateway cannot send an API
 key to an MCP target, so the runtime talks to Etherscan directly. The
-tools are read-only and count against your Etherscan quota.
+tools are read-only and count against your Etherscan quota. Docs:
+https://docs.etherscan.io/api-reference/endpoint/getsourcecode
 
 ## Agentic Wallet (optional)
 

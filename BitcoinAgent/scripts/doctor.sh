@@ -98,9 +98,9 @@ else
 fi
 
 if [[ -n "${ETHERSCAN_API_KEY:-}" ]]; then
-  pass "ETHERSCAN_API_KEY is set (Etherscan MCP enabled)"
+  pass "ETHERSCAN_API_KEY is set (contract source + Etherscan MCP enabled)"
 else
-  note "ETHERSCAN_API_KEY unset — Cursor/BitcoinAgent Etherscan data MCP stays off"
+  note "ETHERSCAN_API_KEY unset — lookup_contract_source and Etherscan data MCP stay off"
 fi
 
 if have onchainos; then

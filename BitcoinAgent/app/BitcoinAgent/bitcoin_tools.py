@@ -248,6 +248,9 @@ def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
     Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic.
+
+    The local CLI also has `source <0xaddress> [chain]` for verified EVM
+    contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
     """
     key = topic.strip().lower()
     guides = {
@@ -285,7 +288,7 @@ def developer_howto(topic: str) -> str:
         "local": (
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
-            "2. Commands: rpc, list, docs, howto, fees, tip, tx, receive, remember, notes\n"
+            "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),

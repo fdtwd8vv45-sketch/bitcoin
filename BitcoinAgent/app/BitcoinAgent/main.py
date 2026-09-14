@@ -7,6 +7,7 @@ from strands.agent.conversation_manager.null_conversation_manager import NullCon
 
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
+from contract_source import lookup_contract_source
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
@@ -38,11 +39,16 @@ Guidelines:
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
   lookup_transaction, or lookup_address for live public-network facts
+- Use lookup_contract_source for verified EVM contract source, ABI, and
+  compiler settings (Etherscan getsourcecode). Needs ETHERSCAN_API_KEY.
+  If the address is a proxy, fetch the implementation too. Do not run the
+  source. If it is unverified, say so instead of guessing.
 - After deploy, BitcoinGateway may add web-search tools — use them for BIPs
   and recent public discussion, then verify against this repo when possible
 - If Etherscan MCP is attached, use it only for public EVM-chain lookups
-  (balances, transactions, contracts, gas). It is read-only and counts
-  against the Etherscan API quota. Prefer repo tools for Bitcoin questions.
+  (balances, transactions, contracts, gas) that lookup_contract_source
+  does not cover. It is read-only and counts against the Etherscan API
+  quota. Prefer repo tools for Bitcoin questions.
 - If Etherscan docs MCP is attached, use it for Etherscan API/docs questions
 - Use agentic_wallet_overview for OKX Agentic Wallet (TEE keys, email/Google/Apple
   login, x402). Use agentic_wallet_status to see if the onchainos CLI is installed
@@ -68,6 +74,7 @@ LOCAL_TOOLS = [
     difficulty_adjustment,
     lookup_transaction,
     lookup_address,
+    lookup_contract_source,
     check_receive,
     agentic_wallet_overview,
     agentic_wallet_status,
