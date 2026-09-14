@@ -3,6 +3,7 @@
 
     python3 local_cli.py "What does getblockcount do?"
     python3 local_cli.py rpc sendtoaddress
+    python3 local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
     python3 local_cli.py agentic
     python3 local_cli.py          # interactive prompt
 """
@@ -16,11 +17,13 @@ from collections.abc import Callable
 
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, load_rpc_index, lookup_rpc, search_docs
+from contract_source import lookup_contract_source, normalize_chain_id
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
 from receive_check import check_receive, classify_payment_id
 
 _TXID = re.compile(r"\b([0-9a-fA-F]{64})\b")
+_ETH = re.compile(r"\b(0x[0-9a-fA-F]{40})\b")
 _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
@@ -32,6 +35,7 @@ _HELP = """Commands (no AWS required):
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
   tx <txid>           Public transaction lookup
+  source <0xaddr> [chain]  Verified EVM contract source (needs ETHERSCAN_API_KEY)
   receive [addr|txid] Why a payment might not show up
   remember <text>     Save a short local note
   notes [query]       Show local notes
@@ -89,6 +93,37 @@ def _looks_like_into_wallet(lower: str) -> bool:
     )
 
 
+def _looks_like_contract_source(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(source code|verified source|getsourcecode|contract source|"
+            r"verified contract|solidity source)\b",
+            lower,
+        )
+    )
+
+
+def _contract_source_from_arg(text: str) -> str:
+    address = ""
+    chain = "1"
+    for token in re.findall(r"[A-Za-z0-9=]+", text or ""):
+        if classify_payment_id(token) == "ethereum":
+            address = token
+        elif normalize_chain_id(token) is not None and token.lower() not in {
+            "source",
+            "contract",
+            "getsourcecode",
+            "on",
+        }:
+            chain = token
+    if not address:
+        return (
+            "Provide a contract address: source <0xaddress> [chainid]. "
+            "Example: source 0xdAC17F958D2ee523a2206206994597C13D831ec7"
+        )
+    return lookup_contract_source(address, chain)
+
+
 def _receive_from_arg(text: str) -> str:
     address = ""
     txid = ""
@@ -128,6 +163,9 @@ def route_query(text: str) -> str:
         "height": chain_tip_height,
         "difficulty": difficulty_adjustment,
         "tx": lambda: lookup_transaction(arg),
+        "source": lambda: _contract_source_from_arg(arg),
+        "contract": lambda: _contract_source_from_arg(arg),
+        "getsourcecode": lambda: _contract_source_from_arg(arg),
         "receive": lambda: _receive_from_arg(arg),
         "remember": lambda: remember_note(arg),
         "notes": lambda: recall_notes(arg),
@@ -140,6 +178,9 @@ def route_query(text: str) -> str:
 
     lower = raw.lower()
     txid = _TXID.search(raw)
+    eth = _ETH.search(raw)
+    if eth and _looks_like_contract_source(lower):
+        return _contract_source_from_arg(raw)
     if _looks_like_agentic(lower):
         if re.search(r"\b(status|installed|logged[- ]in|am i signed)\b", lower):
             return agentic_wallet_status()
