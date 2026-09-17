@@ -8,6 +8,9 @@
     },
     "etherscan-docs": {
       "url": "https://docs.etherscan.io/mcp"
+    },
+    "jupiter-docs": {
+      "url": "https://developers.jup.ag/docs/mcp"
     }
   }
 }

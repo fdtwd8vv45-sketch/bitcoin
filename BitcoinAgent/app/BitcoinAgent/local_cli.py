@@ -5,6 +5,7 @@
     python3 local_cli.py rpc sendtoaddress
     python3 local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
     python3 local_cli.py agentic
+    python3 local_cli.py jupiter price SOL,JUP
     python3 local_cli.py          # interactive prompt
 """
 
@@ -18,6 +19,7 @@ from collections.abc import Callable
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, load_rpc_index, lookup_rpc, search_docs
 from contract_source import lookup_contract_source, normalize_chain_id
+from jupiter import jupiter_cli_status, jupiter_overview, jupiter_price, jupiter_token_search
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
 from receive_check import check_receive, classify_payment_id
@@ -28,9 +30,10 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
+  jupiter [price|token|status]  Jupiter overview, USD prices, token search, or jup CLI
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -79,6 +82,44 @@ def _looks_like_agentic(lower: str) -> bool:
             lower,
         )
     )
+
+
+def _looks_like_jupiter(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(jupiter|jup|jup\.ag|jup-ag)\b",
+            lower,
+        )
+    )
+
+
+def _jupiter_from_arg(text: str) -> str:
+    raw = (text or "").strip()
+    lower = raw.lower()
+    if not raw or lower in {"overview", "help", "docs", "ai"}:
+        return jupiter_overview()
+    if re.search(r"^(status|cli|version)\b", lower):
+        return jupiter_cli_status()
+    price_match = re.match(r"^(price|quote)\b(?:\s+(.*))?$", raw, re.I)
+    if price_match:
+        return jupiter_price(price_match.group(2) or "")
+    token_match = re.match(r"^(token|tokens|search)\b(?:\s+(.*))?$", raw, re.I)
+    if token_match:
+        return jupiter_token_search(token_match.group(2) or "")
+    if re.search(r"\b(status|installed|version|cli)\b", lower) and not re.search(
+        r"\b(price|token|search|quote)\b", lower
+    ):
+        return jupiter_cli_status()
+    if re.search(r"\b(price|quote|usd)\b", lower):
+        rest = re.sub(r"\b(price|quote|usd|of|for|on|the)\b", " ", raw, flags=re.I)
+        return jupiter_price(rest)
+    if re.search(r"\b(token|tokens|search|mint)\b", lower):
+        rest = re.sub(r"\b(token|tokens|search|mint|for|of)\b", " ", raw, flags=re.I)
+        return jupiter_token_search(rest)
+    # Bare symbols / mints after `jupiter`: treat as a price lookup.
+    if raw and not re.search(r"\b(how|what|docs|skill|mcp|cli)\b", lower):
+        return jupiter_price(raw)
+    return jupiter_overview()
 
 
 def _looks_like_into_wallet(lower: str) -> bool:
@@ -158,6 +199,8 @@ def route_query(text: str) -> str:
         "wallet": lambda: developer_howto("wallet"),
         "agentic": lambda: agentic_wallet_status() if re.search(r"\b(status|cli)\b", arg.lower()) else agentic_wallet_overview(),
         "agentic-wallet": lambda: agentic_wallet_status() if re.search(r"\b(status|cli)\b", arg.lower()) else agentic_wallet_overview(),
+        "jupiter": lambda: _jupiter_from_arg(arg),
+        "jup": lambda: _jupiter_from_arg(arg),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -185,6 +228,14 @@ def route_query(text: str) -> str:
         if re.search(r"\b(status|installed|logged[- ]in|am i signed)\b", lower):
             return agentic_wallet_status()
         return agentic_wallet_overview()
+    if _looks_like_jupiter(lower):
+        rest = re.sub(
+            r"\b(jupiter|jup\.ag|jup-ag)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return _jupiter_from_arg(rest)
     if _looks_like_into_wallet(lower) and not _TXID.search(raw):
         return developer_howto("receive")
     if _looks_like_receive(lower):
@@ -222,6 +273,8 @@ def route_query(text: str) -> str:
         "wallet": "wallet",
         "agentic": "agentic",
         "okx": "agentic",
+        "jupiter": "jupiter",
+        "jup-ag": "jupiter",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):

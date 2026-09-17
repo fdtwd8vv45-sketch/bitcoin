@@ -16,6 +16,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py receive <address-or-txid>
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -54,7 +56,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -64,8 +66,10 @@ web search, online evals. This environment cannot deploy those.
 | `check_receive` | Tell a receive delay from a wrong address / network |
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
+| `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, read-only `jup --version` |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
+| Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
 
 Refresh the bundled index after RPC changes:
 
@@ -128,6 +132,39 @@ BitcoinAgent attaches the same servers when `ETHERSCAN_API_KEY` is set
 key to an MCP target, so the runtime talks to Etherscan directly. The
 tools are read-only and count against your Etherscan quota. Docs:
 https://docs.etherscan.io/api-reference/endpoint/getsourcecode
+
+## Jupiter (optional)
+
+Jupiter APIs are REST/JSON on Solana (no RPC node). BitcoinAgent reads the
+docs and does keyless Price / Tokens lookups. It does not swap, place
+orders, or sign. See [JUPITER.md](JUPITER.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter token JUP
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter status
+```
+
+Price and Tokens work without a key at 0.5 RPS. For a higher limit:
+
+```bash
+export JUPITER_API_KEY=jup_...   # from https://developers.jup.ag/portal
+```
+
+| Server | URL | Auth |
+| --- | --- | --- |
+| `jupiter-docs` | `https://developers.jup.ag/docs/mcp` | none |
+
+Cursor is already wired in [`.cursor/mcp.json`](../.cursor/mcp.json).
+BitcoinAgent attaches the same docs MCP when `JUPITER_DOCS_MCP=1` or
+`JUPITER_API_KEY` is set. Trading MCP (`https://mcp.jup.ag`) is not
+attached. Official CLI / skills (on a machine you control):
+
+```bash
+npm i -g @jup-ag/cli
+npx skills add jup-ag/agent-skills --skill "integrating-jupiter"
+```
 
 ## Agentic Wallet (optional)
 
@@ -224,6 +261,7 @@ agentcore deploy
 
 ## Documentation
 
+- [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens (read-only in this agent)
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)
 - [AgentCore CLI](https://github.com/aws/agentcore-cli)
 - [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)

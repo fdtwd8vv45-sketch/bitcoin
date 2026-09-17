@@ -7,9 +7,11 @@ from strands.tools.mcp.mcp_client import MCPClient
 from mcp_client.settings import (
     ETHERSCAN_DOCS_MCP_URL,
     ETHERSCAN_MCP_URL,
+    JUPITER_DOCS_MCP_URL,
     etherscan_api_key,
     etherscan_docs_mcp_enabled,
     etherscan_mcp_enabled,
+    jupiter_docs_mcp_enabled,
 )
 
 logger = logging.getLogger(__name__)
@@ -46,3 +48,14 @@ def get_etherscan_docs_mcp_client() -> MCPClient | None:
     if not etherscan_docs_mcp_enabled():
         return None
     return MCPClient(lambda: streamablehttp_client(ETHERSCAN_DOCS_MCP_URL))
+
+
+def get_jupiter_docs_mcp_client() -> MCPClient | None:
+    """Return a client for the public Jupiter docs MCP, or None if disabled.
+
+    Read-only documentation search. Trading MCP (mcp.jup.ag) is not attached.
+    """
+    if not jupiter_docs_mcp_enabled():
+        logger.info("Jupiter docs MCP unset; running without Jupiter docs tools.")
+        return None
+    return MCPClient(lambda: streamablehttp_client(JUPITER_DOCS_MCP_URL))

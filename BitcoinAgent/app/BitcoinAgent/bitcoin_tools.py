@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -288,7 +288,8 @@ def developer_howto(topic: str) -> str:
         "local": (
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
-            "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, remember, notes\n"
+            "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
+            "agentic, jupiter, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -333,14 +334,32 @@ def developer_howto(topic: str) -> str:
             "https://web3.okx.com/onchainos/dev-docs/wallet/agentic-wallet\n"
             "Not a Bitcoin Core wallet — coins sent to getnewaddress will not appear there."
         ),
+        "jupiter": (
+            "Jupiter is Solana DeFi infrastructure (swap, tokens, price, lend). "
+            "APIs are REST/JSON and need no RPC node.\n"
+            "This agent is read-only: overview, USD prices, token search, and "
+            "`jup --version`. It does not swap, place orders, or sign.\n"
+            "Docs index: https://dev.jup.ag/docs/llms.txt\n"
+            "Cursor docs MCP is already in .cursor/mcp.json (jupiter-docs).\n"
+            "Runtime docs MCP: export JUPITER_DOCS_MCP=1\n"
+            "Skills: npx skills add jup-ag/agent-skills --skill \"integrating-jupiter\"\n"
+            "CLI (on a machine you control): npm i -g @jup-ag/cli\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP\n"
+            "Optional higher rate limit: export JUPITER_API_KEY from "
+            "https://developers.jup.ag/portal\n"
+            "See BitcoinAgent/JUPITER.md."
+        ),
     }
     if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
         key = "agentic"
+    if key in {"jup", "jup-ag", "jupiter-api", "jupiter-docs"}:
+        key = "jupiter"
     if key in guides:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic.\n"
+        "receive, wallet, agentic, jupiter.\n"
         "You can also call search_docs with a free-text query."
     )
 
