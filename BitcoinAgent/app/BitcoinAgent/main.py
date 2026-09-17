@@ -8,11 +8,13 @@ from strands.agent.conversation_manager.null_conversation_manager import NullCon
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
 from contract_source import lookup_contract_source
+from jupiter import jupiter_cli_status, jupiter_overview, jupiter_price, jupiter_token_search
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
     get_etherscan_mcp_client,
     get_gateway_mcp_client,
+    get_jupiter_docs_mcp_client,
 )
 from memory_session import MEMORY_ID, build_session_manager
 from model.load import load_model
@@ -34,7 +36,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -54,6 +56,11 @@ Guidelines:
   login, x402). Use agentic_wallet_status to see if the onchainos CLI is installed
   or logged in. Do not send, swap, trade, or sign through this agent. Never store
   OTP codes, API keys, or seed phrases.
+- Use jupiter_overview for Jupiter APIs and AI tools (llms.txt, skills, docs MCP,
+  CLI). Use jupiter_price for USD prices and jupiter_token_search for Solana token
+  metadata. Use jupiter_cli_status to see if the official `jup` CLI is installed.
+  If Jupiter docs MCP is attached, use it for Jupiter API/docs questions. Do not
+  swap, place orders, lend, or sign through this agent.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -78,6 +85,10 @@ LOCAL_TOOLS = [
     check_receive,
     agentic_wallet_overview,
     agentic_wallet_status,
+    jupiter_overview,
+    jupiter_price,
+    jupiter_token_search,
+    jupiter_cli_status,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])
@@ -110,6 +121,7 @@ def _optional_mcp_clients() -> list:
         get_gateway_mcp_client,
         get_etherscan_mcp_client,
         get_etherscan_docs_mcp_client,
+        get_jupiter_docs_mcp_client,
     ):
         client = factory()
         if client:

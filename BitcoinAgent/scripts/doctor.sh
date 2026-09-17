@@ -103,6 +103,24 @@ else
   note "ETHERSCAN_API_KEY unset — lookup_contract_source and Etherscan data MCP stay off"
 fi
 
+if [[ -n "${JUPITER_API_KEY:-}" ]]; then
+  pass "JUPITER_API_KEY is set (higher Jupiter Price/Tokens rate limit + docs MCP)"
+else
+  note "JUPITER_API_KEY unset — Jupiter Price/Tokens still work keyless at 0.5 RPS"
+fi
+
+if [[ "${JUPITER_DOCS_MCP:-}" == "1" || "${JUPITER_DOCS_MCP:-}" == "true" ]]; then
+  pass "JUPITER_DOCS_MCP is set (Jupiter docs MCP attached at runtime)"
+else
+  note "JUPITER_DOCS_MCP unset — Cursor still has jupiter-docs in .cursor/mcp.json"
+fi
+
+if have jup; then
+  pass "jup CLI on PATH (Jupiter version check available)"
+else
+  note "jup CLI unset — Jupiter overview still works; install with: npm i -g @jup-ag/cli"
+fi
+
 if have onchainos; then
   pass "onchainos CLI on PATH (Agentic Wallet status available)"
 else

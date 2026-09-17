@@ -2,13 +2,15 @@ This is BitcoinAgent, a Strands + AgentCore assistant for this Bitcoin Core
 tree. `main.py` exposes repo tools, public mempool.space lookups, optional
 AgentCore Memory, BitcoinGateway web-search after deploy, optional official
 Etherscan MCP servers when `ETHERSCAN_API_KEY` is set, a local
-`lookup_contract_source` tool (Etherscan `getsourcecode`), and a read-only OKX
-Agentic Wallet overview / `onchainos` CLI status check.
+`lookup_contract_source` tool (Etherscan `getsourcecode`), a read-only OKX
+Agentic Wallet overview / `onchainos` CLI status check, and read-only Jupiter
+Price / Tokens lookups plus optional Jupiter docs MCP.
 
 To use the tools with no AWS account:
 
 ```bash
 python3 local_cli.py "What does getblockcount do?"
+python3 local_cli.py jupiter price SOL,JUP
 ```
 
 `../../scripts/doctor.sh` lists what is still needed for `agentcore dev` / deploy.
@@ -41,9 +43,14 @@ invoking the agent.
 | `LOCAL_DEV` | No | Set to `1` to use `.env.local` instead of AgentCore Identity |
 | `ETHERSCAN_API_KEY` | No | Enables `lookup_contract_source`, official Etherscan data MCP (`mcp.etherscan.io`), and docs MCP |
 | `ETHERSCAN_DOCS_MCP` | No | Set to `1` to attach Etherscan docs MCP without a data API key |
+| `JUPITER_API_KEY` | No | Optional `x-api-key` for higher Jupiter Price/Tokens rate limits; also attaches Jupiter docs MCP |
+| `JUPITER_DOCS_MCP` | No | Set to `1` to attach Jupiter docs MCP (`developers.jup.ag/docs/mcp`) without an API key |
 
 `agentic_wallet_status` looks for the official `onchainos` CLI on `PATH`.
 It never logs in or signs. See `../../AGENTIC_WALLET.md`.
+
+`jupiter_cli_status` looks for the official `jup` CLI on `PATH` and runs
+`jup --version` only. See `../../JUPITER.md`.
 
 # Developing locally
 
