@@ -6,6 +6,10 @@
     "lib": ["es2022"],
     "declaration": true,
     "strict": true,
+    // Keep bivariant function parameters (TS playground ?strictFunctionTypes=false).
+    // CDK callback/props assignments and older DOM-style method hierarchies still
+    // rely on this; `strict` would otherwise turn the flag on.
+    "strictFunctionTypes": false,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
