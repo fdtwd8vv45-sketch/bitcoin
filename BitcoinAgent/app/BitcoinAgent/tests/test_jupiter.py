@@ -83,7 +83,7 @@ class JupiterOverviewTests(unittest.TestCase):
         self.assertIn(DOCS_MCP_URL, text)
         self.assertIn("does not swap", lowered)
         self.assertIn("jupiter-docs", lowered)
-        self.assertIn("check-eligibility", lowered)
+        self.assertIn("express eligibility", lowered)
         self.assertIn("will not craft-txn", lowered)
         self.assertIn(VERIFY_DOCS_URL, text)
 
