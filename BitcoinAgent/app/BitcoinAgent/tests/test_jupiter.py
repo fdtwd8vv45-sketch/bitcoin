@@ -9,16 +9,20 @@ from unittest.mock import patch
 from bitcoin_tools import developer_howto
 from jupiter import (
     DOCS_MCP_URL,
+    ELIGIBILITY_PATH,
     INSTALL_COMMAND,
     KNOWN_MINTS,
+    VERIFY_DOCS_URL,
     jup_cli_path,
     jupiter_cli_status,
     jupiter_get,
     jupiter_overview,
     jupiter_price,
     jupiter_token_search,
+    jupiter_verify_eligibility,
     resolve_price_id,
     resolve_price_ids,
+    resolve_verify_mint,
     run_jup_version,
 )
 from local_cli import route_query
@@ -79,6 +83,9 @@ class JupiterOverviewTests(unittest.TestCase):
         self.assertIn(DOCS_MCP_URL, text)
         self.assertIn("does not swap", lowered)
         self.assertIn("jupiter-docs", lowered)
+        self.assertIn("check-eligibility", lowered)
+        self.assertIn("will not craft-txn", lowered)
+        self.assertIn(VERIFY_DOCS_URL, text)
 
     def test_repo_overview_doc_exists(self) -> None:
         self.assertTrue(OVERVIEW_DOC.is_file())
@@ -86,6 +93,8 @@ class JupiterOverviewTests(unittest.TestCase):
         self.assertIn("llms.txt", body)
         self.assertIn(INSTALL_COMMAND, body)
         self.assertIn("does **not** swap", body)
+        self.assertIn("check-eligibility", body)
+        self.assertIn("never calls `/execute`", body)
 
     def test_howto_jupiter_topic(self) -> None:
         text = developer_howto("jupiter")
@@ -93,6 +102,9 @@ class JupiterOverviewTests(unittest.TestCase):
         self.assertIn("llms.txt", text)
         self.assertEqual(developer_howto("jup"), text)
         self.assertEqual(developer_howto("jupiter-docs"), text)
+        self.assertEqual(developer_howto("vrfd"), text)
+        self.assertIn("Express eligibility", text)
+        self.assertIn("tokens/verification", text)
 
 
 class JupiterPriceTests(unittest.TestCase):
@@ -189,10 +201,102 @@ class JupiterTokenSearchTests(unittest.TestCase):
         self.assertIn("seed", jupiter_token_search("private key").lower())
 
 
+class JupiterVerifyEligibilityTests(unittest.TestCase):
+    def test_resolves_known_symbol_and_strips_verify_words(self) -> None:
+        mint, error = resolve_verify_mint("express verification for USDC")
+        self.assertIsNone(error)
+        self.assertEqual(mint, KNOWN_MINTS["usdc"])
+
+    def test_rejects_multiple_mints(self) -> None:
+        mint, error = resolve_verify_mint("SOL JUP")
+        self.assertIsNone(mint)
+        self.assertIn("single mint", error or "")
+
+    def test_formats_payload_and_refuses_submit(self) -> None:
+        payload = {
+            "tokenExists": True,
+            "isVerified": False,
+            "canVerify": True,
+            "canMetadata": False,
+            "metadataError": "A premium metadata update request for this token already exists",
+        }
+        with patch("jupiter.jupiter_get", return_value=payload) as mocked:
+            text = jupiter_verify_eligibility("USDC")
+        mocked.assert_called_once_with(ELIGIBILITY_PATH, {"tokenId": KNOWN_MINTS["usdc"]})
+        self.assertIn("canVerify: yes", text)
+        self.assertIn("canMetadata: no", text)
+        self.assertIn("premium metadata update", text)
+        self.assertIn("will not craft", text.lower())
+        self.assertIn("POST /tokens/v2/verify/express/execute", text)
+        self.assertIn(VERIFY_DOCS_URL, text)
+        self.assertNotIn("Both canVerify and canMetadata are no", text)
+
+    def test_both_false_warns_before_payment(self) -> None:
+        payload = {
+            "tokenExists": True,
+            "isVerified": True,
+            "canVerify": False,
+            "canMetadata": False,
+            "verificationError": "Already verified",
+        }
+        with patch("jupiter.jupiter_get", return_value=payload):
+            text = jupiter_verify_eligibility(KNOWN_MINTS["usdc"])
+        self.assertIn("reject", text.lower())
+        self.assertIn("1000 JUP", text)
+
+    def test_empty_usage(self) -> None:
+        text = jupiter_verify_eligibility("")
+        self.assertIn("jupiter verify", text)
+        self.assertIn("will not pay 1000 JUP", text)
+
+    def test_rejects_secrets(self) -> None:
+        self.assertIn("seed", jupiter_verify_eligibility("my seed phrase apple").lower())
+
+    def test_unknown_symbol_uses_verified_search_hit(self) -> None:
+        mint = "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+
+        def fake_get(path: str, query: dict[str, str]) -> object:
+            if path == "/tokens/v2/search":
+                return [
+                    {"id": "scamMint11111111111111111111111111111111111", "isVerified": False, "symbol": "BONK"},
+                    {"id": mint, "isVerified": True, "symbol": "BONK"},
+                ]
+            self.assertEqual(path, ELIGIBILITY_PATH)
+            self.assertEqual(query["tokenId"], mint)
+            return {
+                "tokenExists": True,
+                "isVerified": True,
+                "canVerify": False,
+                "canMetadata": True,
+            }
+
+        with patch("jupiter.jupiter_get", side_effect=fake_get):
+            text = jupiter_verify_eligibility("BONK")
+        self.assertIn(mint, text)
+        self.assertIn("canMetadata: yes", text)
+        self.assertNotIn("scamMint", text)
+
+    def test_eligibility_401_mentions_portal_key(self) -> None:
+        with patch("jupiter.jupiter_get", return_value={"error": "Jupiter rejected this Express eligibility request (401). Export a Portal key as JUPITER_API_KEY (https://developers.jup.ag/portal)."}):
+            text = jupiter_verify_eligibility("USDC")
+        self.assertIn("401", text)
+        self.assertIn("JUPITER_API_KEY", text)
+
+    def test_unexpected_payload(self) -> None:
+        with patch("jupiter.jupiter_get", return_value=["not", "a", "dict"]):
+            text = jupiter_verify_eligibility("USDC")
+        self.assertIn("unexpected payload", text.lower())
+
+
 class JupiterHttpTests(unittest.TestCase):
     def test_allowlist_blocks_other_paths(self) -> None:
         with self.assertRaises(ValueError):
             jupiter_get("/swap/v2/order", {"inputMint": SOL})
+        with self.assertRaises(ValueError):
+            jupiter_get("/tokens/v2/verify/express/craft-txn", {"senderAddress": SOL})
+        with self.assertRaises(ValueError):
+            jupiter_get("/tokens/v2/verify/express/execute", {"tokenId": SOL})
+        self.assertEqual(ELIGIBILITY_PATH, "/tokens/v2/verify/express/check-eligibility")
 
     def test_sends_api_key_header_without_leaking_it(self) -> None:
         payload = json.dumps({SOL: {"usdPrice": 1}}).encode()
@@ -217,6 +321,26 @@ class JupiterHttpTests(unittest.TestCase):
         self.assertEqual(header_map.get("x-api-key"), "secret-jup-key")
         dumped = json.dumps(result)
         self.assertNotIn("secret-jup-key", dumped)
+
+    def test_eligibility_401_message_differs_from_price(self) -> None:
+        from io import BytesIO
+
+        import urllib.error
+
+        exc = urllib.error.HTTPError(
+            url="https://api.jup.ag/tokens/v2/verify/express/check-eligibility",
+            code=401,
+            msg="Unauthorized",
+            hdrs=None,
+            fp=BytesIO(b""),
+        )
+        with patch("jupiter.urllib.request.urlopen", side_effect=exc):
+            eligibility = jupiter_get(ELIGIBILITY_PATH, {"tokenId": SOL})
+            price = jupiter_get("/price/v3", {"ids": SOL})
+        self.assertIn("Express eligibility", eligibility["error"])
+        self.assertIn("JUPITER_API_KEY", eligibility["error"])
+        self.assertNotIn("Express eligibility", price["error"])
+        self.assertIn("keyless", price["error"].lower())
 
 
 class JupiterCliStatusTests(unittest.TestCase):
@@ -266,15 +390,40 @@ class JupiterLocalCliTests(unittest.TestCase):
         with patch("jupiter.jup_cli_path", return_value=None):
             status = route_query("jupiter status")
         self.assertIn("not found", status.lower())
+        payload = {
+            "tokenExists": True,
+            "isVerified": True,
+            "canVerify": False,
+            "canMetadata": False,
+            "verificationError": "Already verified",
+        }
+        with patch("jupiter.jupiter_get", return_value=payload):
+            eligibility = route_query("jupiter verify USDC")
+        self.assertIn("canVerify: no", eligibility)
+        self.assertIn("will not craft", eligibility.lower())
 
     def test_help_lists_jupiter(self) -> None:
         text = route_query("help")
         self.assertIn("jupiter", text)
+        self.assertIn("verify", text)
 
     def test_natural_language_price(self) -> None:
         with patch("jupiter.jupiter_get", return_value={JUP: {"usdPrice": 0.4, "priceChange24h": 1.0, "decimals": 6}}):
             text = route_query("what is the jupiter price of JUP")
         self.assertIn("0.4", text)
+
+    def test_natural_language_verify(self) -> None:
+        payload = {
+            "tokenExists": True,
+            "isVerified": False,
+            "canVerify": True,
+            "canMetadata": True,
+        }
+        with patch("jupiter.jupiter_get", return_value=payload) as mocked:
+            text = route_query("can I verify USDC on jupiter")
+        mocked.assert_called_once_with(ELIGIBILITY_PATH, {"tokenId": KNOWN_MINTS["usdc"]})
+        self.assertIn("canVerify: yes", text)
+        self.assertIn("will not craft", text.lower())
 
 
 if __name__ == "__main__":

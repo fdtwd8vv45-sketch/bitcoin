@@ -337,15 +337,18 @@ def developer_howto(topic: str) -> str:
         "jupiter": (
             "Jupiter is Solana DeFi infrastructure (swap, tokens, price, lend). "
             "APIs are REST/JSON and need no RPC node.\n"
-            "This agent is read-only: overview, USD prices, token search, and "
-            "`jup --version`. It does not swap, place orders, or sign.\n"
+            "This agent is read-only: overview, USD prices, token search, "
+            "Express eligibility, and `jup --version`. It does not swap, "
+            "place orders, sign, or submit VRFD Express payments.\n"
             "Docs index: https://dev.jup.ag/docs/llms.txt\n"
+            "Express Verification: https://developers.jup.ag/docs/tokens/verification\n"
             "Cursor docs MCP is already in .cursor/mcp.json (jupiter-docs).\n"
             "Runtime docs MCP: export JUPITER_DOCS_MCP=1\n"
             "Skills: npx skills add jup-ag/agent-skills --skill \"integrating-jupiter\"\n"
             "CLI (on a machine you control): npm i -g @jup-ag/cli\n"
             "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter\n"
             "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC\n"
             "Optional higher rate limit: export JUPITER_API_KEY from "
             "https://developers.jup.ag/portal\n"
             "See BitcoinAgent/JUPITER.md."
@@ -353,7 +356,7 @@ def developer_howto(topic: str) -> str:
     }
     if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
         key = "agentic"
-    if key in {"jup", "jup-ag", "jupiter-api", "jupiter-docs"}:
+    if key in {"jup", "jup-ag", "jupiter-api", "jupiter-docs", "vrfd", "jupiter-verify"}:
         key = "jupiter"
     if key in guides:
         return guides[key]
