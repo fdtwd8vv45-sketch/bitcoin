@@ -104,9 +104,9 @@ else
 fi
 
 if [[ -n "${JUPITER_API_KEY:-}" ]]; then
-  pass "JUPITER_API_KEY is set (higher Jupiter Price/Tokens rate limit + docs MCP)"
+  pass "JUPITER_API_KEY is set (higher Jupiter Price/Tokens/eligibility rate limit + docs MCP)"
 else
-  note "JUPITER_API_KEY unset — Jupiter Price/Tokens still work keyless at 0.5 RPS"
+  note "JUPITER_API_KEY unset — Jupiter Price/Tokens/eligibility still work keyless at 0.5 RPS"
 fi
 
 if [[ "${JUPITER_DOCS_MCP:-}" == "1" || "${JUPITER_DOCS_MCP:-}" == "true" ]]; then

@@ -18,6 +18,7 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -66,7 +67,7 @@ web search, online evals. This environment cannot deploy those.
 | `check_receive` | Tell a receive delay from a wrong address / network |
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
-| `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, read-only `jup --version` |
+| `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
@@ -136,13 +137,15 @@ https://docs.etherscan.io/api-reference/endpoint/getsourcecode
 ## Jupiter (optional)
 
 Jupiter APIs are REST/JSON on Solana (no RPC node). BitcoinAgent reads the
-docs and does keyless Price / Tokens lookups. It does not swap, place
-orders, or sign. See [JUPITER.md](JUPITER.md).
+docs and does keyless Price / Tokens lookups plus a read-only VRFD Express
+eligibility check. It does not swap, place orders, sign, or submit Express
+payments. See [JUPITER.md](JUPITER.md).
 
 ```bash
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter token JUP
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter status
 ```
 
@@ -261,7 +264,7 @@ agentcore deploy
 
 ## Documentation
 
-- [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens (read-only in this agent)
+- [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens, VRFD eligibility (read-only in this agent)
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)
 - [AgentCore CLI](https://github.com/aws/agentcore-cli)
 - [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)

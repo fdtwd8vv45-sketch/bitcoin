@@ -34,8 +34,8 @@ do not have to mint session IDs by hand.
 - [x] Local notes refuse seed phrases / private keys / wallet passwords
 - [x] Etherscan MCP uses `ETHERSCAN_API_KEY` in process env / Cursor `${env:…}` only (Gateway MCP targets cannot attach an API key)
 - [x] Agentic Wallet status is read-only (`onchainos wallet status`); keys stay in OKX's TEE and this agent does not send, swap, or sign
-- [x] Jupiter Price/Tokens calls are allowlisted HTTPS GET to `api.jup.ag` only (`/price/v3`, `/tokens/v2/search`); optional `JUPITER_API_KEY` is an `x-api-key` header and is not logged
-- [x] Jupiter docs MCP is read-only (`developers.jup.ag/docs/mcp`); Trading MCP is not attached and this agent does not swap or sign
+- [x] Jupiter Price/Tokens/eligibility calls are allowlisted HTTPS GET to `api.jup.ag` only (`/price/v3`, `/tokens/v2/search`, `/tokens/v2/verify/express/check-eligibility`); optional `JUPITER_API_KEY` is an `x-api-key` header and is not logged
+- [x] Jupiter docs MCP is read-only (`developers.jup.ag/docs/mcp`); Trading MCP is not attached and this agent does not swap, sign, or submit VRFD Express payments (`craft-txn` / `execute`)
 - [ ] Register any future private API keys with `agentcore add credential` (never runtime env vars)
 
 ### Code quality

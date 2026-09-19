@@ -1,10 +1,11 @@
-"""Read-only Jupiter Price / Tokens lookups and CLI status.
+"""Read-only Jupiter Price / Tokens / VRFD eligibility lookups and CLI status.
 
 Jupiter APIs are REST/JSON at api.jup.ag. Keyless access works at 0.5 RPS;
 an optional JUPITER_API_KEY raises the limit via the x-api-key header.
 
-This module never swaps, places orders, signs, or runs the Jupiter CLI
-except `jup --version`. Trading stays in the official CLI / Trading MCP.
+This module never swaps, places orders, signs, crafts Express payment
+transactions, or runs the Jupiter CLI except `jup --version`. Trading and
+Express submit (craft-txn / execute) stay in the official CLI / API.
 """
 
 from __future__ import annotations
@@ -31,10 +32,15 @@ TRADING_MCP_URL = "https://mcp.jup.ag"
 PORTAL_URL = "https://developers.jup.ag/portal"
 PRICE_DOCS_URL = "https://developers.jup.ag/docs/price"
 TOKENS_DOCS_URL = "https://developers.jup.ag/docs/tokens"
+VERIFY_DOCS_URL = "https://developers.jup.ag/docs/tokens/verification"
+VRFD_URL = "https://verified.jup.ag"
+VRFD_BROWSE_URL = "https://verified.jup.ag/tokens/browse"
+ELIGIBILITY_PATH = "/tokens/v2/verify/express/check-eligibility"
 INSTALL_COMMAND = "npm i -g @jup-ag/cli"
 SKILLS_COMMAND = 'npx skills add jup-ag/agent-skills --skill "integrating-jupiter"'
 _ALLOWED_HOSTS = {JUPITER_API_HOST}
-_ALLOWED_PATHS = ("/price/v3", "/tokens/v2/search")
+# Eligibility is GET-only. Never allowlist craft-txn or execute — those spend 1000 JUP.
+_ALLOWED_PATHS = ("/price/v3", "/tokens/v2/search", ELIGIBILITY_PATH)
 _TIMEOUT_SECONDS = 8
 _MAX_BYTES = 256_000
 _MAX_SEARCH_RESULTS = 8
@@ -96,6 +102,30 @@ _STOPWORDS = {
     "what",
     "with",
 }
+_VERIFY_STOPWORDS = _STOPWORDS | {
+    "be",
+    "can",
+    "craft",
+    "eligible",
+    "eligibility",
+    "execute",
+    "express",
+    "metadata",
+    "pay",
+    "payment",
+    "premium",
+    "request",
+    "sign",
+    "signed",
+    "submit",
+    "submission",
+    "this",
+    "unsigned",
+    "update",
+    "verify",
+    "verification",
+    "vrfd",
+}
 _BASE58_MINT = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{32,44}$")
 _SYMBOL = re.compile(r"^[A-Za-z][A-Za-z0-9]{0,15}$")
 
@@ -137,12 +167,20 @@ def _overview_text() -> str:
         f"- Trading MCP: {TRADING_MCP_URL}  (swap / orders / lend). "
         "BitcoinAgent does not attach it.\n"
         "\n"
-        "This agent is read-only: overview, USD prices, token search, and "
-        "`jup --version`. It does not swap, place orders, lend, or sign.\n"
+        "This agent is read-only: overview, USD prices, token search, "
+        "Express eligibility, and `jup --version`. It does not swap, place "
+        "orders, lend, sign, or submit VRFD Express payments.\n"
         "\n"
-        "Price and Tokens work keyless at 0.5 RPS. For higher limits, create "
-        f"a key at {PORTAL_URL} and export JUPITER_API_KEY (sent as x-api-key, "
-        "never logged).\n"
+        "Express Verification (Jupiter VRFD): check eligibility with "
+        f"`jupiter verify <mint>`. Each Express submission costs 1000 JUP "
+        "(or SOL / USDC / JUPUSD swapped to 1000 JUP via Ultra). This agent "
+        "will not craft-txn, sign, or POST /execute. Free Standard flow: "
+        f"{VRFD_URL}  Docs: {VERIFY_DOCS_URL}\n"
+        "\n"
+        "Price and Tokens work keyless at 0.5 RPS. Express eligibility may "
+        "need a Portal key. For higher limits, create a key at "
+        f"{PORTAL_URL} and export JUPITER_API_KEY (sent as x-api-key, never "
+        "logged).\n"
         "\n"
         "Known symbols for price: SOL, USDC, USDT, JUP, JupUSD, JupSOL, JLP "
         "(or a mint address).\n"
@@ -150,8 +188,10 @@ def _overview_text() -> str:
         "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter\n"
         "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP\n"
         "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter token JUP\n"
+        "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC\n"
         "  python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter status\n"
-        f"Docs: {DOCS_URL}  |  Price: {PRICE_DOCS_URL}  |  Tokens: {TOKENS_DOCS_URL}"
+        f"Docs: {DOCS_URL}  |  Price: {PRICE_DOCS_URL}  |  Tokens: {TOKENS_DOCS_URL}  |  "
+        f"VRFD: {VERIFY_DOCS_URL}"
     )
 
 
@@ -221,13 +261,13 @@ def jupiter_get(path: str, query: dict[str, str]) -> Any:
             raw = response.read(_MAX_BYTES + 1)
             status = getattr(response, "status", 200)
     except urllib.error.HTTPError as exc:
-        return {"error": _http_error_message(exc)}
+        return {"error": _http_error_message(exc, path=path)}
     except urllib.error.URLError:
         return {"error": "Could not reach api.jup.ag. Try again later."}
     if len(raw) > _MAX_BYTES:
         return {"error": "Response from Jupiter was too large."}
     if status == 401:
-        return {"error": "JUPITER_API_KEY was rejected (401). Unset it to run keyless, or replace it."}
+        return {"error": _unauthorized_message(path)}
     if status == 429:
         return {
             "error": "Jupiter rate-limited this request (429). Keyless is 0.5 RPS; "
@@ -239,9 +279,18 @@ def jupiter_get(path: str, query: dict[str, str]) -> Any:
         return {"error": "Jupiter returned a non-JSON body."}
 
 
-def _http_error_message(exc: urllib.error.HTTPError) -> str:
+def _unauthorized_message(path: str) -> str:
+    if path == ELIGIBILITY_PATH:
+        return (
+            "Jupiter rejected this Express eligibility request (401). "
+            f"Export a Portal key as JUPITER_API_KEY ({PORTAL_URL})."
+        )
+    return "JUPITER_API_KEY was rejected (401). Unset it to run keyless, or replace it."
+
+
+def _http_error_message(exc: urllib.error.HTTPError, path: str = "") -> str:
     if exc.code == 401:
-        return "JUPITER_API_KEY was rejected (401). Unset it to run keyless, or replace it."
+        return _unauthorized_message(path)
     if exc.code == 429:
         return (
             "Jupiter rate-limited this request (429). Keyless is 0.5 RPS; "
@@ -433,6 +482,119 @@ def jupiter_token_search(query: str) -> str:
     if isinstance(payload, dict) and payload.get("error"):
         return str(payload["error"])
     return _format_search_payload(payload, raw)
+
+
+def _verify_usage() -> str:
+    return (
+        "Provide a mint or symbol: jupiter verify "
+        "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v\n"
+        "Known symbols: SOL, USDC, USDT, JUP, JupUSD, JupSOL, JLP.\n"
+        "This agent only checks Express eligibility. It will not pay 1000 JUP, "
+        "craft a transaction, sign, or POST /execute.\n"
+        f"Free Standard flow: {VRFD_URL}  Docs: {VERIFY_DOCS_URL}"
+    )
+
+
+def resolve_verify_mint(text: str) -> tuple[str | None, str | None]:
+    """Map a verify query to a single mint, or (None, error)."""
+    kept = [
+        token
+        for token in split_query_tokens(text)
+        if token.lower() not in _VERIFY_STOPWORDS
+    ]
+    if not kept:
+        return None, None
+    mints, unknown = resolve_price_ids(" ".join(kept))
+    if len(mints) > 1:
+        return None, "Provide a single mint or symbol for Express eligibility."
+    if unknown and not mints:
+        search = _search_tokens_payload(",".join(unknown[:5]))
+        if isinstance(search, dict) and search.get("error"):
+            return None, str(search["error"])
+        if isinstance(search, list):
+            picked = _pick_search_mints(search, limit=1)
+            if picked:
+                return picked[0], None
+        leftover = ", ".join(unknown)
+        return None, (
+            f"Could not resolve {leftover!r} to a mint. "
+            "Use a known symbol (SOL, USDC, JUP, …) or a mint address."
+        )
+    if unknown and mints:
+        return None, "Provide a single mint or symbol for Express eligibility."
+    if mints:
+        return mints[0], None
+    return None, None
+
+
+def _yn(value: Any) -> str:
+    if value is True:
+        return "yes"
+    if value is False:
+        return "no"
+    return "n/a"
+
+
+def _format_eligibility_payload(payload: dict[str, Any], mint: str) -> str:
+    label = _MINT_TO_SYMBOL.get(mint, mint)
+    can_verify = payload.get("canVerify")
+    can_metadata = payload.get("canMetadata")
+    lines = [
+        f"Jupiter VRFD Express eligibility for {label} ({mint}):",
+        f"- tokenExists: {_yn(payload.get('tokenExists'))}",
+        f"- isVerified: {_yn(payload.get('isVerified'))}",
+        f"- canVerify: {_yn(can_verify)}",
+    ]
+    verification_error = payload.get("verificationError")
+    if isinstance(verification_error, str) and verification_error:
+        lines.append(f"  verificationError: {verification_error}")
+    lines.append(f"- canMetadata: {_yn(can_metadata)}")
+    metadata_error = payload.get("metadataError")
+    if isinstance(metadata_error, str) and metadata_error:
+        lines.append(f"  metadataError: {metadata_error}")
+    if can_verify is False and can_metadata is False:
+        lines.append(
+            "Both canVerify and canMetadata are no, so Express would reject "
+            "the submission before charging 1000 JUP."
+        )
+    lines.append(
+        "Read-only. This agent will not craft a payment transaction, sign, "
+        "or POST /tokens/v2/verify/express/execute."
+    )
+    lines.append(
+        "Pay 1000 JUP (or SOL / USDC / JUPUSD swapped to 1000 JUP) on a "
+        f"machine you control, or use the free Standard flow at {VRFD_URL}."
+    )
+    lines.append(f"Track requests: {VRFD_BROWSE_URL}")
+    lines.append(f"Docs: {VERIFY_DOCS_URL}")
+    return "\n".join(lines)
+
+
+@tool
+def jupiter_verify_eligibility(token_id: str) -> str:
+    """Check Jupiter VRFD Express eligibility for a Solana mint or known symbol.
+
+    GET /tokens/v2/verify/express/check-eligibility only. Does not craft a
+    1000 JUP payment, sign, or submit verification.
+    """
+    raw = (token_id or "").strip()
+    if not raw:
+        return _verify_usage()
+    if _secret_query(raw):
+        return "Do not paste seed phrases, private keys, or API keys."
+    if len(raw) > 400:
+        return "Eligibility query is too long."
+    mint, error = resolve_verify_mint(raw)
+    if error:
+        return error
+    if not mint:
+        return _verify_usage()
+    payload = jupiter_get(ELIGIBILITY_PATH, {"tokenId": mint})
+    if isinstance(payload, dict) and payload.get("error"):
+        return str(payload["error"])
+    if not isinstance(payload, dict):
+        return "Jupiter Express eligibility returned an unexpected payload."
+    return _format_eligibility_payload(payload, mint)
 
 
 def jup_cli_path() -> str | None:

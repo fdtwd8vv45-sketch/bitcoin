@@ -19,7 +19,13 @@ from collections.abc import Callable
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, load_rpc_index, lookup_rpc, search_docs
 from contract_source import lookup_contract_source, normalize_chain_id
-from jupiter import jupiter_cli_status, jupiter_overview, jupiter_price, jupiter_token_search
+from jupiter import (
+    jupiter_cli_status,
+    jupiter_overview,
+    jupiter_price,
+    jupiter_token_search,
+    jupiter_verify_eligibility,
+)
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
 from receive_check import check_receive, classify_payment_id
@@ -33,7 +39,7 @@ _HELP = """Commands (no AWS required):
   howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
-  jupiter [price|token|status]  Jupiter overview, USD prices, token search, or jup CLI
+  jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -87,7 +93,7 @@ def _looks_like_agentic(lower: str) -> bool:
 def _looks_like_jupiter(lower: str) -> bool:
     return bool(
         re.search(
-            r"\b(jupiter|jup|jup\.ag|jup-ag)\b",
+            r"\b(jupiter|jup|jup\.ag|jup-ag|vrfd|verified\.jup)\b",
             lower,
         )
     )
@@ -103,16 +109,32 @@ def _jupiter_from_arg(text: str) -> str:
     price_match = re.match(r"^(price|quote)\b(?:\s+(.*))?$", raw, re.I)
     if price_match:
         return jupiter_price(price_match.group(2) or "")
+    verify_match = re.match(
+        r"^(verify|verification|eligibility|eligible|vrfd|express)\b(?:\s+(.*))?$",
+        raw,
+        re.I,
+    )
+    if verify_match:
+        return jupiter_verify_eligibility(verify_match.group(2) or "")
     token_match = re.match(r"^(token|tokens|search)\b(?:\s+(.*))?$", raw, re.I)
     if token_match:
         return jupiter_token_search(token_match.group(2) or "")
     if re.search(r"\b(status|installed|version|cli)\b", lower) and not re.search(
-        r"\b(price|token|search|quote)\b", lower
+        r"\b(price|token|search|quote|verify|eligibility)\b", lower
     ):
         return jupiter_cli_status()
     if re.search(r"\b(price|quote|usd)\b", lower):
         rest = re.sub(r"\b(price|quote|usd|of|for|on|the)\b", " ", raw, flags=re.I)
         return jupiter_price(rest)
+    if re.search(r"\b(verify|verification|eligibility|eligible|vrfd|express)\b", lower):
+        rest = re.sub(
+            r"\b(verify|verification|eligibility|eligible|vrfd|express|check|"
+            r"for|of|on|the|can|i|we|this|token|tokens|mint)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return jupiter_verify_eligibility(rest)
     if re.search(r"\b(token|tokens|search|mint)\b", lower):
         rest = re.sub(r"\b(token|tokens|search|mint|for|of)\b", " ", raw, flags=re.I)
         return jupiter_token_search(rest)
@@ -230,7 +252,7 @@ def route_query(text: str) -> str:
         return agentic_wallet_overview()
     if _looks_like_jupiter(lower):
         rest = re.sub(
-            r"\b(jupiter|jup\.ag|jup-ag)\b",
+            r"\b(jupiter|jup\.ag|jup-ag|vrfd|verified\.jup)\b",
             " ",
             raw,
             flags=re.I,

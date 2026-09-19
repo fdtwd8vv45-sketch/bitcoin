@@ -8,7 +8,13 @@ from strands.agent.conversation_manager.null_conversation_manager import NullCon
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
 from contract_source import lookup_contract_source
-from jupiter import jupiter_cli_status, jupiter_overview, jupiter_price, jupiter_token_search
+from jupiter import (
+    jupiter_cli_status,
+    jupiter_overview,
+    jupiter_price,
+    jupiter_token_search,
+    jupiter_verify_eligibility,
+)
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
@@ -58,9 +64,11 @@ Guidelines:
   OTP codes, API keys, or seed phrases.
 - Use jupiter_overview for Jupiter APIs and AI tools (llms.txt, skills, docs MCP,
   CLI). Use jupiter_price for USD prices and jupiter_token_search for Solana token
-  metadata. Use jupiter_cli_status to see if the official `jup` CLI is installed.
-  If Jupiter docs MCP is attached, use it for Jupiter API/docs questions. Do not
-  swap, place orders, lend, or sign through this agent.
+  metadata. Use jupiter_verify_eligibility to check Jupiter VRFD Express
+  eligibility (read-only GET). Use jupiter_cli_status to see if the official
+  `jup` CLI is installed. If Jupiter docs MCP is attached, use it for Jupiter
+  API/docs questions. Do not swap, place orders, lend, sign, craft Express
+  payment transactions, or POST /execute through this agent.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -88,6 +96,7 @@ LOCAL_TOOLS = [
     jupiter_overview,
     jupiter_price,
     jupiter_token_search,
+    jupiter_verify_eligibility,
     jupiter_cli_status,
 ]
 if not MEMORY_ID:
