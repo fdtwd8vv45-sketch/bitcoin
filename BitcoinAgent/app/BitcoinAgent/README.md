@@ -8,7 +8,9 @@ Price / Tokens lookups plus optional Jupiter docs MCP. Express
 Verification is eligibility-only (`check-eligibility`); this agent does
 not craft, sign, or submit the 1000 JUP payment. A read-only
 `libbndl` tools inspect, extract, save (BND2 PC), and fetch Criterion/EA
-BUNDLE files, pinned to Bo98/libbndl@2b88eff.
+BUNDLE files, pinned to Bo98/libbndl@2b88eff. APKO smoke tools plan a
+catalog matrix and run the factory@b87283a8 Docker preflight (actions
+pin `7eaff21e`).
 
 To use the tools with no AWS account:
 
@@ -17,6 +19,7 @@ python3 local_cli.py "What does getblockcount do?"
 python3 local_cli.py jupiter price SOL,JUP
 python3 local_cli.py libbndl inspect path/to/file.BNDL
 python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
+python3 local_cli.py apko plan path/to/images.apko.json
 ```
 
 `../../scripts/doctor.sh` lists what is still needed for `agentcore dev` / deploy.
@@ -60,6 +63,9 @@ It never logs in or signs. See `../../AGENTIC_WALLET.md`.
 
 `libbndl_*` inspect, extract, save, and fetch `.BNDL` / `.BND2` files.
 See `../../LIBBNDL.md`.
+
+`apko_*` plans `images.apko.json` smoke legs and can preflight/run them
+on a local Docker daemon. See `../../APKO.md`.
 
 # Developing locally
 

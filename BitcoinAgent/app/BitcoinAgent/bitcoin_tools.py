@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, libbndl.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, libbndl, apko.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -289,7 +289,7 @@ def developer_howto(topic: str) -> str:
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
-            "agentic, jupiter, libbndl, remember, notes\n"
+            "agentic, jupiter, libbndl, apko, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -368,6 +368,21 @@ def developer_howto(topic: str) -> str:
             "libbndl extract <file> <id-or-name> [outdir]\n"
             "See BitcoinAgent/LIBBNDL.md."
         ),
+        "apko": (
+            "APKO smoke tests at ethereum-optimism/actions@7eaff21e pin "
+            "factory@b87283a8 so amd64 jobs get a Docker daemon and fail "
+            "before the command loop on pull/arch errors.\n"
+            "Defaults: amd64 → ubuntu-24.04, arm64 → ubuntu-24.04-arm "
+            "(not ubuntu-slim).\n"
+            "Consumer: https://github.com/ethereum-optimism/actions/commit/"
+            "7eaff21e45042406c7e5602f04bcabe959c36047\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "apko plan path/to/images.apko.json\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "apko preflight alpine:3.20 amd64\n"
+            "See BitcoinAgent/APKO.md."
+        ),
     }
     if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
         key = "agentic"
@@ -375,11 +390,13 @@ def developer_howto(topic: str) -> str:
         key = "jupiter"
     if key in {"bndl", "bnd2", "bundle", "libapt2"}:
         key = "libbndl"
+    if key in {"melange", "ubuntu-slim", "apko-smoke", "smoke-test"}:
+        key = "apko"
     if key in guides:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic, jupiter, libbndl.\n"
+        "receive, wallet, agentic, jupiter, libbndl, apko.\n"
         "You can also call search_docs with a free-text query."
     )
 
