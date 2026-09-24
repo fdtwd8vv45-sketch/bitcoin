@@ -6,6 +6,7 @@
     python3 local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
     python3 local_cli.py agentic
     python3 local_cli.py jupiter price SOL,JUP
+    python3 local_cli.py libbndl inspect path/to/file.BNDL
     python3 local_cli.py          # interactive prompt
 """
 
@@ -26,6 +27,7 @@ from jupiter import (
     jupiter_token_search,
     jupiter_verify_eligibility,
 )
+from libbndl import libbndl_from_arg, libbndl_overview
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
 from receive_check import check_receive, classify_payment_id
@@ -36,10 +38,11 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | libbndl
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
+  libbndl [inspect|lookup]  Criterion/EA BUNDLE overview, or inspect/lookup a local archive
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -94,6 +97,15 @@ def _looks_like_jupiter(lower: str) -> bool:
     return bool(
         re.search(
             r"\b(jupiter|jup|jup\.ag|jup-ag|vrfd|verified\.jup)\b",
+            lower,
+        )
+    )
+
+
+def _looks_like_libbndl(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(libbndl|libapt2|bndl|bnd2|bundle archive|burnout paradise)\b",
             lower,
         )
     )
@@ -223,6 +235,9 @@ def route_query(text: str) -> str:
         "agentic-wallet": lambda: agentic_wallet_status() if re.search(r"\b(status|cli)\b", arg.lower()) else agentic_wallet_overview(),
         "jupiter": lambda: _jupiter_from_arg(arg),
         "jup": lambda: _jupiter_from_arg(arg),
+        "libbndl": lambda: libbndl_from_arg(arg),
+        "bndl": lambda: libbndl_from_arg(arg),
+        "bnd2": lambda: libbndl_from_arg(arg),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -258,6 +273,18 @@ def route_query(text: str) -> str:
             flags=re.I,
         )
         return _jupiter_from_arg(rest)
+    if _looks_like_libbndl(lower):
+        rest = re.sub(
+            r"\b(libbndl|libapt2|bundle archive|burnout paradise)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        if re.search(r"\b(inspect|lookup|list)\b", rest, re.I) or re.search(
+            r"\.(bndl|bnd2|bundle)\b", rest, re.I
+        ):
+            return libbndl_from_arg(rest)
+        return libbndl_overview()
     if _looks_like_into_wallet(lower) and not _TXID.search(raw):
         return developer_howto("receive")
     if _looks_like_receive(lower):
@@ -297,6 +324,9 @@ def route_query(text: str) -> str:
         "okx": "agentic",
         "jupiter": "jupiter",
         "jup-ag": "jupiter",
+        "libbndl": "libbndl",
+        "bndl": "libbndl",
+        "bundle": "libbndl",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):

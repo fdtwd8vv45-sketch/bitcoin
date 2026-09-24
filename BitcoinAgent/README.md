@@ -19,6 +19,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -57,7 +59,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `libbndl` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -68,6 +70,7 @@ web search, online evals. This environment cannot deploy those.
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
 | `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
+| `libbndl_overview` / `libbndl_inspect` / `libbndl_lookup` | Criterion/EA BUNDLE overview + read-only inspect/lookup of a local `.BNDL`/`.BND2` (pinned to Bo98/libbndl@2b88eff) |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
@@ -169,6 +172,20 @@ npm i -g @jup-ag/cli
 npx skills add jup-ag/agent-skills --skill "integrating-jupiter"
 ```
 
+## libbndl (optional)
+
+[libbndl](https://github.com/Bo98/libbndl) reads Criterion/EA BUNDLE
+archives. BitcoinAgent pins
+[2b88eff](https://github.com/Bo98/libbndl/tree/2b88effe9278dd832f7a1771a472cd4db0dbc072)
+(non-Xbox BNDL, BNDL v3/v4) and inspects local files only. It does not
+write or extract archives. See [LIBBNDL.md](LIBBNDL.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl lookup path/to/file.BNDL 0x12345678
+```
+
 ## Agentic Wallet (optional)
 
 OKX Agentic Wallet keeps key generation, storage, and signing inside a TEE.
@@ -265,6 +282,7 @@ agentcore deploy
 ## Documentation
 
 - [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens, VRFD eligibility (read-only in this agent)
+- [libbndl](LIBBNDL.md) — Criterion/EA BUNDLE inspect/lookup, pinned to Bo98/libbndl@2b88eff
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)
 - [AgentCore CLI](https://github.com/aws/agentcore-cli)
 - [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)

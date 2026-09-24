@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, libbndl.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -289,7 +289,7 @@ def developer_howto(topic: str) -> str:
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
-            "agentic, jupiter, remember, notes\n"
+            "agentic, jupiter, libbndl, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -353,16 +353,31 @@ def developer_howto(topic: str) -> str:
             "https://developers.jup.ag/portal\n"
             "See BitcoinAgent/JUPITER.md."
         ),
+        "libbndl": (
+            "libbndl reads Criterion/EA BUNDLE archives (Burnout Paradise and "
+            "related titles). This agent pins Bo98/libbndl@2b88eff "
+            "(non-Xbox BNDL, BNDL v3/v4).\n"
+            "Read-only: overview, inspect a local .BNDL/.BND2, lookup one "
+            "resource by name or hex ID. It does not write or extract files.\n"
+            "Tree: https://github.com/Bo98/libbndl/tree/"
+            "2b88effe9278dd832f7a1771a472cd4db0dbc072\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "libbndl inspect <file>\n"
+            "See BitcoinAgent/LIBBNDL.md."
+        ),
     }
     if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
         key = "agentic"
     if key in {"jup", "jup-ag", "jupiter-api", "jupiter-docs", "vrfd", "jupiter-verify"}:
         key = "jupiter"
+    if key in {"bndl", "bnd2", "bundle", "libapt2"}:
+        key = "libbndl"
     if key in guides:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic, jupiter.\n"
+        "receive, wallet, agentic, jupiter, libbndl.\n"
         "You can also call search_docs with a free-text query."
     )
 

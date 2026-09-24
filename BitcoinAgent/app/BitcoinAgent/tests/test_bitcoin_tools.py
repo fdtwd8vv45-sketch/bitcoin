@@ -63,6 +63,7 @@ class BitcoinToolsTests(unittest.TestCase):
         self.assertIn("getnewaddress", developer_howto("wallet"))
         self.assertIn("npx -y @okxweb3/onchainos-installer install", developer_howto("agentic"))
         self.assertIn("npm i -g @jup-ag/cli", developer_howto("jupiter"))
+        self.assertIn("2b88eff", developer_howto("libbndl"))
         self.assertIn("Unknown topic", developer_howto("spaceships"))
 
     def test_strip_trailing_tool_use(self) -> None:

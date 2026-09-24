@@ -6,13 +6,16 @@ Etherscan MCP servers when `ETHERSCAN_API_KEY` is set, a local
 Agentic Wallet overview / `onchainos` CLI status check, and read-only Jupiter
 Price / Tokens lookups plus optional Jupiter docs MCP. Express
 Verification is eligibility-only (`check-eligibility`); this agent does
-not craft, sign, or submit the 1000 JUP payment.
+not craft, sign, or submit the 1000 JUP payment. A read-only
+`libbndl` inspector lists resources in local Criterion/EA BUNDLE files
+and is pinned to Bo98/libbndl@2b88eff.
 
 To use the tools with no AWS account:
 
 ```bash
 python3 local_cli.py "What does getblockcount do?"
 python3 local_cli.py jupiter price SOL,JUP
+python3 local_cli.py libbndl inspect path/to/file.BNDL
 ```
 
 `../../scripts/doctor.sh` lists what is still needed for `agentcore dev` / deploy.
@@ -53,6 +56,9 @@ It never logs in or signs. See `../../AGENTIC_WALLET.md`.
 
 `jupiter_cli_status` looks for the official `jup` CLI on `PATH` and runs
 `jup --version` only. See `../../JUPITER.md`.
+
+`libbndl_inspect` / `libbndl_lookup` read a local `.BNDL` / `.BND2` path
+only. See `../../LIBBNDL.md`.
 
 # Developing locally
 
