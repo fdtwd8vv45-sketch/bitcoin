@@ -15,6 +15,17 @@ from jupiter import (
     jupiter_token_search,
     jupiter_verify_eligibility,
 )
+from libbndl import (
+    libbndl_add,
+    libbndl_create,
+    libbndl_extract,
+    libbndl_fetch,
+    libbndl_inspect,
+    libbndl_lookup,
+    libbndl_overview,
+    libbndl_replace,
+    libbndl_types,
+)
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
@@ -42,7 +53,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/libbndl topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -69,6 +80,12 @@ Guidelines:
   `jup` CLI is installed. If Jupiter docs MCP is attached, use it for Jupiter
   API/docs questions. Do not swap, place orders, lend, sign, craft Express
   payment transactions, or POST /execute through this agent.
+- Use libbndl_overview for Criterion/EA BUNDLE archives (libbndl pinned to
+  Bo98/libbndl@2b88eff, non-Xbox BNDL + v3/v4). Use libbndl_inspect /
+  libbndl_types / libbndl_lookup to list resources, libbndl_extract to write
+  GetBinary payloads, libbndl_create / libbndl_add / libbndl_replace to Save
+  BND2 PC archives, and libbndl_fetch to download an http(s) archive. Do not
+  execute extracted payloads.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -98,6 +115,15 @@ LOCAL_TOOLS = [
     jupiter_token_search,
     jupiter_verify_eligibility,
     jupiter_cli_status,
+    libbndl_overview,
+    libbndl_inspect,
+    libbndl_lookup,
+    libbndl_types,
+    libbndl_extract,
+    libbndl_create,
+    libbndl_add,
+    libbndl_replace,
+    libbndl_fetch,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])
