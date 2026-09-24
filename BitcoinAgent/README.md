@@ -21,6 +21,7 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -70,7 +71,7 @@ web search, online evals. This environment cannot deploy those.
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
 | `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
-| `libbndl_overview` / `libbndl_inspect` / `libbndl_lookup` | Criterion/EA BUNDLE overview + read-only inspect/lookup of a local `.BNDL`/`.BND2` (pinned to Bo98/libbndl@2b88eff) |
+| `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
@@ -174,16 +175,17 @@ npx skills add jup-ag/agent-skills --skill "integrating-jupiter"
 
 ## libbndl (optional)
 
-[libbndl](https://github.com/Bo98/libbndl) reads Criterion/EA BUNDLE
-archives. BitcoinAgent pins
+[libbndl](https://github.com/Bo98/libbndl) reads and writes Criterion/EA
+BUNDLE archives. BitcoinAgent pins
 [2b88eff](https://github.com/Bo98/libbndl/tree/2b88effe9278dd832f7a1771a472cd4db0dbc072)
-(non-Xbox BNDL, BNDL v3/v4) and inspects local files only. It does not
-write or extract archives. See [LIBBNDL.md](LIBBNDL.md).
+(non-Xbox BNDL, BNDL v3/v4): inspect, extract, create/add/replace (BND2
+PC), and http(s) fetch. See [LIBBNDL.md](LIBBNDL.md).
 
 ```bash
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
-python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl lookup path/to/file.BNDL 0x12345678
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl create /tmp/out.bnd2 hello.txt TextFile ./hello.txt
 ```
 
 ## Agentic Wallet (optional)

@@ -15,7 +15,17 @@ from jupiter import (
     jupiter_token_search,
     jupiter_verify_eligibility,
 )
-from libbndl import libbndl_inspect, libbndl_lookup, libbndl_overview
+from libbndl import (
+    libbndl_add,
+    libbndl_create,
+    libbndl_extract,
+    libbndl_fetch,
+    libbndl_inspect,
+    libbndl_lookup,
+    libbndl_overview,
+    libbndl_replace,
+    libbndl_types,
+)
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
@@ -71,9 +81,11 @@ Guidelines:
   API/docs questions. Do not swap, place orders, lend, sign, craft Express
   payment transactions, or POST /execute through this agent.
 - Use libbndl_overview for Criterion/EA BUNDLE archives (libbndl pinned to
-  Bo98/libbndl@2b88eff, non-Xbox BNDL + v3/v4). Use libbndl_inspect to list
-  resources in a local .BNDL/.BND2 file and libbndl_lookup for one name or
-  hex ID. Do not write, replace, or extract archives through this agent.
+  Bo98/libbndl@2b88eff, non-Xbox BNDL + v3/v4). Use libbndl_inspect /
+  libbndl_types / libbndl_lookup to list resources, libbndl_extract to write
+  GetBinary payloads, libbndl_create / libbndl_add / libbndl_replace to Save
+  BND2 PC archives, and libbndl_fetch to download an http(s) archive. Do not
+  execute extracted payloads.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -106,6 +118,12 @@ LOCAL_TOOLS = [
     libbndl_overview,
     libbndl_inspect,
     libbndl_lookup,
+    libbndl_types,
+    libbndl_extract,
+    libbndl_create,
+    libbndl_add,
+    libbndl_replace,
+    libbndl_fetch,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])

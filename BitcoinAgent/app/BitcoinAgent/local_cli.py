@@ -7,6 +7,7 @@
     python3 local_cli.py agentic
     python3 local_cli.py jupiter price SOL,JUP
     python3 local_cli.py libbndl inspect path/to/file.BNDL
+    python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
     python3 local_cli.py          # interactive prompt
 """
 
@@ -42,7 +43,7 @@ _HELP = """Commands (no AWS required):
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
-  libbndl [inspect|lookup]  Criterion/EA BUNDLE overview, or inspect/lookup a local archive
+  libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -280,9 +281,9 @@ def route_query(text: str) -> str:
             raw,
             flags=re.I,
         )
-        if re.search(r"\b(inspect|lookup|list)\b", rest, re.I) or re.search(
+        if re.search(r"\b(inspect|lookup|list|extract|create|add|replace|fetch|types)\b", rest, re.I) or re.search(
             r"\.(bndl|bnd2|bundle)\b", rest, re.I
-        ):
+        ) or re.search(r"https?://", rest, re.I):
             return libbndl_from_arg(rest)
         return libbndl_overview()
     if _looks_like_into_wallet(lower) and not _TXID.search(raw):

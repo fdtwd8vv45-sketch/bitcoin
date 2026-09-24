@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import zlib
 from pathlib import Path
+from unittest.mock import patch
 
 from bitcoin_tools import developer_howto
 from libbndl import (
@@ -18,11 +19,19 @@ from libbndl import (
     PLATFORM_XBOX360,
     TREE_URL,
     BundleError,
+    fetch_bundle_bytes,
+    get_binary,
     hash_resource_name,
+    libbndl_add,
+    libbndl_create,
+    libbndl_extract,
+    libbndl_fetch,
     libbndl_from_arg,
     libbndl_inspect,
     libbndl_lookup,
     libbndl_overview,
+    libbndl_replace,
+    libbndl_types,
     map_bndl_block_to_bnd2,
     parse_bundle_bytes,
     parse_bundle_path,
@@ -46,7 +55,15 @@ def _u64(value: int, big_endian: bool = False) -> bytes:
     return struct.pack(">Q" if big_endian else "<Q", value)
 
 
-def build_bnd2_pc(*, resource_id: int = 0x12345678, resource_type: int = 0x03, name: str = "hello.txt") -> bytes:
+def build_bnd2_pc(
+    *,
+    resource_id: int = 0x12345678,
+    resource_type: int = 0x03,
+    name: str = "hello.txt",
+    payload: bytes = b"hello!",
+    compressed: bool = False,
+) -> bytes:
+    stored = zlib.compress(payload) if compressed else payload
     rst = (
         '<?xml version="1.0"?>\n'
         "<ResourceStringTable>\n"
@@ -55,9 +72,10 @@ def build_bnd2_pc(*, resource_id: int = 0x12345678, resource_type: int = 0x03, n
     ).encode("utf-8") + b"\x00"
     header_size = 0x30
     id_offset = header_size
-    rst_offset = id_offset + 64
-    uncomp = len(b"unused")
-    packed = uncomp  # alignment nibble 0 -> align 1
+    data_offset = id_offset + 64
+    rst_offset = data_offset + len(stored)
+    packed = len(payload)  # alignment nibble 0 -> align 1
+    flags = FLAG_HAS_RST | (1 if compressed else 0)
     entry = b"".join(
         [
             _u64(resource_id),
@@ -65,7 +83,7 @@ def build_bnd2_pc(*, resource_id: int = 0x12345678, resource_type: int = 0x03, n
             _u32(packed),
             _u32(0),
             _u32(0),
-            _u32(0),
+            _u32(len(stored) if compressed else 0),
             _u32(0),
             _u32(0),
             _u32(0),
@@ -85,14 +103,14 @@ def build_bnd2_pc(*, resource_id: int = 0x12345678, resource_type: int = 0x03, n
             _u32(rst_offset),
             _u32(1),
             _u32(id_offset),
+            _u32(data_offset),
             _u32(0),
             _u32(0),
-            _u32(0),
-            _u32(FLAG_HAS_RST),
+            _u32(flags),
             b"\x00" * 8,
         ]
     )
-    return header + entry + rst
+    return header + entry + stored + rst
 
 
 def build_bndl_v3(platform: int, *, resource_id: int = 0x11111111, resource_type: int = 0x03) -> bytes:
@@ -136,22 +154,29 @@ def build_bndl_v3(platform: int, *, resource_id: int = 0x11111111, resource_type
             table += _u32(32, big) + _u32(4, big)
         else:
             table += _u32(0, big) + _u32(1, big)
-    for _ in range(blocks):
-        table += _u32(0, big) + _u32(1, big)
+    payload = b"P" * 32
+    payload_offset = platform_off + 4 + 8 + len(table) + (8 * blocks) + (4 * blocks)
+    for block in range(blocks):
+        mapped = map_bndl_block_to_bnd2(platform, block)
+        if mapped == 0:
+            table += _u32(payload_offset, big) + _u32(1, big)
+        else:
+            table += _u32(0, big) + _u32(1, big)
     table += b"\x00" * (4 * blocks)
-    return bytes(header) + id_list + bytes(table)
+    return bytes(header) + id_list + bytes(table) + payload
 
 
 class LibbndlOverviewTests(unittest.TestCase):
-    def test_overview_pins_commit_and_refuses_writes(self) -> None:
+    def test_overview_pins_commit_and_covers_full_api(self) -> None:
         text = libbndl_overview()
         lowered = text.lower()
         self.assertIn(PINNED_COMMIT, text)
         self.assertIn(TREE_URL, text)
         self.assertIn(COMMIT_URL, text)
         self.assertIn("non-xbox", lowered)
-        self.assertIn("will not", lowered)
-        self.assertIn("save", lowered)
+        self.assertIn("extract", lowered)
+        self.assertIn("create", lowered)
+        self.assertIn("fetch", lowered)
         self.assertIn("cmake", lowered)
 
     def test_repo_overview_doc_exists(self) -> None:
@@ -234,10 +259,62 @@ class LibbndlParseTests(unittest.TestCase):
             missing = libbndl_lookup(str(path), "nope")
             self.assertIn("No resource", missing)
 
-    def test_inspect_missing_and_url(self) -> None:
+    def test_inspect_missing_and_rejects_secrets(self) -> None:
         self.assertIn("File not found", libbndl_inspect("/no/such/bundle.BNDL"))
-        self.assertIn("local files", libbndl_inspect("https://example.com/a.BNDL").lower())
         self.assertIn("seed", libbndl_inspect("my seed phrase apple").lower())
+
+    def test_extract_uncompressed_and_compressed(self) -> None:
+        plain = build_bnd2_pc(payload=b"hello!")
+        zipped = build_bnd2_pc(payload=b"hello!", compressed=True)
+        info = parse_bundle_bytes(plain, "plain.bnd2")
+        self.assertEqual(get_binary(info, info.entries[0], 0), b"hello!")
+        zinfo = parse_bundle_bytes(zipped, "zip.bnd2")
+        self.assertEqual(get_binary(zinfo, zinfo.entries[0], 0), b"hello!")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "sample.BND2"
+            path.write_bytes(plain)
+            out = Path(tmp) / "out"
+            text = libbndl_extract(str(path), "hello.txt", str(out))
+            self.assertIn("Extracted", text)
+            self.assertEqual((out / "hello.txt.block0").read_bytes(), b"hello!")
+
+    def test_create_add_replace_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = Path(tmp) / "note.txt"
+            payload.write_text("first", encoding="utf-8")
+            extra = Path(tmp) / "extra.txt"
+            extra.write_text("second", encoding="utf-8")
+            archive = Path(tmp) / "pack.bnd2"
+            created = libbndl_create(str(archive), "note.txt", "TextFile", str(payload))
+            self.assertIn("Wrote BND2", created)
+            listed = libbndl_inspect(str(archive))
+            self.assertIn("note.txt", listed)
+            self.assertIn("TextFile", libbndl_types(str(archive)))
+            added = libbndl_add(str(archive), "extra.txt", "RawFile", str(extra))
+            self.assertIn("2 resource", added)
+            replaced_payload = Path(tmp) / "note2.txt"
+            replaced_payload.write_text("third", encoding="utf-8")
+            libbndl_replace(str(archive), "note.txt", str(replaced_payload))
+            out = Path(tmp) / "extracted"
+            libbndl_extract(str(archive), "note.txt", str(out))
+            self.assertEqual((out / "note.txt.block0").read_bytes(), b"third")
+
+    def test_fetch_saves_and_inspects(self) -> None:
+        blob = build_bnd2_pc()
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "remote.bnd2"
+            with patch("libbndl.fetch_bundle_bytes", return_value=blob):
+                text = libbndl_fetch("https://example.com/cars.BND2", str(dest))
+            self.assertIn("Fetched", text)
+            self.assertIn("hello.txt", text)
+            self.assertTrue(dest.is_file())
+            self.assertEqual(dest.read_bytes()[:4], MAGIC_BND2)
+
+    def test_fetch_rejects_private_hosts(self) -> None:
+        with self.assertRaises(BundleError):
+            fetch_bundle_bytes("https://127.0.0.1/secret.BNDL")
+        with self.assertRaises(BundleError):
+            fetch_bundle_bytes("file:///etc/passwd")
 
     def test_parse_path_uses_disk_bytes(self) -> None:
         blob = build_bndl_v3(PLATFORM_PC)
@@ -276,7 +353,18 @@ class LibbndlCliTests(unittest.TestCase):
     def test_howto_route(self) -> None:
         text = route_query("howto libbndl")
         self.assertIn("inspect", text)
+        self.assertIn("extract", text)
         self.assertIn(PINNED_COMMIT[:7], text)
+
+    def test_local_cli_create_and_extract(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            payload = Path(tmp) / "hello.txt"
+            payload.write_bytes(b"hello!")
+            archive = Path(tmp) / "out.bnd2"
+            created = route_query(f"libbndl create {archive} hello.txt TextFile {payload}")
+            self.assertIn("Wrote BND2", created)
+            extracted = route_query(f"libbndl extract {archive} hello.txt {tmp}/x")
+            self.assertIn("Extracted", extracted)
 
 
 if __name__ == "__main__":

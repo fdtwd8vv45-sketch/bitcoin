@@ -1,19 +1,25 @@
-"""Read-only Criterion/EA BUNDLE inspector pinned to libbndl 2b88eff.
+"""Criterion/EA BUNDLE tools pinned to libbndl 2b88eff.
 
 Matches Bo98/libbndl commit 2b88effe9278dd832f7a1771a472cd4db0dbc072
-(non-Xbox BNDL plus BNDL v3/v4 improvements). This module lists archive
-metadata and resources from a local file. It never writes, replaces,
-compresses, or extracts payloads to disk.
+(non-Xbox BNDL plus BNDL v3/v4 improvements). Covers the pinned API:
+inspect, lookup, list-by-type, GetBinary extract, Save / AddResource /
+ReplaceResource (BND2 PC), and optional HTTP(S) fetch of an archive.
 """
 
 from __future__ import annotations
 
+import ipaddress
 import re
+import socket
 import struct
+import urllib.error
+import urllib.request
 import xml.etree.ElementTree as ET
 import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlparse
+
 from agent_state import reject_secrets
 from optional_tool import tool
 
@@ -48,6 +54,10 @@ MAX_LIST_ENTRIES = 200
 MAX_PARSE_ENTRIES = 10_000
 MAX_TABLE_BYTES = 2_000_000
 MAX_RST_BYTES = 256_000
+MAX_FILE_BYTES = 256 * 1024 * 1024
+MAX_PAYLOAD_BYTES = 8 * 1024 * 1024
+MAX_FETCH_BYTES = 32 * 1024 * 1024
+FETCH_TIMEOUT_SECONDS = 15
 HEADER_PREFIX = 256
 
 RESOURCE_TYPES: dict[int, str] = {
@@ -162,15 +172,21 @@ RESOURCE_TYPES: dict[int, str] = {
     0x11004: "BkSoundBulletImpactStream",
 }
 
+TYPE_BY_NAME = {name.lower(): value for value, name in RESOURCE_TYPES.items()}
+
 _PATH_TOKEN = re.compile(r"[^\s]+")
 _RESOURCE_TOKEN = re.compile(r"^(0x)?[0-9a-fA-F]{1,8}$")
 _STOPWORDS = {
     "a",
     "an",
+    "add",
     "archive",
     "bnd2",
     "bndl",
     "bundle",
+    "create",
+    "extract",
+    "fetch",
     "file",
     "inspect",
     "libbndl",
@@ -180,9 +196,12 @@ _STOPWORDS = {
     "on",
     "open",
     "read",
+    "replace",
     "show",
     "the",
     "this",
+    "type",
+    "types",
 }
 
 
@@ -195,6 +214,7 @@ class BlockInfo:
     uncompressed_size: int = 0
     uncompressed_alignment: int = 0
     compressed_size: int = 0
+    data_offset: int = 0
 
 
 @dataclass
@@ -219,6 +239,8 @@ class BundleInfo:
     entries: list[ResourceEntry]
     parsed_entries: int
     truncated: bool = False
+    raw: bytes = b""
+    big_endian: bool = False
 
 
 class BinaryCursor:
@@ -369,6 +391,24 @@ def _apply_debug_info(entries: list[ResourceEntry], debug: dict[int, tuple[str, 
             entry.name, entry.type_name = debug[entry.resource_id]
 
 
+def _read_block(data: bytes, block: BlockInfo, *, compressed: bool) -> bytes:
+    read_size = block.compressed_size if compressed and block.compressed_size else block.uncompressed_size
+    if read_size <= 0:
+        return b""
+    if read_size > MAX_PAYLOAD_BYTES:
+        raise BundleError(f"block is larger than the {MAX_PAYLOAD_BYTES} byte extract cap")
+    raw = _read_at(data, block.data_offset, read_size)
+    if compressed and block.compressed_size > 0:
+        try:
+            out = zlib.decompress(raw)
+        except zlib.error as exc:
+            raise BundleError(f"zlib decompress failed: {exc}") from exc
+        if block.uncompressed_size and len(out) != block.uncompressed_size:
+            raise BundleError("decompressed size does not match the archive header")
+        return out
+    return raw
+
+
 def _parse_bnd2_rst(data: bytes, rst_offset: int) -> dict[int, tuple[str, str]]:
     if rst_offset <= 0 or rst_offset >= len(data):
         return {}
@@ -400,9 +440,7 @@ def parse_bnd2(data: bytes, source: str) -> BundleInfo:
     rst_offset = cur.read_u32()
     num_entries = cur.read_u32()
     id_block_offset = cur.read_u32()
-    cur.read_u32()
-    cur.read_u32()
-    cur.read_u32()
+    file_block_offsets = [cur.read_u32(), cur.read_u32(), cur.read_u32()]
     flags = cur.read_u32()
     if num_entries > MAX_PARSE_ENTRIES:
         raise BundleError(f"refusing {num_entries} entries (cap {MAX_PARSE_ENTRIES})")
@@ -426,7 +464,9 @@ def parse_bnd2(data: bytes, source: str) -> BundleInfo:
             )
         for block in blocks:
             block.compressed_size = table_cur.read_u32()
-        table_cur.skip(12)
+        rels = [table_cur.read_u32() for _ in range(3)]
+        for index, block in enumerate(blocks):
+            block.data_offset = file_block_offsets[index] + rels[index]
         table_cur.read_u32()
         resource_type = table_cur.read_u32()
         dependencies = table_cur.read_u16()
@@ -453,6 +493,8 @@ def parse_bnd2(data: bytes, source: str) -> BundleInfo:
         file_size=len(data),
         entries=entries,
         parsed_entries=len(entries),
+        raw=data,
+        big_endian=cur.big_endian,
     )
 
 
@@ -471,8 +513,9 @@ def parse_bndl(data: bytes, source: str) -> BundleInfo:
         raise BundleError(f"unsupported BNDL revision {revision} (libbndl 2b88eff accepts 3-5)")
     num_entries = cur.read_u32()
     blocks = _bndl_block_count(platform)
+    data_block_sizes = []
     for _ in range(blocks):
-        cur.read_u32()
+        data_block_sizes.append(cur.read_u32())
         cur.read_u32()
     cur.skip(4 * blocks)
     id_list_offset = cur.read_u32()
@@ -524,7 +567,15 @@ def parse_bndl(data: bytes, source: str) -> BundleInfo:
             else:
                 block_infos[mapped].uncompressed_size = size
                 block_infos[mapped].uncompressed_alignment = alignment
-        table.skip(8 * blocks)
+        data_block_start = 0
+        for block in range(blocks):
+            if block > 0:
+                data_block_start += data_block_sizes[block - 1]
+            rel = table.read_u32()
+            table.read_u32()
+            mapped = map_bndl_block_to_bnd2(platform, block)
+            if mapped != -1:
+                block_infos[mapped].data_offset = rel + data_block_start
         table.skip(4 * blocks)
         dependencies = 0
         if dep_offset and dep_offset + 4 <= len(data):
@@ -555,9 +606,18 @@ def parse_bndl(data: bytes, source: str) -> BundleInfo:
                     continue
                 entry.blocks[mapped].uncompressed_size = info.read_u32()
                 entry.blocks[mapped].uncompressed_alignment = info.read_u32()
-    kept = [entry for entry in entries if entry.resource_id != RST_RESOURCE_ID]
-    if len(kept) != len(entries):
+    rst_entry = next((entry for entry in entries if entry.resource_id == RST_RESOURCE_ID), None)
+    if rst_entry is not None:
         flags |= FLAG_HAS_RST
+        try:
+            rst_payload = _read_block(data, rst_entry.blocks[0], compressed=bool(compressed))
+            if len(rst_payload) >= 4:
+                text_len = struct.unpack_from("<I", rst_payload, 0)[0]
+                xml = rst_payload[4 : 4 + text_len].decode("utf-8", errors="replace")
+                _apply_debug_info(entries, _parse_rst_xml(xml))
+        except (BundleError, UnicodeError, struct.error):
+            pass
+    kept = [entry for entry in entries if entry.resource_id != RST_RESOURCE_ID]
     return BundleInfo(
         source=source,
         magic="BNDL",
@@ -567,6 +627,8 @@ def parse_bndl(data: bytes, source: str) -> BundleInfo:
         file_size=len(data),
         entries=kept,
         parsed_entries=len(kept),
+        raw=data,
+        big_endian=platform != PLATFORM_PC,
     )
 
 
@@ -585,18 +647,29 @@ def parse_bundle_path(path: Path) -> BundleInfo:
     size = path.stat().st_size
     if size < 4:
         raise BundleError("file is too small to be a BUNDLE archive")
-    if size > 64 * 1024 * 1024:
-        # Tables live near the start; still refuse multi-hundred-MB slurp.
-        # Read a generous prefix that covers typical ID tables.
-        with path.open("rb") as handle:
-            data = handle.read(8 * 1024 * 1024)
-        info = parse_bundle_bytes(data, str(path))
-        info.file_size = size
-        return info
+    if size > MAX_FILE_BYTES:
+        raise BundleError(f"file is larger than the {MAX_FILE_BYTES} byte cap")
     data = path.read_bytes()
     info = parse_bundle_bytes(data, str(path))
     info.file_size = size
     return info
+
+
+def get_binary(info: BundleInfo, entry: ResourceEntry, file_block: int = 0) -> bytes:
+    if file_block < 0 or file_block > 2:
+        raise BundleError("file block must be 0, 1, or 2")
+    return _read_block(info.raw, entry.blocks[file_block], compressed=bool(info.flags & FLAG_COMPRESSED))
+
+
+def resolve_resource_type(token: str) -> int | None:
+    raw = (token or "").strip()
+    if not raw:
+        return None
+    if raw.lower() in TYPE_BY_NAME:
+        return TYPE_BY_NAME[raw.lower()]
+    if _RESOURCE_TOKEN.match(raw):
+        return int(raw, 16)
+    return None
 
 
 def _overview_text() -> str:
@@ -611,27 +684,17 @@ def _overview_text() -> str:
         "improves BNDL v3 and v4. BND2 remains revision 2. BNDL revisions "
         "3-5 are accepted.\n"
         "\n"
-        "What this agent will do:\n"
-        "- Explain the library and the pinned revision.\n"
-        "- Inspect a local .BNDL / .BND2 file: magic, platform, revision, "
-        "flags, and a resource list.\n"
-        "- Look up one resource by name or 32-bit ID (CRC-32 of the "
-        "lowercased name, same as libbndl).\n"
+        "What this agent will do (pinned API):\n"
+        "- Inspect / lookup / list-by-type on a local file or a fetched URL.\n"
+        "- Extract GetBinary payloads (zlib-decompressed) to a local folder.\n"
+        "- Create, add, and replace resources; Save writes BND2 PC.\n"
+        "- Fetch an http(s) archive (size-capped, no private hosts).\n"
         "\n"
-        "What this agent will not do:\n"
-        "- Write, replace, or create archives (Save / AddResource / "
-        "ReplaceResource stay in the C++ library).\n"
-        "- Extract payloads to disk or decompress huge file blocks.\n"
-        "- Download game files.\n"
+        "Writes always emit BND2 revision 2 for PC, matching libbndl's "
+        "supported SaveBND2 path. BNDL sources are converted on save.\n"
         "\n"
         "Build the upstream library:\n"
         f"  {BUILD_COMMANDS}\n"
-        "\n"
-        "C++ sketch (from the pinned README):\n"
-        "  #include <libbndl/bundle.hpp>\n"
-        "  libbndl::Bundle arch;\n"
-        "  arch.Load(path);\n"
-        "  auto ids = arch.ListResourceIDs();\n"
         "\n"
         f"Tree: {TREE_URL}\n"
         f"Commit: {COMMIT_URL}\n"
@@ -639,6 +702,10 @@ def _overview_text() -> str:
         "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl\n"
         "       python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl "
         "inspect <file>\n"
+        "       python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl "
+        "extract <file> <id-or-name> [outdir]\n"
+        "       python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl "
+        "create <out.bnd2> <name> <type> <payload>\n"
         "See BitcoinAgent/LIBBNDL.md."
     )
 
@@ -647,14 +714,60 @@ def _secret_query(text: str) -> bool:
     return reject_secrets(text) is not None
 
 
-def _resolve_path(raw: str) -> Path | str:
+def _is_url(token: str) -> bool:
+    return bool(re.match(r"^https?://", token or "", re.I))
+
+
+def _host_is_public(host: str) -> bool:
+    hostname = (host or "").split("%")[0]
+    if not hostname or hostname.lower() in {"localhost", "metadata.google.internal"}:
+        return False
+    try:
+        infos = socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        return False
+    for info in infos:
+        ip = info[4][0]
+        try:
+            parsed = ipaddress.ip_address(ip)
+        except ValueError:
+            return False
+        if parsed.is_private or parsed.is_loopback or parsed.is_link_local or parsed.is_reserved:
+            return False
+    return True
+
+
+def fetch_bundle_bytes(url: str) -> bytes:
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise BundleError("only http and https URLs can be fetched")
+    if parsed.username or parsed.password:
+        raise BundleError("URLs with credentials are not fetched")
+    if not _host_is_public(parsed.hostname or ""):
+        raise BundleError("refusing to fetch a private or local host")
+    request = urllib.request.Request(url, method="GET", headers={"User-Agent": "BitcoinAgent-libbndl/2b88eff"})
+    try:
+        with urllib.request.urlopen(request, timeout=FETCH_TIMEOUT_SECONDS) as response:
+            data = response.read(MAX_FETCH_BYTES + 1)
+    except urllib.error.URLError as exc:
+        raise BundleError(f"fetch failed: {exc}") from exc
+    if len(data) > MAX_FETCH_BYTES:
+        raise BundleError(f"download is larger than the {MAX_FETCH_BYTES} byte cap")
+    if len(data) < 4:
+        raise BundleError("downloaded file is too small to be a BUNDLE archive")
+    return data
+
+
+def _resolve_existing_file(raw: str) -> Path | str:
     token = (raw or "").strip()
     if not token:
         return "Provide a local BUNDLE path: libbndl inspect <file>"
     if _secret_query(token):
         return "Do not paste seed phrases, private keys, or wallet passwords."
+    if _is_url(token):
+        return token
     if re.match(r"^[a-z]+://", token, re.I):
-        return "Only local files are inspected. Pass a filesystem path, not a URL."
+        return "Only http(s) URLs or local files are accepted."
     path = Path(token).expanduser()
     try:
         path = path.resolve()
@@ -665,6 +778,41 @@ def _resolve_path(raw: str) -> Path | str:
     if not path.is_file():
         return f"Not a file: {path}"
     return path
+
+
+def _resolve_dest_path(raw: str, *, must_exist: bool = False) -> Path | str:
+    token = (raw or "").strip()
+    if not token:
+        return "Provide a local destination path."
+    if _secret_query(token):
+        return "Do not paste seed phrases, private keys, or wallet passwords."
+    if re.match(r"^[a-z]+://", token, re.I):
+        return "Destination must be a local filesystem path."
+    path = Path(token).expanduser()
+    try:
+        path = path.resolve()
+    except OSError as exc:
+        return f"Cannot resolve path: {exc}"
+    if must_exist and not path.exists():
+        return f"File not found: {path}"
+    return path
+
+
+def load_bundle(source: str) -> BundleInfo | str:
+    resolved = _resolve_existing_file(source)
+    if isinstance(resolved, str) and not _is_url(resolved):
+        return resolved
+    try:
+        if isinstance(resolved, str) and _is_url(resolved):
+            data = fetch_bundle_bytes(resolved)
+            info = parse_bundle_bytes(data, resolved)
+            info.file_size = len(data)
+            return info
+        return parse_bundle_path(resolved)
+    except BundleError as exc:
+        return f"Failed to load {resolved}: {exc}"
+    except OSError as exc:
+        return f"Cannot read {resolved}: {exc}"
 
 
 def _format_header(info: BundleInfo) -> list[str]:
@@ -686,16 +834,21 @@ def _format_entry_row(entry: ResourceEntry) -> str:
     return f"0x{entry.resource_id:08X}  {type_label:<28} {name:<24} {sizes}"
 
 
-def _format_bundle(info: BundleInfo, *, limit: int = MAX_LIST_ENTRIES) -> str:
+def _format_bundle(info: BundleInfo, *, type_filter: int | None = None, limit: int = MAX_LIST_ENTRIES) -> str:
+    entries = info.entries
+    if type_filter is not None:
+        entries = [entry for entry in entries if entry.resource_type == type_filter]
     lines = _format_header(info)
-    if not info.entries:
+    if type_filter is not None:
+        lines.append(f"Type filter: {resource_type_name(type_filter)} (0x{type_filter:X}) — {len(entries)} match(es)")
+    if not entries:
         lines.append("No resources.")
         return "\n".join(lines)
     lines.append("")
     lines.append("ID          Type                         Name                     Uncomp blocks")
-    shown = info.entries[:limit]
+    shown = entries[:limit]
     lines.extend(_format_entry_row(entry) for entry in shown)
-    leftover = len(info.entries) - len(shown)
+    leftover = len(entries) - len(shown)
     if leftover > 0:
         lines.append(f"... and {leftover} more. Use libbndl lookup <file> <id-or-name>.")
     return "\n".join(lines)
@@ -732,93 +885,458 @@ def _format_entry(info: BundleInfo, entry: ResourceEntry) -> str:
     for index, block in enumerate(entry.blocks):
         lines.append(
             f"Block {index}: uncomp={block.uncompressed_size} "
-            f"align={block.uncompressed_alignment} comp={block.compressed_size}"
+            f"align={block.uncompressed_alignment} comp={block.compressed_size} "
+            f"offset={block.data_offset}"
         )
-    lines.append("Payload bytes are not extracted.")
+    lines.append("Extract with: libbndl extract <file> <id-or-name> [outdir]")
     return "\n".join(lines)
 
 
-def inspect_bundle(path: str) -> str:
-    resolved = _resolve_path(path)
-    if isinstance(resolved, str):
-        return resolved
-    try:
-        info = parse_bundle_path(resolved)
-    except BundleError as exc:
-        return f"Failed to inspect {resolved}: {exc}"
-    except OSError as exc:
-        return f"Cannot read {resolved}: {exc}"
-    return _format_bundle(info)
+def inspect_bundle(path: str, resource_type: str = "") -> str:
+    info = load_bundle(path)
+    if isinstance(info, str):
+        return info
+    type_filter = resolve_resource_type(resource_type) if resource_type else None
+    if resource_type and type_filter is None:
+        return f"Unknown resource type {resource_type!r}. Use a name such as TextFile or a hex ID."
+    return _format_bundle(info, type_filter=type_filter)
 
 
 def lookup_resource(path: str, resource: str) -> str:
     if _secret_query(f"{path} {resource}"):
         return "Do not paste seed phrases, private keys, or wallet passwords."
-    resolved = _resolve_path(path)
-    if isinstance(resolved, str):
-        return resolved
+    info = load_bundle(path)
+    if isinstance(info, str):
+        return info
     token = (resource or "").strip()
     if not token:
         return "Provide a resource name or hex ID: libbndl lookup <file> <id-or-name>"
-    try:
-        info = parse_bundle_path(resolved)
-    except BundleError as exc:
-        return f"Failed to inspect {resolved}: {exc}"
-    except OSError as exc:
-        return f"Cannot read {resolved}: {exc}"
     entry = _find_entry(info, token)
     if entry is None:
         hashed = hash_resource_name(token)
         return (
-            f"No resource {token!r} in {resolved} "
+            f"No resource {token!r} in {info.source} "
             f"(name hash 0x{hashed:08X}). {info.parsed_entries} entries parsed."
         )
     return _format_entry(info, entry)
 
 
+def list_resource_ids_by_type(path: str) -> str:
+    info = load_bundle(path)
+    if isinstance(info, str):
+        return info
+    grouped: dict[int, list[ResourceEntry]] = {}
+    for entry in info.entries:
+        grouped.setdefault(entry.resource_type, []).append(entry)
+    lines = [
+        f"libbndl types (Bo98/libbndl @{PINNED_COMMIT[:7]})",
+        f"File: {info.source}",
+        f"Entries: {info.parsed_entries}",
+        "",
+    ]
+    if not grouped:
+        lines.append("No resources.")
+        return "\n".join(lines)
+    for resource_type in sorted(grouped):
+        items = grouped[resource_type]
+        lines.append(f"{resource_type_name(resource_type)} (0x{resource_type:X}): {len(items)}")
+        for entry in items[:20]:
+            label = entry.name or f"0x{entry.resource_id:08X}"
+            lines.append(f"  {label}")
+        if len(items) > 20:
+            lines.append(f"  ... and {len(items) - 20} more")
+    return "\n".join(lines)
+
+
+def extract_resource(path: str, resource: str, outdir: str = "") -> str:
+    if _secret_query(f"{path} {resource} {outdir}"):
+        return "Do not paste seed phrases, private keys, or wallet passwords."
+    info = load_bundle(path)
+    if isinstance(info, str):
+        return info
+    token = (resource or "").strip()
+    if not token:
+        return "Provide a resource name or hex ID: libbndl extract <file> <id-or-name> [outdir]"
+    entry = _find_entry(info, token)
+    if entry is None:
+        return f"No resource {token!r} in {info.source}."
+    dest_raw = (outdir or "").strip()
+    if dest_raw:
+        dest = _resolve_dest_path(dest_raw)
+        if isinstance(dest, str):
+            return dest
+    else:
+        stem = Path(urlparse(info.source).path).stem or "bundle"
+        dest = Path.cwd() / f"{stem}-extract"
+    dest.mkdir(parents=True, exist_ok=True)
+    written: list[str] = []
+    for index in range(3):
+        try:
+            payload = get_binary(info, entry, index)
+        except BundleError as exc:
+            return f"Failed to extract block {index}: {exc}"
+        if not payload:
+            continue
+        name = entry.name or f"{entry.resource_id:08x}"
+        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", name)
+        out_path = dest / f"{safe}.block{index}"
+        out_path.write_bytes(payload)
+        written.append(f"{out_path} ({len(payload)} bytes)")
+    if not written:
+        return f"Resource 0x{entry.resource_id:08X} has no payload bytes in any file block."
+    return "Extracted:\n" + "\n".join(f"  {line}" for line in written)
+
+
+def _align_buf(buf: bytearray, alignment: int) -> None:
+    if alignment <= 1:
+        return
+    pad = (-len(buf)) % alignment
+    buf.extend(b"\x00" * pad)
+
+
+def _alignment_nibble(alignment: int) -> int:
+    if alignment <= 1:
+        return 0
+    return alignment.bit_length() - 1
+
+
+def save_bnd2_pc(entries: list[ResourceEntry], payloads: dict[int, list[bytes]]) -> bytes:
+    flags = FLAG_UNUSED1 | FLAG_UNUSED2
+    if any(entry.name for entry in entries):
+        flags |= FLAG_HAS_RST
+    out = bytearray()
+    out.extend(MAGIC_BND2)
+    out.extend(struct.pack("<I", 2))
+    out.extend(struct.pack("<I", PLATFORM_PC))
+    rst_ptr = len(out)
+    out.extend(b"\x00" * 4)
+    out.extend(struct.pack("<I", len(entries)))
+    id_ptr = len(out)
+    out.extend(b"\x00" * 4)
+    block_ptrs = []
+    for _ in range(3):
+        block_ptrs.append(len(out))
+        out.extend(b"\x00" * 4)
+    out.extend(struct.pack("<I", flags))
+    out.extend(b"\x00" * 8)
+    _align_buf(out, 16)
+    struct.pack_into("<I", out, rst_ptr, len(out))
+    if flags & FLAG_HAS_RST:
+        lines = ['<ResourceStringTable>']
+        for entry in entries:
+            type_label = entry.type_name or resource_type_name(entry.resource_type)
+            name = entry.name or f"{entry.resource_id:08x}"
+            lines.append(
+                f'<Resource id="{entry.resource_id:08x}" type="{type_label}" name="{name}"/>'
+            )
+        lines.append("</ResourceStringTable>")
+        out.extend("\n".join(lines).encode("utf-8") + b"\x00")
+        _align_buf(out, 16)
+    struct.pack_into("<I", out, id_ptr, len(out))
+    rel_slots: list[list[int]] = []
+    for entry in entries:
+        out.extend(struct.pack("<Q", entry.resource_id))
+        out.extend(struct.pack("<Q", entry.checksum))
+        blocks_payload = payloads.get(entry.resource_id, [b"", b"", b""])
+        for index in range(3):
+            payload = blocks_payload[index] if index < len(blocks_payload) else b""
+            align = entry.blocks[index].uncompressed_alignment or 1
+            packed = len(payload) | (_alignment_nibble(align) << 28)
+            out.extend(struct.pack("<I", packed))
+        for _ in range(3):
+            out.extend(struct.pack("<I", 0))
+        slots = []
+        for _ in range(3):
+            slots.append(len(out))
+            out.extend(b"\x00" * 4)
+        rel_slots.append(slots)
+        out.extend(struct.pack("<I", 0))
+        out.extend(struct.pack("<I", entry.resource_type))
+        out.extend(struct.pack("<H", entry.dependencies))
+        out.extend(struct.pack("<H", 0))
+    for block_index in range(3):
+        block_start = len(out)
+        struct.pack_into("<I", out, block_ptrs[block_index], block_start)
+        for entry_index, entry in enumerate(entries):
+            blocks_payload = payloads.get(entry.resource_id, [b"", b"", b""])
+            payload = blocks_payload[block_index] if block_index < len(blocks_payload) else b""
+            if not payload:
+                continue
+            struct.pack_into("<I", out, rel_slots[entry_index][block_index], len(out) - block_start)
+            out.extend(payload)
+            last = entry_index == len(entries) - 1
+            _align_buf(out, 16 if (block_index == 0 or last) else 0x80)
+        if block_index != 2:
+            _align_buf(out, 0x80)
+    return bytes(out)
+
+
+def _entry_payloads(info: BundleInfo) -> dict[int, list[bytes]]:
+    out: dict[int, list[bytes]] = {}
+    for entry in info.entries:
+        blocks = []
+        for index in range(3):
+            try:
+                blocks.append(get_binary(info, entry, index))
+            except BundleError:
+                blocks.append(b"")
+        out[entry.resource_id] = blocks
+    return out
+
+
+def _write_bundle(path: Path, entries: list[ResourceEntry], payloads: dict[int, list[bytes]]) -> str:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = save_bnd2_pc(entries, payloads)
+    path.write_bytes(data)
+    return f"Wrote BND2 PC archive {path} ({len(data)} bytes, {len(entries)} resource(s))."
+
+
+def create_bundle(out_path: str, name: str, resource_type: str, payload_path: str) -> str:
+    dest = _resolve_dest_path(out_path)
+    if isinstance(dest, str):
+        return dest
+    payload_file = _resolve_dest_path(payload_path, must_exist=True)
+    if isinstance(payload_file, str):
+        return payload_file
+    if not payload_file.is_file():
+        return f"Not a file: {payload_file}"
+    type_id = resolve_resource_type(resource_type)
+    if type_id is None:
+        return f"Unknown resource type {resource_type!r}."
+    data = payload_file.read_bytes()
+    if len(data) > MAX_PAYLOAD_BYTES:
+        return f"Payload is larger than the {MAX_PAYLOAD_BYTES} byte cap."
+    resource_name = (name or payload_file.name).strip()
+    entry = ResourceEntry(
+        resource_id=hash_resource_name(resource_name),
+        resource_type=type_id,
+        name=resource_name,
+        type_name=resource_type_name(type_id),
+        blocks=[BlockInfo(uncompressed_alignment=4), BlockInfo(), BlockInfo()],
+    )
+    return _write_bundle(dest, [entry], {entry.resource_id: [data, b"", b""]})
+
+
+def add_resource(archive: str, name: str, resource_type: str, payload_path: str, out_path: str = "") -> str:
+    info = load_bundle(archive)
+    if isinstance(info, str):
+        return info
+    target = out_path or ("" if _is_url(info.source) else info.source)
+    dest = _resolve_dest_path(target)
+    if isinstance(dest, str):
+        if not out_path and _is_url(info.source):
+            return "Provide a local destination: libbndl add <url> <name> <type> <payload> <out.bnd2>"
+        return dest
+    payload_file = _resolve_dest_path(payload_path, must_exist=True)
+    if isinstance(payload_file, str):
+        return payload_file
+    type_id = resolve_resource_type(resource_type)
+    if type_id is None:
+        return f"Unknown resource type {resource_type!r}."
+    resource_name = (name or payload_file.name).strip()
+    resource_id = hash_resource_name(resource_name)
+    if any(entry.resource_id == resource_id for entry in info.entries):
+        return f"Resource {resource_name!r} (0x{resource_id:08X}) already exists. Use replace."
+    data = payload_file.read_bytes()
+    if len(data) > MAX_PAYLOAD_BYTES:
+        return f"Payload is larger than the {MAX_PAYLOAD_BYTES} byte cap."
+    payloads = _entry_payloads(info)
+    entry = ResourceEntry(
+        resource_id=resource_id,
+        resource_type=type_id,
+        name=resource_name,
+        type_name=resource_type_name(type_id),
+        blocks=[BlockInfo(uncompressed_alignment=4), BlockInfo(), BlockInfo()],
+    )
+    payloads[resource_id] = [data, b"", b""]
+    return _write_bundle(dest, [*info.entries, entry], payloads)
+
+
+def replace_resource(archive: str, resource: str, payload_path: str, out_path: str = "") -> str:
+    info = load_bundle(archive)
+    if isinstance(info, str):
+        return info
+    dest = _resolve_dest_path(out_path or ("" if _is_url(info.source) else info.source))
+    if isinstance(dest, str):
+        if not out_path and _is_url(info.source):
+            return "Provide a local destination: libbndl replace <url> <id> <payload> <out.bnd2>"
+        return dest
+    payload_file = _resolve_dest_path(payload_path, must_exist=True)
+    if isinstance(payload_file, str):
+        return payload_file
+    entry = _find_entry(info, resource)
+    if entry is None:
+        return f"No resource {resource!r} in {info.source}."
+    data = payload_file.read_bytes()
+    if len(data) > MAX_PAYLOAD_BYTES:
+        return f"Payload is larger than the {MAX_PAYLOAD_BYTES} byte cap."
+    payloads = _entry_payloads(info)
+    payloads[entry.resource_id] = [data, b"", b""]
+    return _write_bundle(dest, info.entries, payloads)
+
+
+def fetch_archive(url: str, dest_path: str = "") -> str:
+    if _secret_query(f"{url} {dest_path}"):
+        return "Do not paste seed phrases, private keys, or wallet passwords."
+    token = (url or "").strip()
+    if not _is_url(token):
+        return "Provide an http(s) URL: libbndl fetch <url> [dest]"
+    try:
+        data = fetch_bundle_bytes(token)
+    except BundleError as exc:
+        return f"Fetch failed: {exc}"
+    dest: Path
+    if dest_path.strip():
+        resolved = _resolve_dest_path(dest_path)
+        if isinstance(resolved, str):
+            return resolved
+        dest = resolved
+    else:
+        name = Path(urlparse(token).path).name or "downloaded.BNDL"
+        dest = Path.cwd() / name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(data)
+    try:
+        info = parse_bundle_bytes(data, str(dest))
+    except BundleError as exc:
+        return f"Saved {dest} ({len(data)} bytes) but it is not a BUNDLE archive: {exc}"
+    return f"Fetched {token} -> {dest} ({len(data)} bytes)\n{_format_bundle(info)}"
+
+
 @tool
 def libbndl_overview() -> str:
-    """Explain libbndl (Criterion/EA BUNDLE reader) at the pinned 2b88eff commit.
-
-    Read-only. Does not write or extract archives.
-    """
+    """Explain libbndl at the pinned 2b88eff commit (inspect, extract, save, fetch)."""
     return _overview_text()
 
 
 @tool
-def libbndl_inspect(path: str) -> str:
-    """Inspect a local BNDL/BND2 archive: platform, revision, flags, resources.
+def libbndl_inspect(path: str, resource_type: str = "") -> str:
+    """Inspect a BNDL/BND2 archive: platform, revision, flags, resources.
 
-    Path is a filesystem file. Read-only metadata; no extract or write.
-    Pinned to Bo98/libbndl@2b88eff (non-Xbox BNDL, BNDL v3/v4).
+    Path is a local file or http(s) URL. Optional resource_type filters the list
+    (TextFile, Raster, or a hex type ID). Pinned to Bo98/libbndl@2b88eff.
     """
-    return inspect_bundle(path)
+    return inspect_bundle(path, resource_type)
 
 
 @tool
 def libbndl_lookup(path: str, resource: str) -> str:
-    """Look up one resource in a local BNDL/BND2 file by name or hex ID.
+    """Look up one resource in a BNDL/BND2 file by name or hex ID.
 
     Names are hashed with CRC-32 of the lowercased string, matching libbndl.
-    Read-only; does not extract payload bytes to disk.
     """
     return lookup_resource(path, resource)
 
 
+@tool
+def libbndl_types(path: str) -> str:
+    """List resource IDs grouped by type (ListResourceIDsByType)."""
+    return list_resource_ids_by_type(path)
+
+
+@tool
+def libbndl_extract(path: str, resource: str, outdir: str = "") -> str:
+    """Extract GetBinary payloads for one resource to a local folder.
+
+    Writes <name>.block0/1/2 after zlib decompress when the archive is
+    compressed. Does not execute extracted data.
+    """
+    return extract_resource(path, resource, outdir)
+
+
+@tool
+def libbndl_create(out_path: str, name: str, resource_type: str, payload_path: str) -> str:
+    """Create a new BND2 PC archive with one resource (Save / AddResource)."""
+    return create_bundle(out_path, name, resource_type, payload_path)
+
+
+@tool
+def libbndl_add(archive: str, name: str, resource_type: str, payload_path: str, out_path: str = "") -> str:
+    """Add a resource to an archive and Save as BND2 PC."""
+    return add_resource(archive, name, resource_type, payload_path, out_path)
+
+
+@tool
+def libbndl_replace(archive: str, resource: str, payload_path: str, out_path: str = "") -> str:
+    """Replace one resource payload and Save as BND2 PC."""
+    return replace_resource(archive, resource, payload_path, out_path)
+
+
+@tool
+def libbndl_fetch(url: str, dest_path: str = "") -> str:
+    """Download an http(s) BUNDLE archive, save it locally, and inspect it."""
+    return fetch_archive(url, dest_path)
+
+
 def libbndl_from_arg(text: str) -> str:
-    """Route a local-CLI argument string onto overview / inspect / lookup."""
+    """Route a local-CLI argument string onto the full libbndl tool set."""
     raw = (text or "").strip()
     lower = raw.lower()
     if not raw or lower in {"overview", "help", "docs"}:
         return libbndl_overview()
+    fetch_match = re.match(r"^fetch\b(?:\s+(\S+))?(?:\s+(\S+))?$", raw, re.I)
+    if fetch_match:
+        return libbndl_fetch(fetch_match.group(1) or "", fetch_match.group(2) or "")
+    types_match = re.match(r"^(types|by-type|bytype)\b(?:\s+(.*))?$", raw, re.I)
+    if types_match:
+        return libbndl_types(types_match.group(2) or "")
+    extract_match = re.match(r"^(extract|getbinary|dump)\b(?:\s+(\S+))(?:\s+(\S+))?(?:\s+(\S+))?$", raw, re.I)
+    if extract_match:
+        return libbndl_extract(extract_match.group(2), extract_match.group(3) or "", extract_match.group(4) or "")
+    create_match = re.match(
+        r"^create\b(?:\s+(\S+))(?:\s+(\S+))(?:\s+(\S+))(?:\s+(\S+))?$",
+        raw,
+        re.I,
+    )
+    if create_match:
+        return libbndl_create(
+            create_match.group(1),
+            create_match.group(2),
+            create_match.group(3),
+            create_match.group(4) or "",
+        )
+    add_match = re.match(
+        r"^add\b(?:\s+(\S+))(?:\s+(\S+))(?:\s+(\S+))(?:\s+(\S+))?(?:\s+(\S+))?$",
+        raw,
+        re.I,
+    )
+    if add_match:
+        return libbndl_add(
+            add_match.group(1),
+            add_match.group(2),
+            add_match.group(3),
+            add_match.group(4) or "",
+            add_match.group(5) or "",
+        )
+    replace_match = re.match(
+        r"^replace\b(?:\s+(\S+))(?:\s+(\S+))(?:\s+(\S+))?(?:\s+(\S+))?$",
+        raw,
+        re.I,
+    )
+    if replace_match:
+        return libbndl_replace(
+            replace_match.group(1),
+            replace_match.group(2),
+            replace_match.group(3) or "",
+            replace_match.group(4) or "",
+        )
     inspect_match = re.match(r"^(inspect|info|list|open|read|show)\b(?:\s+(.*))?$", raw, re.I)
     if inspect_match:
-        return libbndl_inspect(inspect_match.group(2) or "")
+        rest = inspect_match.group(2) or ""
+        type_match = re.match(r"^(\S+)\s+type\s+(\S+)$", rest, re.I)
+        if type_match:
+            return libbndl_inspect(type_match.group(1), type_match.group(2))
+        return libbndl_inspect(rest)
     lookup_match = re.match(r"^(lookup|get|find|resource)\b(?:\s+(\S+))(?:\s+(.*))?$", raw, re.I)
     if lookup_match and lookup_match.group(3):
         return libbndl_lookup(lookup_match.group(2), lookup_match.group(3))
     if lookup_match:
         return libbndl_inspect(lookup_match.group(2) or "")
+    if _is_url(raw.split()[0] if raw else ""):
+        parts = raw.split()
+        if len(parts) >= 2 and parts[1].lower() == "fetch":
+            return libbndl_fetch(parts[0], parts[2] if len(parts) > 2 else "")
+        return libbndl_inspect(parts[0])
     tokens = [token for token in _PATH_TOKEN.findall(raw) if token.lower() not in _STOPWORDS]
     if len(tokens) >= 2 and Path(tokens[0]).suffix.lower() in {".bndl", ".bnd2", ".bundle"}:
         return libbndl_lookup(tokens[0], tokens[1])

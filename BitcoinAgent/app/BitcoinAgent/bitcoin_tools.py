@@ -357,13 +357,15 @@ def developer_howto(topic: str) -> str:
             "libbndl reads Criterion/EA BUNDLE archives (Burnout Paradise and "
             "related titles). This agent pins Bo98/libbndl@2b88eff "
             "(non-Xbox BNDL, BNDL v3/v4).\n"
-            "Read-only: overview, inspect a local .BNDL/.BND2, lookup one "
-            "resource by name or hex ID. It does not write or extract files.\n"
+            "Pinned API: inspect, lookup, types, extract (GetBinary + zlib), "
+            "create/add/replace (Save as BND2 PC), and http(s) fetch.\n"
             "Tree: https://github.com/Bo98/libbndl/tree/"
             "2b88effe9278dd832f7a1771a472cd4db0dbc072\n"
             "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl\n"
             "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
             "libbndl inspect <file>\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "libbndl extract <file> <id-or-name> [outdir]\n"
             "See BitcoinAgent/LIBBNDL.md."
         ),
     }
