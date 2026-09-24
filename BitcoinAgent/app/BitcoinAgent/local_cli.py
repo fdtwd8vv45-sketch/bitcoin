@@ -8,6 +8,7 @@
     python3 local_cli.py jupiter price SOL,JUP
     python3 local_cli.py libbndl inspect path/to/file.BNDL
     python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
+    python3 local_cli.py apko plan path/to/images.apko.json
     python3 local_cli.py          # interactive prompt
 """
 
@@ -19,6 +20,7 @@ import sys
 from collections.abc import Callable
 
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
+from apko_smoke import apko_from_arg, apko_smoke_overview
 from bitcoin_tools import developer_howto, list_rpc_methods, load_rpc_index, lookup_rpc, search_docs
 from contract_source import lookup_contract_source, normalize_chain_id
 from jupiter import (
@@ -39,11 +41,12 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | libbndl
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | libbndl | apko
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
   libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
+  apko [plan|status|preflight|run]  APKO smoke plan / Docker preflight (actions@7eaff21e)
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -107,6 +110,15 @@ def _looks_like_libbndl(lower: str) -> bool:
     return bool(
         re.search(
             r"\b(libbndl|libapt2|bndl|bnd2|bundle archive|burnout paradise)\b",
+            lower,
+        )
+    )
+
+
+def _looks_like_apko(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(apko|melange|ubuntu-slim|smoke test|smoke_test|images\.apko)\b",
             lower,
         )
     )
@@ -239,6 +251,8 @@ def route_query(text: str) -> str:
         "libbndl": lambda: libbndl_from_arg(arg),
         "bndl": lambda: libbndl_from_arg(arg),
         "bnd2": lambda: libbndl_from_arg(arg),
+        "apko": lambda: apko_from_arg(arg),
+        "melange": lambda: apko_from_arg(arg),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -286,6 +300,13 @@ def route_query(text: str) -> str:
         ) or re.search(r"https?://", rest, re.I):
             return libbndl_from_arg(rest)
         return libbndl_overview()
+    if _looks_like_apko(lower):
+        rest = re.sub(r"\b(apko|melange)\b", " ", raw, flags=re.I)
+        if re.search(r"\b(plan|status|preflight|pull|run|smoke|matrix|daemon)\b", rest, re.I) or rest.strip().endswith(
+            ".json"
+        ):
+            return apko_from_arg(rest)
+        return apko_smoke_overview()
     if _looks_like_into_wallet(lower) and not _TXID.search(raw):
         return developer_howto("receive")
     if _looks_like_receive(lower):
@@ -328,6 +349,9 @@ def route_query(text: str) -> str:
         "libbndl": "libbndl",
         "bndl": "libbndl",
         "bundle": "libbndl",
+        "apko": "apko",
+        "melange": "apko",
+        "ubuntu-slim": "apko",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):

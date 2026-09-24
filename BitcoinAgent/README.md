@@ -22,6 +22,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko plan path/to/images.apko.json
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -60,7 +62,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `libbndl` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `libbndl`, `apko` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -72,6 +74,7 @@ web search, online evals. This environment cannot deploy those.
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
 | `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
 | `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
+| `apko_smoke_overview` / `plan` / `status` / `preflight` / `run` | APKO smoke contract pinned to ethereum-optimism/actions@7eaff21e (factory@b87283a8: Docker daemon + pull/arch preflight) |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
@@ -188,6 +191,22 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl create /tmp/out.bnd2 hello.txt TextFile ./hello.txt
 ```
 
+## APKO smoke tests (optional)
+
+APKO image smoke tests are pinned to
+[ethereum-optimism/actions@7eaff21e](https://github.com/ethereum-optimism/actions/commit/7eaff21e45042406c7e5602f04bcabe959c36047),
+which pins factory
+[b87283a8](https://github.com/ethereum-optimism/factory/commit/b87283a8bb6c325da0ef18400eb819b5979a9bd3).
+amd64 jobs default to `ubuntu-24.04` (a Docker daemon), and image pull
+plus architecture checks fail **before** the command loop. See
+[APKO.md](APKO.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko plan path/to/images.apko.json
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko preflight alpine:3.20 amd64
+```
+
 ## Agentic Wallet (optional)
 
 OKX Agentic Wallet keeps key generation, storage, and signing inside a TEE.
@@ -285,6 +304,7 @@ agentcore deploy
 
 - [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens, VRFD eligibility (read-only in this agent)
 - [libbndl](LIBBNDL.md) — Criterion/EA BUNDLE inspect/lookup, pinned to Bo98/libbndl@2b88eff
+- [APKO](APKO.md) — APKO smoke plan/preflight, pinned to ethereum-optimism/actions@7eaff21e
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)
 - [AgentCore CLI](https://github.com/aws/agentcore-cli)
 - [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)

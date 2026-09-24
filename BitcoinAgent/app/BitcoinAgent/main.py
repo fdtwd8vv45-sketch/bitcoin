@@ -6,6 +6,13 @@ from strands import Agent
 from strands.agent.conversation_manager.null_conversation_manager import NullConversationManager
 
 from agentic_wallet import agentic_wallet_overview, agentic_wallet_status
+from apko_smoke import (
+    apko_docker_status,
+    apko_plan_smoke,
+    apko_smoke_overview,
+    apko_smoke_preflight,
+    apko_smoke_run,
+)
 from bitcoin_tools import developer_howto, list_rpc_methods, lookup_rpc, search_docs
 from contract_source import lookup_contract_source
 from jupiter import (
@@ -53,7 +60,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/libbndl topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/libbndl/apko topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -86,6 +93,13 @@ Guidelines:
   GetBinary payloads, libbndl_create / libbndl_add / libbndl_replace to Save
   BND2 PC archives, and libbndl_fetch to download an http(s) archive. Do not
   execute extracted payloads.
+- Use apko_smoke_overview for the APKO smoke-test pin
+  (ethereum-optimism/actions@7eaff21e → factory@b87283a8). Use
+  apko_plan_smoke to plan catalog smoke legs (amd64 → ubuntu-24.04, not
+  ubuntu-slim). Use apko_docker_status / apko_smoke_preflight /
+  apko_smoke_run to require a Docker daemon, pull the image, and check
+  architecture before the command loop. Do not publish images or log in
+  to Artifact Registry through this agent.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -124,6 +138,11 @@ LOCAL_TOOLS = [
     libbndl_add,
     libbndl_replace,
     libbndl_fetch,
+    apko_smoke_overview,
+    apko_plan_smoke,
+    apko_docker_status,
+    apko_smoke_preflight,
+    apko_smoke_run,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])
