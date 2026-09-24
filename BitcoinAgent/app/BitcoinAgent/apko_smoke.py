@@ -551,9 +551,12 @@ def apko_from_arg(text: str) -> str:
     if plan_match:
         return apko_plan_smoke(plan_match.group(2) or "")
 
-    pre_match = re.match(r"^(preflight|pull)\b(?:\s+(\S+))?(?:\s+(\S+))?$", raw, re.I)
+    pre_match = re.match(r"^(preflight|pull)\b(?:\s+(.*))?$", raw, re.I)
     if pre_match:
-        return apko_smoke_preflight(pre_match.group(2) or "", pre_match.group(3) or "amd64")
+        tokens = (pre_match.group(2) or "").split()
+        image = tokens[0] if tokens else ""
+        arch = tokens[1] if len(tokens) > 1 else "amd64"
+        return apko_smoke_preflight(image, arch)
 
     run_match = re.match(r"^(run|smoke|test)\b(?:\s+(.*))?$", raw, re.I)
     if run_match:

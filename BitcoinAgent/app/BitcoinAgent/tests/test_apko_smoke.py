@@ -301,6 +301,10 @@ class ApkoSmokeTests(unittest.TestCase):
         self.assertIn("apko", help_text)
         howto = route_query("howto apko")
         self.assertIn("7eaff21", howto)
+        self.assertIn(
+            "refusing image reference",
+            route_query("apko preflight alpine:3.20; rm -rf /"),
+        )
 
 
 if __name__ == "__main__":
