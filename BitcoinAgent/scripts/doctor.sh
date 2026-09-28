@@ -115,6 +115,18 @@ else
   note "JUPITER_DOCS_MCP unset — Cursor still has jupiter-docs in .cursor/mcp.json"
 fi
 
+if [[ "${PHANTOM_DOCS_MCP:-}" == "1" || "${PHANTOM_DOCS_MCP:-}" == "true" ]]; then
+  pass "PHANTOM_DOCS_MCP is set (Phantom docs MCP attached at runtime)"
+else
+  note "PHANTOM_DOCS_MCP unset — Cursor still has phantom-docs in .cursor/mcp.json"
+fi
+
+if [[ -n "${PHANTOM_APP_ID:-}" ]]; then
+  pass "PHANTOM_APP_ID is set (not printed; client SDK integrations only)"
+else
+  note "PHANTOM_APP_ID unset — Phantom overview still works; get an App ID at https://phantom.com/portal"
+fi
+
 if have jup; then
   pass "jup CLI on PATH (Jupiter version check available)"
 else
@@ -125,6 +137,12 @@ if have onchainos; then
   pass "onchainos CLI on PATH (Agentic Wallet status available)"
 else
   note "onchainos CLI unset — Agentic Wallet overview still works; install with: npx -y @okxweb3/onchainos-installer install"
+fi
+
+if have phantom; then
+  pass "phantom CLI on PATH (Phantom Connect version check available)"
+else
+  note "phantom CLI unset — Phantom Connect overview still works; install with: npm install -g @phantom/cli"
 fi
 
 say

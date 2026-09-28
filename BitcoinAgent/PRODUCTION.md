@@ -36,6 +36,8 @@ do not have to mint session IDs by hand.
 - [x] Agentic Wallet status is read-only (`onchainos wallet status`); keys stay in OKX's TEE and this agent does not send, swap, or sign
 - [x] Jupiter Price/Tokens/eligibility calls are allowlisted HTTPS GET to `api.jup.ag` only (`/price/v3`, `/tokens/v2/search`, `/tokens/v2/verify/express/check-eligibility`); optional `JUPITER_API_KEY` is an `x-api-key` header and is not logged
 - [x] Jupiter docs MCP is read-only (`developers.jup.ag/docs/mcp`); Trading MCP is not attached and this agent does not swap, sign, or submit VRFD Express payments (`craft-txn` / `execute`)
+- [x] Phantom npm lookups are allowlisted HTTPS GET to `registry.npmjs.org` only (`/@phantom/…/latest`); docs MCP is read-only (`docs.phantom.com/mcp`); wallet MCP (`@phantom/mcp-server`) is not attached and this agent does not connect, login, sign, or send
+- [x] Phantom CLI status is `phantom --version` only; `PHANTOM_APP_ID` is never printed
 - [ ] Register any future private API keys with `agentcore add credential` (never runtime env vars)
 
 ### Code quality

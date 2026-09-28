@@ -19,6 +19,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py agentic status
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom packages
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
@@ -62,7 +64,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `libbndl`, `apko` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `libbndl`, `apko` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -73,11 +75,13 @@ web search, online evals. This environment cannot deploy those.
 | `remember_note` / `recall_notes` | Local notes when AgentCore Memory is unset |
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
 | `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
+| `phantom_connect_overview` / `phantom_connect_packages` / `phantom_connect_cli_status` | Phantom Connect SDK overview, npm latest versions, read-only `phantom --version` |
 | `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
 | `apko_smoke_overview` / `plan` / `status` / `preflight` / `run` | APKO smoke contract pinned to ethereum-optimism/actions@7eaff21e (factory@b87283a8: Docker daemon + pull/arch preflight) |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
+| Phantom docs MCP | Optional. Set `PHANTOM_DOCS_MCP=1` for Phantom Connect SDK docs MCP |
 
 Refresh the bundled index after RPC changes:
 
@@ -174,6 +178,33 @@ attached. Official CLI / skills (on a machine you control):
 ```bash
 npm i -g @jup-ag/cli
 npx skills add jup-ag/agent-skills --skill "integrating-jupiter"
+```
+
+## Phantom Connect SDK (optional)
+
+[Phantom Connect SDK](https://github.com/phantom/phantom-connect-sdk) is
+the open-source React / Browser / React Native toolkit for embedded
+wallets (Google / Apple) or the Phantom extension. BitcoinAgent reads
+the docs and looks up npm versions. It does not connect a wallet, login,
+sign, or send. See [PHANTOM.md](PHANTOM.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom packages
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom status
+```
+
+| Server | URL | Auth |
+| --- | --- | --- |
+| `phantom-docs` | `https://docs.phantom.com/mcp` | none |
+
+Cursor is already wired in [`.cursor/mcp.json`](../.cursor/mcp.json).
+BitcoinAgent attaches the same docs MCP when `PHANTOM_DOCS_MCP=1`.
+Wallet MCP (`@phantom/mcp-server`) is not attached. Official CLI (on a
+machine you control):
+
+```bash
+npm install -g @phantom/cli
 ```
 
 ## libbndl (optional)
@@ -303,6 +334,7 @@ agentcore deploy
 ## Documentation
 
 - [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens, VRFD eligibility (read-only in this agent)
+- [Phantom Connect](PHANTOM.md) — Phantom Connect SDKs, docs MCP, npm versions (read-only in this agent)
 - [libbndl](LIBBNDL.md) — Criterion/EA BUNDLE inspect/lookup, pinned to Bo98/libbndl@2b88eff
 - [APKO](APKO.md) — APKO smoke plan/preflight, pinned to ethereum-optimism/actions@7eaff21e
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)

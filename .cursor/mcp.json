@@ -11,6 +11,9 @@
     },
     "jupiter-docs": {
       "url": "https://developers.jup.ag/docs/mcp"
+    },
+    "phantom-docs": {
+      "url": "https://docs.phantom.com/mcp"
     }
   }
 }
