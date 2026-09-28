@@ -6,6 +6,8 @@
     python3 local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
     python3 local_cli.py agentic
     python3 local_cli.py jupiter price SOL,JUP
+    python3 local_cli.py phantom
+    python3 local_cli.py phantom packages
     python3 local_cli.py libbndl inspect path/to/file.BNDL
     python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
     python3 local_cli.py apko plan path/to/images.apko.json
@@ -30,6 +32,11 @@ from jupiter import (
     jupiter_token_search,
     jupiter_verify_eligibility,
 )
+from phantom_connect import (
+    phantom_connect_cli_status,
+    phantom_connect_overview,
+    phantom_connect_packages,
+)
 from libbndl import libbndl_from_arg, libbndl_overview
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
@@ -41,10 +48,11 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | libbndl | apko
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | libbndl | apko
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
+  phantom [packages|status]  Phantom Connect SDK overview, npm versions, or phantom CLI
   libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
   apko [plan|status|preflight|run]  APKO smoke plan / Docker preflight (actions@7eaff21e)
   fees                Recommended fees from mempool.space
@@ -101,6 +109,17 @@ def _looks_like_jupiter(lower: str) -> bool:
     return bool(
         re.search(
             r"\b(jupiter|jup|jup\.ag|jup-ag|vrfd|verified\.jup)\b",
+            lower,
+        )
+    )
+
+
+def _looks_like_phantom(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(phantom connect|phantom-connect|phantom sdk|"
+            r"@phantom/|docs\.phantom\.com|phantom\.com/portal|"
+            r"react-sdk|browser-sdk|react-native-sdk)\b",
             lower,
         )
     )
@@ -167,6 +186,35 @@ def _jupiter_from_arg(text: str) -> str:
     if raw and not re.search(r"\b(how|what|docs|skill|mcp|cli)\b", lower):
         return jupiter_price(raw)
     return jupiter_overview()
+
+
+def _phantom_from_arg(text: str) -> str:
+    raw = (text or "").strip()
+    lower = raw.lower()
+    if not raw or lower in {"overview", "help", "docs", "sdk", "connect"}:
+        return phantom_connect_overview()
+    if re.search(r"^(status|cli|version)\b", lower):
+        return phantom_connect_cli_status()
+    packages_match = re.match(
+        r"^(packages?|npm|versions)\b(?:\s+(.*))?$",
+        raw,
+        re.I,
+    )
+    if packages_match:
+        return phantom_connect_packages(packages_match.group(2) or "")
+    if re.search(r"\b(status|installed|cli)\b", lower) and not re.search(
+        r"\b(package|packages|npm|react|browser)\b", lower
+    ):
+        return phantom_connect_cli_status()
+    if re.search(r"\b(package|packages|npm|react-sdk|browser-sdk|react-native)\b", lower):
+        rest = re.sub(
+            r"\b(package|packages|npm|latest|version|versions|of|for|the)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return phantom_connect_packages(rest)
+    return phantom_connect_overview()
 
 
 def _looks_like_into_wallet(lower: str) -> bool:
@@ -248,6 +296,8 @@ def route_query(text: str) -> str:
         "agentic-wallet": lambda: agentic_wallet_status() if re.search(r"\b(status|cli)\b", arg.lower()) else agentic_wallet_overview(),
         "jupiter": lambda: _jupiter_from_arg(arg),
         "jup": lambda: _jupiter_from_arg(arg),
+        "phantom": lambda: _phantom_from_arg(arg),
+        "phantom-connect": lambda: _phantom_from_arg(arg),
         "libbndl": lambda: libbndl_from_arg(arg),
         "bndl": lambda: libbndl_from_arg(arg),
         "bnd2": lambda: libbndl_from_arg(arg),
@@ -288,6 +338,15 @@ def route_query(text: str) -> str:
             flags=re.I,
         )
         return _jupiter_from_arg(rest)
+    if _looks_like_phantom(lower):
+        rest = re.sub(
+            r"\b(phantom connect|phantom-connect|phantom sdk|phantom|"
+            r"@phantom/|docs\.phantom\.com|phantom\.com/portal)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return _phantom_from_arg(rest)
     if _looks_like_libbndl(lower):
         rest = re.sub(
             r"\b(libbndl|libapt2|bundle archive|burnout paradise)\b",
@@ -346,6 +405,8 @@ def route_query(text: str) -> str:
         "okx": "agentic",
         "jupiter": "jupiter",
         "jup-ag": "jupiter",
+        "phantom": "phantom",
+        "phantom-connect": "phantom",
         "libbndl": "libbndl",
         "bndl": "libbndl",
         "bundle": "libbndl",

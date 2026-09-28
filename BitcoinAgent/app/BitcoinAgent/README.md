@@ -6,7 +6,9 @@ Etherscan MCP servers when `ETHERSCAN_API_KEY` is set, a local
 Agentic Wallet overview / `onchainos` CLI status check, and read-only Jupiter
 Price / Tokens lookups plus optional Jupiter docs MCP. Express
 Verification is eligibility-only (`check-eligibility`); this agent does
-not craft, sign, or submit the 1000 JUP payment. A read-only
+not craft, sign, or submit the 1000 JUP payment. Read-only Phantom
+Connect SDK overview, npm latest versions, and `phantom --version`, plus
+optional Phantom docs MCP. Wallet MCP is not attached. Read-only
 `libbndl` tools inspect, extract, save (BND2 PC), and fetch Criterion/EA
 BUNDLE files, pinned to Bo98/libbndl@2b88eff. APKO smoke tools plan a
 catalog matrix and run the factory@b87283a8 Docker preflight (actions
@@ -17,6 +19,7 @@ To use the tools with no AWS account:
 ```bash
 python3 local_cli.py "What does getblockcount do?"
 python3 local_cli.py jupiter price SOL,JUP
+python3 local_cli.py phantom packages
 python3 local_cli.py libbndl inspect path/to/file.BNDL
 python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
 python3 local_cli.py apko plan path/to/images.apko.json
@@ -54,12 +57,17 @@ invoking the agent.
 | `ETHERSCAN_DOCS_MCP` | No | Set to `1` to attach Etherscan docs MCP without a data API key |
 | `JUPITER_API_KEY` | No | Optional `x-api-key` for higher Jupiter Price/Tokens/eligibility rate limits; also attaches Jupiter docs MCP |
 | `JUPITER_DOCS_MCP` | No | Set to `1` to attach Jupiter docs MCP (`developers.jup.ag/docs/mcp`) without an API key |
+| `PHANTOM_DOCS_MCP` | No | Set to `1` to attach Phantom docs MCP (`docs.phantom.com/mcp`) |
+| `PHANTOM_APP_ID` | No | Optional Portal App ID; status reports set/unset and never prints the value |
 
 `agentic_wallet_status` looks for the official `onchainos` CLI on `PATH`.
 It never logs in or signs. See `../../AGENTIC_WALLET.md`.
 
 `jupiter_cli_status` looks for the official `jup` CLI on `PATH` and runs
 `jup --version` only. See `../../JUPITER.md`.
+
+`phantom_connect_cli_status` looks for the official `phantom` CLI on
+`PATH` and runs `phantom --version` only. See `../../PHANTOM.md`.
 
 `libbndl_*` inspect, extract, save, and fetch `.BNDL` / `.BND2` files.
 See `../../LIBBNDL.md`.

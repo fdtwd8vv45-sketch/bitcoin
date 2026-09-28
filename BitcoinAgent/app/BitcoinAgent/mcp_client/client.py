@@ -8,10 +8,12 @@ from mcp_client.settings import (
     ETHERSCAN_DOCS_MCP_URL,
     ETHERSCAN_MCP_URL,
     JUPITER_DOCS_MCP_URL,
+    PHANTOM_DOCS_MCP_URL,
     etherscan_api_key,
     etherscan_docs_mcp_enabled,
     etherscan_mcp_enabled,
     jupiter_docs_mcp_enabled,
+    phantom_docs_mcp_enabled,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,3 +61,14 @@ def get_jupiter_docs_mcp_client() -> MCPClient | None:
         logger.info("Jupiter docs MCP unset; running without Jupiter docs tools.")
         return None
     return MCPClient(lambda: streamablehttp_client(JUPITER_DOCS_MCP_URL))
+
+
+def get_phantom_docs_mcp_client() -> MCPClient | None:
+    """Return a client for the public Phantom docs MCP, or None if disabled.
+
+    Read-only documentation search. Wallet MCP (@phantom/mcp-server) is not attached.
+    """
+    if not phantom_docs_mcp_enabled():
+        logger.info("Phantom docs MCP unset; running without Phantom docs tools.")
+        return None
+    return MCPClient(lambda: streamablehttp_client(PHANTOM_DOCS_MCP_URL))

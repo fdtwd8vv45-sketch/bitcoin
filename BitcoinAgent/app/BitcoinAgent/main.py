@@ -22,6 +22,11 @@ from jupiter import (
     jupiter_token_search,
     jupiter_verify_eligibility,
 )
+from phantom_connect import (
+    phantom_connect_cli_status,
+    phantom_connect_overview,
+    phantom_connect_packages,
+)
 from libbndl import (
     libbndl_add,
     libbndl_create,
@@ -39,6 +44,7 @@ from mcp_client.client import (
     get_etherscan_mcp_client,
     get_gateway_mcp_client,
     get_jupiter_docs_mcp_client,
+    get_phantom_docs_mcp_client,
 )
 from memory_session import MEMORY_ID, build_session_manager
 from model.load import load_model
@@ -60,7 +66,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/libbndl/apko topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/libbndl/apko topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -87,6 +93,12 @@ Guidelines:
   `jup` CLI is installed. If Jupiter docs MCP is attached, use it for Jupiter
   API/docs questions. Do not swap, place orders, lend, sign, craft Express
   payment transactions, or POST /execute through this agent.
+- Use phantom_connect_overview for Phantom Connect SDKs (React, Browser, React
+  Native), Portal App ID, and docs MCP. Use phantom_connect_packages for npm
+  latest versions and phantom_connect_cli_status for `phantom --version`. If
+  Phantom docs MCP is attached, use it for Phantom SDK/docs questions. Do not
+  connect a wallet, login, sign, send, swap, or attach @phantom/mcp-server
+  through this agent.
 - Use libbndl_overview for Criterion/EA BUNDLE archives (libbndl pinned to
   Bo98/libbndl@2b88eff, non-Xbox BNDL + v3/v4). Use libbndl_inspect /
   libbndl_types / libbndl_lookup to list resources, libbndl_extract to write
@@ -129,6 +141,9 @@ LOCAL_TOOLS = [
     jupiter_token_search,
     jupiter_verify_eligibility,
     jupiter_cli_status,
+    phantom_connect_overview,
+    phantom_connect_packages,
+    phantom_connect_cli_status,
     libbndl_overview,
     libbndl_inspect,
     libbndl_lookup,
@@ -176,6 +191,7 @@ def _optional_mcp_clients() -> list:
         get_etherscan_mcp_client,
         get_etherscan_docs_mcp_client,
         get_jupiter_docs_mcp_client,
+        get_phantom_docs_mcp_client,
     ):
         client = factory()
         if client:

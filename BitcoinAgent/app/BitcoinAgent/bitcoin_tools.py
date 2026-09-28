@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, libbndl, apko.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, libbndl, apko.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -289,7 +289,7 @@ def developer_howto(topic: str) -> str:
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
-            "agentic, jupiter, libbndl, apko, remember, notes\n"
+            "agentic, jupiter, phantom, libbndl, apko, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -320,7 +320,8 @@ def developer_howto(topic: str) -> str:
             "addresses and txids.\n"
             "Never paste a seed phrase or private key.\n"
             "OKX Agentic Wallet (TEE, email login, x402) is a different product — "
-            "see howto topic `agentic`."
+            "see howto topic `agentic`. Phantom Connect SDK (embedded / extension "
+            "wallets) is another — see howto topic `phantom`."
         ),
         "agentic": (
             "OKX Agentic Wallet: keys stay in a TEE. Sign in with email, Google, or "
@@ -352,6 +353,25 @@ def developer_howto(topic: str) -> str:
             "Optional higher rate limit: export JUPITER_API_KEY from "
             "https://developers.jup.ag/portal\n"
             "See BitcoinAgent/JUPITER.md."
+        ),
+        "phantom": (
+            "Phantom Connect SDK: React, Browser, and React Native clients for "
+            "embedded wallets (Google / Apple) or the Phantom extension.\n"
+            "This agent is read-only: overview, npm latest versions, and "
+            "`phantom --version`. It does not connect a wallet, login, sign, "
+            "or send. Wallet MCP (@phantom/mcp-server) is not attached.\n"
+            "Source: https://github.com/phantom/phantom-connect-sdk\n"
+            "Docs: https://docs.phantom.com/wallet-sdks-overview\n"
+            "Portal App ID: https://phantom.com/portal\n"
+            "Cursor docs MCP is already in .cursor/mcp.json (phantom-docs).\n"
+            "Runtime docs MCP: export PHANTOM_DOCS_MCP=1\n"
+            "CLI (on a machine you control): npm install -g @phantom/cli\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "phantom packages\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "phantom status\n"
+            "See BitcoinAgent/PHANTOM.md."
         ),
         "libbndl": (
             "libbndl reads Criterion/EA BUNDLE archives (Burnout Paradise and "
@@ -388,6 +408,15 @@ def developer_howto(topic: str) -> str:
         key = "agentic"
     if key in {"jup", "jup-ag", "jupiter-api", "jupiter-docs", "vrfd", "jupiter-verify"}:
         key = "jupiter"
+    if key in {
+        "phantom-connect",
+        "phantom-sdk",
+        "phantom-docs",
+        "react-sdk",
+        "browser-sdk",
+        "react-native-sdk",
+    }:
+        key = "phantom"
     if key in {"bndl", "bnd2", "bundle", "libapt2"}:
         key = "libbndl"
     if key in {"melange", "ubuntu-slim", "apko-smoke", "smoke-test"}:
@@ -396,7 +425,7 @@ def developer_howto(topic: str) -> str:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic, jupiter, libbndl, apko.\n"
+        "receive, wallet, agentic, jupiter, phantom, libbndl, apko.\n"
         "You can also call search_docs with a free-text query."
     )
 
