@@ -21,6 +21,9 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter price SOL,JUP
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py jupiter verify USDC
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom packages
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats coin bitcoin
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats portfolio
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
@@ -64,7 +67,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `libbndl`, `apko` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `libbndl`, `apko` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -76,12 +79,14 @@ web search, online evals. This environment cannot deploy those.
 | `agentic_wallet_overview` / `agentic_wallet_status` | OKX Agentic Wallet overview + read-only `onchainos` CLI status |
 | `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
 | `phantom_connect_overview` / `phantom_connect_packages` / `phantom_connect_cli_status` | Phantom Connect SDK overview, npm latest versions, read-only `phantom --version` |
+| `coinstats_overview` / `coinstats_coin` / `coinstats_markets` / `coinstats_portfolio_list` / `coinstats_portfolio` / `coinstats_wallet` / `coinstats_status` | CoinStats MCP overview, prices, global market, portfolio list/coins + PnL, one-chain wallet balance |
 | `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
 | `apko_smoke_overview` / `plan` / `status` / `preflight` / `run` | APKO smoke contract pinned to ethereum-optimism/actions@7eaff21e (factory@b87283a8: Docker daemon + pull/arch preflight) |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
 | Phantom docs MCP | Optional. Set `PHANTOM_DOCS_MCP=1` for Phantom Connect SDK docs MCP |
+| CoinStats MCP | Optional. Cursor OAuth at `mcp.coinstats.app`; REST needs `COINSTATS_API_KEY` |
 
 Refresh the bundled index after RPC changes:
 
@@ -206,6 +211,39 @@ machine you control):
 ```bash
 npm install -g @phantom/cli
 ```
+
+## CoinStats (optional)
+
+[CoinStats](https://coinstats.app/mcp/) is crypto market data plus
+portfolios. Cursor uses the hosted MCP at
+`https://mcp.coinstats.app/mcp` (OAuth 2.1). BitcoinAgent reads the
+same REST API for prices, global market cap, your portfolios + PnL, and
+a public wallet balance. It does not add transactions, connect wallets
+or exchanges, sync, or delete portfolios. See [COINSTATS.md](COINSTATS.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats coin bitcoin
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats markets
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats portfolio
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats wallet bc1q… bitcoin
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats status
+```
+
+REST calls need a dashboard key:
+
+```bash
+export COINSTATS_API_KEY=your_key   # from https://openapi.coinstats.app
+```
+
+| Server | URL | Auth |
+| --- | --- | --- |
+| `coinstats` | `https://mcp.coinstats.app/mcp` | OAuth 2.1 / PKCE (Cursor) |
+
+Cursor is already wired in [`.cursor/mcp.json`](../.cursor/mcp.json).
+BitcoinAgent does not attach the hosted MCP at runtime because those
+tools can mutate portfolios. The runtime talks to `api.coinstats.app`
+directly when `COINSTATS_API_KEY` is set.
 
 ## libbndl (optional)
 
@@ -335,6 +373,7 @@ agentcore deploy
 
 - [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens, VRFD eligibility (read-only in this agent)
 - [Phantom Connect](PHANTOM.md) — Phantom Connect SDKs, docs MCP, npm versions (read-only in this agent)
+- [CoinStats](COINSTATS.md) — CoinStats MCP (Cursor OAuth) + read-only prices / portfolio / wallet
 - [libbndl](LIBBNDL.md) — Criterion/EA BUNDLE inspect/lookup, pinned to Bo98/libbndl@2b88eff
 - [APKO](APKO.md) — APKO smoke plan/preflight, pinned to ethereum-optimism/actions@7eaff21e
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)

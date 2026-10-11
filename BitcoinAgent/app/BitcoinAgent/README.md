@@ -9,6 +9,9 @@ Verification is eligibility-only (`check-eligibility`); this agent does
 not craft, sign, or submit the 1000 JUP payment. Read-only Phantom
 Connect SDK overview, npm latest versions, and `phantom --version`, plus
 optional Phantom docs MCP. Wallet MCP is not attached. Read-only
+CoinStats prices / portfolio / wallet lookups (REST needs
+`COINSTATS_API_KEY`). The hosted CoinStats MCP is Cursor OAuth only and
+is not attached here because it includes write tools. Read-only
 `libbndl` tools inspect, extract, save (BND2 PC), and fetch Criterion/EA
 BUNDLE files, pinned to Bo98/libbndl@2b88eff. APKO smoke tools plan a
 catalog matrix and run the factory@b87283a8 Docker preflight (actions
@@ -20,6 +23,7 @@ To use the tools with no AWS account:
 python3 local_cli.py "What does getblockcount do?"
 python3 local_cli.py jupiter price SOL,JUP
 python3 local_cli.py phantom packages
+python3 local_cli.py coinstats coin bitcoin
 python3 local_cli.py libbndl inspect path/to/file.BNDL
 python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
 python3 local_cli.py apko plan path/to/images.apko.json
@@ -59,6 +63,7 @@ invoking the agent.
 | `JUPITER_DOCS_MCP` | No | Set to `1` to attach Jupiter docs MCP (`developers.jup.ag/docs/mcp`) without an API key |
 | `PHANTOM_DOCS_MCP` | No | Set to `1` to attach Phantom docs MCP (`docs.phantom.com/mcp`) |
 | `PHANTOM_APP_ID` | No | Optional Portal App ID; status reports set/unset and never prints the value |
+| `COINSTATS_API_KEY` | No | Enables CoinStats REST (`api.coinstats.app`) for prices, markets, portfolio, and wallet; sent as `X-API-KEY` and never printed |
 
 `agentic_wallet_status` looks for the official `onchainos` CLI on `PATH`.
 It never logs in or signs. See `../../AGENTIC_WALLET.md`.
@@ -68,6 +73,10 @@ It never logs in or signs. See `../../AGENTIC_WALLET.md`.
 
 `phantom_connect_cli_status` looks for the official `phantom` CLI on
 `PATH` and runs `phantom --version` only. See `../../PHANTOM.md`.
+
+`coinstats_*` reads CoinStats market and portfolio data. Cursor uses
+the hosted MCP via OAuth; this runtime talks to REST only. See
+`../../COINSTATS.md`.
 
 `libbndl_*` inspect, extract, save, and fetch `.BNDL` / `.BND2` files.
 See `../../LIBBNDL.md`.

@@ -27,6 +27,15 @@ from phantom_connect import (
     phantom_connect_overview,
     phantom_connect_packages,
 )
+from coinstats import (
+    coinstats_coin,
+    coinstats_markets,
+    coinstats_overview,
+    coinstats_portfolio,
+    coinstats_portfolio_list,
+    coinstats_status,
+    coinstats_wallet,
+)
 from libbndl import (
     libbndl_add,
     libbndl_create,
@@ -66,7 +75,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/libbndl/apko topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/libbndl/apko topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -99,6 +108,14 @@ Guidelines:
   Phantom docs MCP is attached, use it for Phantom SDK/docs questions. Do not
   connect a wallet, login, sign, send, swap, or attach @phantom/mcp-server
   through this agent.
+- Use coinstats_overview for the CoinStats hosted MCP
+  (mcp.coinstats.app, OAuth in Cursor). Use coinstats_coin / coinstats_markets
+  for prices and global market cap, coinstats_portfolio_list /
+  coinstats_portfolio for your portfolios + PnL, coinstats_wallet for a
+  public wallet balance on one chain, and coinstats_status to see if
+  COINSTATS_API_KEY is set (never print it). Needs the key for REST. Do not
+  add transactions, connect wallets/exchanges, sync, or delete portfolios.
+  Do not attach the hosted CoinStats MCP write tools through this agent.
 - Use libbndl_overview for Criterion/EA BUNDLE archives (libbndl pinned to
   Bo98/libbndl@2b88eff, non-Xbox BNDL + v3/v4). Use libbndl_inspect /
   libbndl_types / libbndl_lookup to list resources, libbndl_extract to write
@@ -144,6 +161,13 @@ LOCAL_TOOLS = [
     phantom_connect_overview,
     phantom_connect_packages,
     phantom_connect_cli_status,
+    coinstats_overview,
+    coinstats_coin,
+    coinstats_markets,
+    coinstats_portfolio_list,
+    coinstats_portfolio,
+    coinstats_wallet,
+    coinstats_status,
     libbndl_overview,
     libbndl_inspect,
     libbndl_lookup,

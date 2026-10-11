@@ -127,6 +127,12 @@ else
   note "PHANTOM_APP_ID unset — Phantom overview still works; get an App ID at https://phantom.com/portal"
 fi
 
+if [[ -n "${COINSTATS_API_KEY:-}" ]]; then
+  pass "COINSTATS_API_KEY is set (CoinStats REST prices / portfolio / wallet; not printed)"
+else
+  note "COINSTATS_API_KEY unset — CoinStats overview still works; Cursor OAuth MCP is in .cursor/mcp.json"
+fi
+
 if have jup; then
   pass "jup CLI on PATH (Jupiter version check available)"
 else

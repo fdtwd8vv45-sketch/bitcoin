@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, libbndl, apko.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -289,7 +289,7 @@ def developer_howto(topic: str) -> str:
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
-            "agentic, jupiter, phantom, libbndl, apko, remember, notes\n"
+            "agentic, jupiter, phantom, coinstats, libbndl, apko, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -321,7 +321,8 @@ def developer_howto(topic: str) -> str:
             "Never paste a seed phrase or private key.\n"
             "OKX Agentic Wallet (TEE, email login, x402) is a different product — "
             "see howto topic `agentic`. Phantom Connect SDK (embedded / extension "
-            "wallets) is another — see howto topic `phantom`."
+            "wallets) is another — see howto topic `phantom`. CoinStats "
+            "portfolios are another — see howto topic `coinstats`."
         ),
         "agentic": (
             "OKX Agentic Wallet: keys stay in a TEE. Sign in with email, Google, or "
@@ -373,6 +374,23 @@ def developer_howto(topic: str) -> str:
             "phantom status\n"
             "See BitcoinAgent/PHANTOM.md."
         ),
+        "coinstats": (
+            "CoinStats hosted MCP (mcp.coinstats.app) is prices, wallets, "
+            "portfolios, exchanges, and news over Streamable HTTP + OAuth.\n"
+            "This agent is read-only: overview, coin prices, global market "
+            "cap, portfolio list / coins + PnL, and a public wallet balance "
+            "on one chain. It does not add transactions, connect wallets or "
+            "exchanges, sync, or delete portfolios.\n"
+            "Cursor MCP is already in .cursor/mcp.json (coinstats).\n"
+            "REST: export COINSTATS_API_KEY from https://openapi.coinstats.app\n"
+            "Connect: https://coinstats.app/api-docs/mcp/connecting/\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "coinstats coin bitcoin\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "coinstats portfolio\n"
+            "See BitcoinAgent/COINSTATS.md."
+        ),
         "libbndl": (
             "libbndl reads Criterion/EA BUNDLE archives (Burnout Paradise and "
             "related titles). This agent pins Bo98/libbndl@2b88eff "
@@ -417,6 +435,13 @@ def developer_howto(topic: str) -> str:
         "react-native-sdk",
     }:
         key = "phantom"
+    if key in {
+        "coin-stats",
+        "coinstats-mcp",
+        "coinstats-portfolio",
+        "mcp.coinstats",
+    }:
+        key = "coinstats"
     if key in {"bndl", "bnd2", "bundle", "libapt2"}:
         key = "libbndl"
     if key in {"melange", "ubuntu-slim", "apko-smoke", "smoke-test"}:
@@ -425,7 +450,7 @@ def developer_howto(topic: str) -> str:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic, jupiter, phantom, libbndl, apko.\n"
+        "receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko.\n"
         "You can also call search_docs with a free-text query."
     )
 
