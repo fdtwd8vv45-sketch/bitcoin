@@ -14,6 +14,9 @@
     },
     "phantom-docs": {
       "url": "https://docs.phantom.com/mcp"
+    },
+    "coinstats": {
+      "url": "https://mcp.coinstats.app/mcp"
     }
   }
 }

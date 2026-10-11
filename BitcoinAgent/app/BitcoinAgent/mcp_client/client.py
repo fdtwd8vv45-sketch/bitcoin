@@ -72,3 +72,9 @@ def get_phantom_docs_mcp_client() -> MCPClient | None:
         logger.info("Phantom docs MCP unset; running without Phantom docs tools.")
         return None
     return MCPClient(lambda: streamablehttp_client(PHANTOM_DOCS_MCP_URL))
+
+
+# CoinStats hosted MCP (https://mcp.coinstats.app/mcp) is Cursor OAuth
+# only. It is not attached here: AgentCore Gateway cannot complete
+# browser OAuth, and the catalog includes write tools (add / connect /
+# sync / delete portfolio). BitcoinAgent uses allowlisted REST GETs.

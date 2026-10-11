@@ -38,6 +38,8 @@ do not have to mint session IDs by hand.
 - [x] Jupiter docs MCP is read-only (`developers.jup.ag/docs/mcp`); Trading MCP is not attached and this agent does not swap, sign, or submit VRFD Express payments (`craft-txn` / `execute`)
 - [x] Phantom npm lookups are allowlisted HTTPS GET to `registry.npmjs.org` only (`/@phantom/…/latest`); docs MCP is read-only (`docs.phantom.com/mcp`); wallet MCP (`@phantom/mcp-server`) is not attached and this agent does not connect, login, sign, or send
 - [x] Phantom CLI status is `phantom --version` only; `PHANTOM_APP_ID` is never printed
+- [x] CoinStats REST calls are allowlisted HTTPS GET to `api.coinstats.app` only (`/v1/coins`, `/v1/coins/{id}`, `/v1/markets`, `/v1/portfolio/list`, `/v1/portfolio/coins`, `/v1/wallet/balance`); `COINSTATS_API_KEY` is an `X-API-KEY` header and is not logged
+- [x] CoinStats hosted MCP (`mcp.coinstats.app`) is Cursor OAuth only; write tools (`add-portfolio-transaction`, `connect-portfolio-*`, `sync-portfolio`, `delete-portfolio`) are not attached and this agent does not mutate portfolios or send `all`/`forceall` wallet queries
 - [ ] Register any future private API keys with `agentcore add credential` (never runtime env vars)
 
 ### Code quality

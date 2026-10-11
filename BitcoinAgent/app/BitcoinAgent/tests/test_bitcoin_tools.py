@@ -64,6 +64,7 @@ class BitcoinToolsTests(unittest.TestCase):
         self.assertIn("npx -y @okxweb3/onchainos-installer install", developer_howto("agentic"))
         self.assertIn("npm i -g @jup-ag/cli", developer_howto("jupiter"))
         self.assertIn("github.com/phantom/phantom-connect-sdk", developer_howto("phantom"))
+        self.assertIn("mcp.coinstats.app", developer_howto("coinstats"))
         self.assertIn("2b88eff", developer_howto("libbndl"))
         self.assertIn("7eaff21", developer_howto("apko"))
         self.assertIn("Unknown topic", developer_howto("spaceships"))

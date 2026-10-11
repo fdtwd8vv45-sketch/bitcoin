@@ -8,6 +8,7 @@
     python3 local_cli.py jupiter price SOL,JUP
     python3 local_cli.py phantom
     python3 local_cli.py phantom packages
+    python3 local_cli.py coinstats coin bitcoin
     python3 local_cli.py libbndl inspect path/to/file.BNDL
     python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
     python3 local_cli.py apko plan path/to/images.apko.json
@@ -37,6 +38,15 @@ from phantom_connect import (
     phantom_connect_overview,
     phantom_connect_packages,
 )
+from coinstats import (
+    coinstats_coin,
+    coinstats_markets,
+    coinstats_overview,
+    coinstats_portfolio,
+    coinstats_portfolio_list,
+    coinstats_status,
+    coinstats_wallet,
+)
 from libbndl import libbndl_from_arg, libbndl_overview
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
@@ -48,11 +58,12 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | libbndl | apko
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | libbndl | apko
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
   phantom [packages|status]  Phantom Connect SDK overview, npm versions, or phantom CLI
+  coinstats [coin|markets|portfolio|wallet|status]  CoinStats MCP/REST overview, prices, portfolio, wallet
   libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
   apko [plan|status|preflight|run]  APKO smoke plan / Docker preflight (actions@7eaff21e)
   fees                Recommended fees from mempool.space
@@ -123,6 +134,76 @@ def _looks_like_phantom(lower: str) -> bool:
             lower,
         )
     )
+
+
+def _looks_like_coinstats(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(coinstats|coin-stats|coin stats|mcp\.coinstats|"
+            r"coinstats\.app)\b",
+            lower,
+        )
+    )
+
+
+def _coinstats_from_arg(text: str) -> str:
+    raw = (text or "").strip()
+    lower = raw.lower()
+    if not raw or lower in {"overview", "help", "docs", "mcp", "ai"}:
+        return coinstats_overview()
+    if re.search(r"^(status|key|auth)\b", lower):
+        return coinstats_status()
+    if re.search(r"^(markets?|global|dominance|mcap|marketcap)\b", lower):
+        return coinstats_markets()
+    list_match = re.match(r"^portfolio\s+(list|ls|portfolios)\b", raw, re.I)
+    if list_match or re.match(r"^(list|portfolios)\b", raw, re.I):
+        return coinstats_portfolio_list()
+    portfolio_match = re.match(r"^portfolio\b(?:\s+(.*))?$", raw, re.I)
+    if portfolio_match:
+        rest = (portfolio_match.group(1) or "").strip()
+        if rest.lower() in {"list", "ls", "portfolios"}:
+            return coinstats_portfolio_list()
+        return coinstats_portfolio(rest)
+    wallet_match = re.match(r"^wallet\b(?:\s+(.*))?$", raw, re.I)
+    if wallet_match:
+        rest = (wallet_match.group(1) or "").strip()
+        parts = rest.split()
+        address = parts[0] if parts else ""
+        chain = parts[1] if len(parts) > 1 else ""
+        return coinstats_wallet(address, chain)
+    coin_match = re.match(r"^(coin|price|quote)\b(?:\s+(.*))?$", raw, re.I)
+    if coin_match:
+        return coinstats_coin(coin_match.group(2) or "")
+    if re.search(r"\b(status|api key|apikey)\b", lower) and not re.search(
+        r"\b(coin|price|portfolio|wallet|market)\b", lower
+    ):
+        return coinstats_status()
+    if re.search(r"\b(market|markets|dominance|mcap)\b", lower):
+        return coinstats_markets()
+    if re.search(r"\b(portfolio|portfolios|pnl|p/l|holdings)\b", lower):
+        if re.search(r"\b(list|ls)\b", lower):
+            return coinstats_portfolio_list()
+        rest = re.sub(
+            r"\b(portfolio|portfolios|pnl|p/l|holdings|coins?|for|of|the|my)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return coinstats_portfolio(rest)
+    if re.search(r"\b(wallet|balance|address)\b", lower):
+        rest = re.sub(
+            r"\b(wallet|balance|address|for|of|the|on)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        parts = rest.split()
+        address = parts[0] if parts else ""
+        chain = parts[1] if len(parts) > 1 else ""
+        return coinstats_wallet(address, chain)
+    if raw and not re.search(r"\b(how|what|docs|skill|mcp|cli)\b", lower):
+        return coinstats_coin(raw)
+    return coinstats_overview()
 
 
 def _looks_like_libbndl(lower: str) -> bool:
@@ -298,6 +379,8 @@ def route_query(text: str) -> str:
         "jup": lambda: _jupiter_from_arg(arg),
         "phantom": lambda: _phantom_from_arg(arg),
         "phantom-connect": lambda: _phantom_from_arg(arg),
+        "coinstats": lambda: _coinstats_from_arg(arg),
+        "coin-stats": lambda: _coinstats_from_arg(arg),
         "libbndl": lambda: libbndl_from_arg(arg),
         "bndl": lambda: libbndl_from_arg(arg),
         "bnd2": lambda: libbndl_from_arg(arg),
@@ -347,6 +430,15 @@ def route_query(text: str) -> str:
             flags=re.I,
         )
         return _phantom_from_arg(rest)
+    if _looks_like_coinstats(lower):
+        rest = re.sub(
+            r"\b(coinstats|coin-stats|coin stats|mcp\.coinstats|"
+            r"coinstats\.app)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return _coinstats_from_arg(rest)
     if _looks_like_libbndl(lower):
         rest = re.sub(
             r"\b(libbndl|libapt2|bundle archive|burnout paradise)\b",
@@ -407,6 +499,8 @@ def route_query(text: str) -> str:
         "jup-ag": "jupiter",
         "phantom": "phantom",
         "phantom-connect": "phantom",
+        "coinstats": "coinstats",
+        "coin-stats": "coinstats",
         "libbndl": "libbndl",
         "bndl": "libbndl",
         "bundle": "libbndl",
