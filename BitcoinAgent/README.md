@@ -29,6 +29,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko plan path/to/images.apko.json
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution eth_blockNumber
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -67,7 +69,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `libbndl`, `apko` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `libbndl`, `apko`, `execution` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -82,6 +84,7 @@ web search, online evals. This environment cannot deploy those.
 | `coinstats_overview` / `coinstats_coin` / `coinstats_markets` / `coinstats_portfolio_list` / `coinstats_portfolio` / `coinstats_wallet` / `coinstats_status` | CoinStats MCP overview, prices, global market, portfolio list/coins + PnL, one-chain wallet balance |
 | `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
 | `apko_smoke_overview` / `plan` / `status` / `preflight` / `run` | APKO smoke contract pinned to ethereum-optimism/actions@7eaff21e (factory@b87283a8: Docker daemon + pull/arch preflight) |
+| `execution_apis_overview` / `method` / `list` / `graphql` / `contribute` | Ethereum Execution APIs spec pinned to ethereum/execution-apis@34151926 (OpenRPC JSON-RPC + EIP-1767 GraphQL; never calls a node) |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
@@ -276,6 +279,26 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko plan path/to/images.apko
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko preflight alpine:3.20 amd64
 ```
 
+## Ethereum Execution APIs (optional)
+
+The [Execution API specification](https://github.com/ethereum/execution-apis)
+is the canonical JSON-RPC (OpenRPC) plus GraphQL interface every Ethereum
+execution client implements. BitcoinAgent looks up that **spec** at pin
+[34151926](https://github.com/ethereum/execution-apis/commit/34151926fbf395e66797add1f60fd759681678e6).
+It does not connect to a node, sign, send, or call `engine_*`. See
+[EXECUTION_APIS.md](EXECUTION_APIS.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution eth_blockNumber
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution list eth
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution graphql
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution contribute
+```
+
+Quickstart (compile YAML → `openrpc.json`, Docusaurus, hive):
+https://ethereum.github.io/execution-apis/docs/quickstart/
+
 ## Agentic Wallet (optional)
 
 OKX Agentic Wallet keeps key generation, storage, and signing inside a TEE.
@@ -376,6 +399,7 @@ agentcore deploy
 - [CoinStats](COINSTATS.md) — CoinStats MCP (Cursor OAuth) + read-only prices / portfolio / wallet
 - [libbndl](LIBBNDL.md) — Criterion/EA BUNDLE inspect/lookup, pinned to Bo98/libbndl@2b88eff
 - [APKO](APKO.md) — APKO smoke plan/preflight, pinned to ethereum-optimism/actions@7eaff21e
+- [Execution APIs](EXECUTION_APIS.md) — Ethereum JSON-RPC OpenRPC + GraphQL spec lookup, pinned to ethereum/execution-apis@34151926
 - [Agentic Wallet](AGENTIC_WALLET.md) — OKX TEE wallet overview (read-only in this agent)
 - [AgentCore CLI](https://github.com/aws/agentcore-cli)
 - [AgentCore CDK Constructs](https://github.com/aws/agentcore-l3-cdk-constructs)

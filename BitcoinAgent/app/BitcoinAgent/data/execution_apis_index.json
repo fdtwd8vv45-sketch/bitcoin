@@ -1,0 +1,3531 @@
+{
+  "commit": "34151926fbf395e66797add1f60fd759681678e6",
+  "version": "1.0.0-beta.7",
+  "source": "https://github.com/ethereum/execution-apis",
+  "docs": "https://ethereum.github.io/execution-apis/",
+  "quickstart": "https://ethereum.github.io/execution-apis/docs/quickstart/",
+  "methods": {
+    "debug_getRawHeader": {
+      "name": "debug_getRawHeader",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Returns an RLP-encoded header.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        }
+      ],
+      "result_name": "Header RLP",
+      "result_schema": "bytes",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_getRawHeader example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"0x32026E\""
+            }
+          ],
+          "result": "\"0xf90236a09f73691f6dabca4f0a99b05d0a701995506aa311dcaa9ce9833d6f4ca474c162a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d4934794c6e2459991bfe27cca6d86722f35da23a1e4cb97a078103ea8c47231886481d72ec1afae6eeb06c3773ce24a91323d5c9eed69d4cca0008992da2531db404f07b0871dd620a94ba346963e1b1c6dc7b00748e8593a1ea0b6c3890d9604434fc52f722848c84d1770add20cd75\u2026"
+        }
+      ],
+      "source": "src/debug/getters.yaml"
+    },
+    "debug_getRawBlock": {
+      "name": "debug_getRawBlock",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Returns an RLP-encoded block.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        }
+      ],
+      "result_name": "Block RLP",
+      "result_schema": "bytes",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_getRawBlock example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"0x32026E\""
+            }
+          ],
+          "result": "\"0xf96096f90236a09f73691f6dabca4f0a99b05d0a701995506aa311dcaa9ce9833d6f4ca474c162a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d4934794c6e2459991bfe27cca6d86722f35da23a1e4cb97a078103ea8c47231886481d72ec1afae6eeb06c3773ce24a91323d5c9eed69d4cca0008992da2531db404f07b0871dd620a94ba346963e1b1c6dc7b00748e8593a1ea0b6c3890d9604434fc52f722848c84d1770add\u2026"
+        }
+      ],
+      "source": "src/debug/getters.yaml"
+    },
+    "debug_getRawTransaction": {
+      "name": "debug_getRawTransaction",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Returns an array of EIP-2718 binary-encoded transactions.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        }
+      ],
+      "result_name": "EIP-2718 binary-encoded transaction",
+      "result_schema": "bytes",
+      "errors": [
+        "4444: Pruned history unavailable",
+        "-32602: Invalid params"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_getRawTransaction example",
+          "params": [
+            {
+              "name": "Transaction hash",
+              "value": "\"0x3a2fd1a5ea9ffee477f449be53a49398533d2c006a5815023920d1c397298df3\""
+            }
+          ],
+          "result": "\"0xf8678084342770c182520894658bdf435d810c91414ec09147daa6db624063798203e880820a95a0af5fc351b9e457a31f37c84e5cd99dd3c5de60af3de33c6f4160177a2c786a60a0201da7a21046af55837330a2c52fc1543cd4d9ead00ddf178dd96935b607ff9b\""
+        }
+      ],
+      "source": "src/debug/getters.yaml"
+    },
+    "debug_getRawReceipts": {
+      "name": "debug_getRawReceipts",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Returns an array of EIP-2718 binary-encoded receipts.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Receipts",
+      "result_schema": "array[bytes]",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_getRawReceipts example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"0x32026E\""
+            }
+          ],
+          "result": "[\"0xf901a60182c70eb90100000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000020000000000000000000000080000000000000000000000000000000000400000000010000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000001000000000000004000000000000000000000000\u2026"
+        }
+      ],
+      "source": "src/debug/getters.yaml"
+    },
+    "debug_getRawBlockAccessList": {
+      "name": "debug_getRawBlockAccessList",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Returns the RLP-encoded EIP-7928 block access list for a given block.",
+      "description": "Returns the EIP-7928 block access list of the given block as raw RLP-encoded bytes. A block with no state accesses returns the empty RLP list `0xc0`. For unknown blocks and for blocks that predate the Amsterdam fork clients MUST return the `-32001: Resource not found` error, and for blocks whose access list has been pruned clients MUST return the `4444: Pruned history unavailable` error.",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Block access list RLP",
+      "result_schema": "bytes",
+      "errors": [
+        "4444: Pruned history unavailable",
+        "-32001: Resource not found"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_getRawBlockAccessList example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "\"0xc0\""
+        }
+      ],
+      "source": "src/debug/getters.yaml"
+    },
+    "debug_getBadBlocks": {
+      "name": "debug_getBadBlocks",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Returns an array of recent bad blocks that the client has seen on the network.",
+      "description": "",
+      "params": [],
+      "result_name": "Blocks",
+      "result_schema": "array[BadBlock]",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_getBadBlocks example",
+          "params": [],
+          "result": "[{\"block\":{\"number\":\"0xd\",\"hash\":\"0x85c2edc1ca74b4863cab46ff6ed4df514a698aa7c29a9bce58742a33af07d7e6\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"parentHash\":\"0x544a2f7a4c8defc0d8da44aa0c0db7c36b56db2605c01ed266e919e936579d31\",\"nonce\":\"0x0000000000000000\",\"sha3Uncles\":\"0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a1\u2026"
+        }
+      ],
+      "source": "src/debug/getters.yaml"
+    },
+    "debug_traceBlockByNumber": {
+      "name": "debug_traceBlockByNumber",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Replays a block and returns traces for all transactions.",
+      "description": "Replays the block identified by the given number and returns a trace for every transaction in the block. The parent block must be present in the client's database. The genesis block (block 0) cannot be traced because it has no parent state to replay from; clients MUST return an error for this input.\nWhen no tracer is specified (or the tracer field is absent), the opcode (struct) logger is used and each entry conforms to OpcodeBlockTransactionTrace, whose result field conforms to OpcodeTransactionTrace.\nWhen a named tracer is specified via the tracer field in TraceConfig (e.g. \"callTracer\", \"prestateTracer\"), the result field of each entry contains tracer-specific output. Defining the output schemas of named tracers is outside the scope of this specification.\nThe response is an array ordered by transaction index within the block. Each entry includes the transaction hash paired with its trace result. If a timeout is configured and reached before tracing completes, the client MUST return an error; no partial results are returned. Clients that do not support execution timeouts MAY ignore the timeout field.",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        },
+        {
+          "name": "TraceConfig",
+          "required": false,
+          "schema": "TraceConfig",
+          "enum": []
+        }
+      ],
+      "result_name": "Block trace",
+      "result_schema": "array[OpcodeBlockTransactionTrace | Named tracer entry]",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_traceBlockByNumber example (opcode tracer)",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"0x3\""
+            },
+            {
+              "name": "TraceConfig",
+              "value": "{\"disableStack\":false,\"disableStorage\":false,\"enableMemory\":false,\"enableReturnData\":false}"
+            }
+          ],
+          "result": "[{\"txHash\":\"0xdd8cf045113754c306ba9ac8ac8786235e33bc5c087678084ef260a2a583f127\",\"result\":{\"structLogs\":[{\"pc\":0,\"op\":\"PUSH1\",\"gas\":68612,\"gasCost\":3,\"depth\":1,\"stack\":[\"0x60\"]},{\"pc\":2,\"op\":\"PUSH1\",\"gas\":68609,\"gasCost\":3,\"depth\":1,\"stack\":[\"0x60\",\"0x40\"]},{\"pc\":4,\"op\":\"MSTORE\",\"gas\":68606,\"gasCost\":12,\"depth\":1,\"stack\":[]}],\"gas\":26916,\"failed\":false,\"retur\u2026"
+        }
+      ],
+      "source": "src/debug/trace.yaml"
+    },
+    "debug_traceBlockByHash": {
+      "name": "debug_traceBlockByHash",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Replays a block and returns traces for all transactions.",
+      "description": "Replays the block identified by the given hash and returns a trace for every transaction in the block. The parent block must be present in the client's database. The genesis block (block 0) cannot be traced because it has no parent state to replay from; clients MUST return an error for this input.\nWhen no tracer is specified (or the tracer field is absent), the opcode (struct) logger is used and each entry conforms to OpcodeBlockTransactionTrace, whose result field conforms to OpcodeTransactionTrace.\nWhen a named tracer is specified via the tracer field in TraceConfig (e.g. \"callTracer\", \"prestateTracer\"), the result field of each entry contains tracer-specific output. Defining the output schemas of named tracers is outside the scope of this specification.\nThe response is an array ordered by transaction index within the block. Each entry includes the transaction hash paired with its trace result. If a timeout is configured and reached before tracing completes, the client MUST return an error; no partial results are returned. Clients that do not support execution timeouts MAY ignore the timeout field.\nClients MUST return an error if no block with the given hash is found.",
+      "params": [
+        {
+          "name": "Block hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "TraceConfig",
+          "required": false,
+          "schema": "TraceConfig",
+          "enum": []
+        }
+      ],
+      "result_name": "Block trace",
+      "result_schema": "array[OpcodeBlockTransactionTrace | Named tracer entry]",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_traceBlockByHash example (opcode tracer)",
+          "params": [
+            {
+              "name": "Block hash",
+              "value": "\"0x79ba0368c2c6563a7d263695b583dcc6d1c25d4988daa0105804d38bdd987f2f\""
+            },
+            {
+              "name": "TraceConfig",
+              "value": "{\"disableStack\":false,\"disableStorage\":false,\"enableMemory\":false,\"enableReturnData\":false}"
+            }
+          ],
+          "result": "[{\"txHash\":\"0xdd8cf045113754c306ba9ac8ac8786235e33bc5c087678084ef260a2a583f127\",\"result\":{\"structLogs\":[{\"pc\":0,\"op\":\"PUSH1\",\"gas\":68612,\"gasCost\":3,\"depth\":1,\"stack\":[\"0x60\"]},{\"pc\":2,\"op\":\"PUSH1\",\"gas\":68609,\"gasCost\":3,\"depth\":1,\"stack\":[\"0x60\",\"0x40\"]},{\"pc\":4,\"op\":\"MSTORE\",\"gas\":68606,\"gasCost\":12,\"depth\":1,\"stack\":[]}],\"gas\":26916,\"failed\":false,\"retur\u2026"
+        }
+      ],
+      "source": "src/debug/trace.yaml"
+    },
+    "debug_traceTransaction": {
+      "name": "debug_traceTransaction",
+      "namespace": "debug",
+      "kind": "read",
+      "summary": "Replays a transaction and returns its trace.",
+      "description": "Executes the transaction identified by the given hash in the exact manner it was executed on the network, replaying all prior transactions in the same block as necessary to reconstruct the correct pre-execution state.\nWhen no tracer is specified (or the tracer field is absent), the opcode (struct) logger is used and the result conforms to OpcodeTransactionTrace.\nWhen a named tracer is specified via the tracer field in TraceConfig (e.g. \"callTracer\", \"prestateTracer\"), the result contains tracer-specific output. Defining the output schemas of named tracers is outside the scope of this specification.",
+      "params": [
+        {
+          "name": "Transaction hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "TraceConfig",
+          "required": false,
+          "schema": "TraceConfig",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction trace",
+      "result_schema": "OpcodeTransactionTrace | Named tracer result",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "debug_traceTransaction example (opcode tracer)",
+          "params": [
+            {
+              "name": "Transaction hash",
+              "value": "\"0xdd8cf045113754c306ba9ac8ac8786235e33bc5c087678084ef260a2a583f127\""
+            },
+            {
+              "name": "TraceConfig",
+              "value": "{\"disableStack\":false,\"disableStorage\":false,\"enableMemory\":false,\"enableReturnData\":false}"
+            }
+          ],
+          "result": "{\"structLogs\":[{\"pc\":0,\"op\":\"PUSH1\",\"gas\":68612,\"gasCost\":3,\"depth\":1,\"stack\":[\"0x60\"]},{\"pc\":2,\"op\":\"PUSH1\",\"gas\":68609,\"gasCost\":3,\"depth\":1,\"stack\":[\"0x60\",\"0x40\"]},{\"pc\":4,\"op\":\"MSTORE\",\"gas\":68606,\"gasCost\":12,\"depth\":1,\"stack\":[]}],\"gas\":26916,\"failed\":false,\"returnValue\":\"0x\"}"
+        },
+        {
+          "name": "debug_traceTransaction example (callTracer)",
+          "params": [
+            {
+              "name": "Transaction hash",
+              "value": "\"0xdd8cf045113754c306ba9ac8ac8786235e33bc5c087678084ef260a2a583f127\""
+            },
+            {
+              "name": "TraceConfig",
+              "value": "{\"tracer\":\"callTracer\",\"tracerConfig\":{\"onlyTopCall\":false,\"withLog\":true}}"
+            }
+          ],
+          "result": "{\"type\":\"CALL\",\"from\":\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\",\"to\":\"0x0100000000000000000000000000000000000000\",\"value\":\"0x0\",\"gas\":\"0x1a49e\",\"gasUsed\":\"0x1a49e\",\"input\":\"0x\",\"output\":\"0x\"}"
+        }
+      ],
+      "source": "src/debug/trace.yaml"
+    },
+    "engine_getBlobsV1": {
+      "name": "engine_getBlobsV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Fetches blobs from the blob pool",
+      "description": "",
+      "params": [
+        {
+          "name": "Blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        }
+      ],
+      "result_name": "List of blobs and proofs",
+      "result_schema": "array[BlobAndProofV1]",
+      "errors": [
+        "-38004: Too large request",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/cancun.md#engine_getBlobsV1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getBlobsV1 example",
+          "params": [
+            {
+              "name": "Blob versioned hashes",
+              "value": "[\"0x000657f37554c781402a22917dee2f75def7ab966d7b770905398eba3c444014\"]"
+            }
+          ],
+          "result": "[{\"blob\":\"0x722662154e6d76b2b2b92e70c0cac3ccf534f9b74eb5b89819ec509083d00a503ae5c198d17634e79059c2cd735491553d22c4e09d1d9fea3ecf214565df22847267ddd7c47030f8667b61a9860b085c060c07eb215a4de991a8fed0cae3821f0ee8de64d25d2de4a710ea9fd89f8f4666fcc7451e6d69a02098bbe5d5b87c60720f6db75bcbad49fc11512930d9d97bef3f2b4bf6c8fcbc414bf61c98d6bff23ba6ab1d76e044908135e6c8720d\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/blob.yaml"
+    },
+    "engine_getBlobsV2": {
+      "name": "engine_getBlobsV2",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Fetch blobs from the blob mempool",
+      "description": "",
+      "params": [
+        {
+          "name": "Blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        }
+      ],
+      "result_name": "List of blobs and corresponding cell proofs",
+      "result_schema": "array[BlobAndProofV2] | null",
+      "errors": [
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/osaka.md#engine_getBlobsV2",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getBlobsV2 example",
+          "params": [
+            {
+              "name": "Blob versioned hashes",
+              "value": "[\"0x000657f37554c781402a22917dee2f75def7ab966d7b770905398eba3c444014\"]"
+            }
+          ],
+          "result": "[{\"blob\":\"0x1824b159acc5056f998c4fefecbc4ff55884b7fa0003480200000001fffffffe304962b3598a0adf33189fdfd9789feab1096ff40006900400000003fffffffc6092c566b31415be66313fbfb2f13fd56212dfe8000d200800000007fffffff84d37e37a3c8aae349928a7775c40a7a570681bcd001be41100000010ffffffef26821fa14f77df20ff1776e6aedf77458d12939700396c2300000022ffffffdd4d043f429eefbe41fe2eedcd5dbe\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/blob.yaml"
+    },
+    "engine_getBlobsV3": {
+      "name": "engine_getBlobsV3",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Fetch blobs from the blob mempool, returning partial hits",
+      "description": "",
+      "params": [
+        {
+          "name": "Blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        }
+      ],
+      "result_name": "List of blobs and corresponding cell proofs, with positional nulls for missing blobs",
+      "result_schema": "array[BlobAndProofV2 | null] | null",
+      "errors": [
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/osaka.md#engine_getBlobsV3",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getBlobsV3 example",
+          "params": [
+            {
+              "name": "Blob versioned hashes",
+              "value": "[\"0x000657f37554c781402a22917dee2f75def7ab966d7b770905398eba3c444014\",\"0x0000000000000000000000000000000000000000000000000000000000000001\"]"
+            }
+          ],
+          "result": "[{\"blob\":\"0x1824b159acc5056f998c4fefecbc4ff55884b7fa0003480200000001fffffffe304962b3598a0adf33189fdfd9789feab1096ff40006900400000003fffffffc6092c566b31415be66313fbfb2f13fd56212dfe8000d200800000007fffffff84d37e37a3c8aae349928a7775c40a7a570681bcd001be41100000010ffffffef26821fa14f77df20ff1776e6aedf77458d12939700396c2300000022ffffffdd4d043f429eefbe41fe2eedcd5dbe\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/blob.yaml"
+    },
+    "engine_getBlobsV4": {
+      "name": "engine_getBlobsV4",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Retrieve blob cells from the Execution layer blobpool",
+      "description": "",
+      "params": [
+        {
+          "name": "Blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        },
+        {
+          "name": "Cell indices bitarray",
+          "required": true,
+          "schema": "bytes16",
+          "enum": []
+        }
+      ],
+      "result_name": "List of requested blob cells and proofs, with positional nulls for missing blobs",
+      "result_schema": "array[BlobCellsAndProofsV1 | null] | null",
+      "errors": [
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/amsterdam.md#engine_getblobsv4",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getBlobsV4 example",
+          "params": [
+            {
+              "name": "Blob versioned hashes",
+              "value": "[\"0x014edfed8547661f6cb416eba53061a2f6dce872c0497e6dd485a876fe2567f1\",\"0x01d50a91f3d499e2edd1fed6a705e0b3e0266a8f2d44762ef9914e69a01ec241\",\"0x0100000000000000000000000000000000000000000000000000000000000001\"]"
+            },
+            {
+              "name": "Cell indices bitarray",
+              "value": "\"0x00000000000000000000000000000003\""
+            }
+          ],
+          "result": "[{\"blob_cells\":[\"0x1824b159acc5056f998c4fefecbc4ff55884b7fa0003480200000001fffffffe304962b3598a0adf33189fdfd9789feab1096ff40006900400000003fffffffc6092c566b31415be66313fbfb2f13fd56212dfe8000d200800000007fffffff84d37e37a3c8aae349928a7775c40a7a570681bcd001be41100000010ffffffef26821fa14f77df20ff1776e6aedf77458d12939700396c2300000022ffffffdd4d043f429eefbe41fe2ee\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/blob.yaml"
+    },
+    "engine_exchangeCapabilities": {
+      "name": "engine_exchangeCapabilities",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Exchanges list of supported Engine API methods",
+      "description": "",
+      "params": [
+        {
+          "name": "Consensus client methods",
+          "required": true,
+          "schema": "array[string]",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution client methods",
+      "result_schema": "array[string]",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/common.md#engine_exchangecapabilities",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_exchangeCapabilities example",
+          "params": [
+            {
+              "name": "Consensus client methods",
+              "value": "[\"engine_exchangeTransitionConfigurationV1\",\"engine_forkchoiceUpdatedV1\",\"engine_getPayloadBodiesByHashV1\",\"engine_getPayloadBodiesByRangeV1\",\"engine_getPayloadBodiesByHashV2\",\"engine_getPayloadBodiesByRangeV2\",\"engine_getPayloadV1\",\"engine_newPayloadV1\"]"
+            }
+          ],
+          "result": "[\"engine_getPayloadV1\",\"engine_getPayloadV2\",\"engine_executePayloadV1\",\"engine_newPayloadV1\",\"engine_newPayloadV2\",\"engine_forkchoiceUpdatedV1\",\"engine_forkchoiceUpdatedV2\",\"engine_exchangeTransitionConfigurationV1\",\"engine_getPayloadBodiesByHashV1\",\"engine_getPayloadBodiesByRangeV1\",\"engine_getPayloadBodiesByHashV2\",\"engine_getPayloadBodiesByRangeV2\"]"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/capabilities.yaml"
+    },
+    "engine_forkchoiceUpdatedV1": {
+      "name": "engine_forkchoiceUpdatedV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Updates the forkchoice state",
+      "description": "",
+      "params": [
+        {
+          "name": "Forkchoice state",
+          "required": true,
+          "schema": "ForkchoiceStateV1",
+          "enum": []
+        },
+        {
+          "name": "Payload attributes",
+          "required": false,
+          "schema": "PayloadAttributesV1",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "ForkchoiceUpdatedResponseV1",
+      "errors": [
+        "-38002: Invalid forkchoice state",
+        "-38003: Invalid payload attributes",
+        "-38006: Too deep reorg"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_forkchoiceupdatedv1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_forkchoiceUpdatedV1 example",
+          "params": [
+            {
+              "name": "Forkchoice state",
+              "value": "{\"headBlockHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"safeBlockHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"finalizedBlockHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\"}"
+            },
+            {
+              "name": "Payload attributes",
+              "value": "{\"timestamp\":\"0x5\",\"prevRandao\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"suggestedFeeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\"}"
+            }
+          ],
+          "result": "{\"payloadStatus\":{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null},\"payloadId\":\"0x0000000021f32cc1\"}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/forkchoice.yaml"
+    },
+    "engine_forkchoiceUpdatedV2": {
+      "name": "engine_forkchoiceUpdatedV2",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Updates the forkchoice state",
+      "description": "",
+      "params": [
+        {
+          "name": "Forkchoice state",
+          "required": true,
+          "schema": "ForkchoiceStateV1",
+          "enum": []
+        },
+        {
+          "name": "Payload attributes",
+          "required": false,
+          "schema": "PayloadAttributesV2",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "ForkchoiceUpdatedResponseV1",
+      "errors": [
+        "-38002: Invalid forkchoice state",
+        "-38003: Invalid payload attributes",
+        "-38005: Unsupported fork",
+        "-38006: Too deep reorg"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#engine_forkchoiceupdatedv2",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_forkchoiceUpdatedV2 example",
+          "params": [
+            {
+              "name": "Forkchoice state",
+              "value": "{\"headBlockHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"safeBlockHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"finalizedBlockHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\"}"
+            },
+            {
+              "name": "Payload attributes",
+              "value": "{\"timestamp\":\"0x64e7785b\",\"prevRandao\":\"0xc130d5e63c61c935f6089e61140ca9136172677cf6aa5800dcc1cf0a02152a14\",\"suggestedFeeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"withdrawals\":[{\"index\":\"0xf0\",\"validatorIndex\":\"0xf0\",\"address\":\"0x00000000000000000000000000000000000010f0\",\"amount\":\"0x1\"},{\"index\":\"0xf1\",\"validatorIndex\":\"0xf1\",\"address\":\"0x0000\u2026"
+            }
+          ],
+          "result": "{\"payloadStatus\":{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null},\"payloadId\":\"0x0000000021f32cc1\"}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/forkchoice.yaml"
+    },
+    "engine_forkchoiceUpdatedV3": {
+      "name": "engine_forkchoiceUpdatedV3",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Updates the forkchoice state",
+      "description": "",
+      "params": [
+        {
+          "name": "Forkchoice state",
+          "required": true,
+          "schema": "ForkchoiceStateV1",
+          "enum": []
+        },
+        {
+          "name": "Payload attributes",
+          "required": false,
+          "schema": "PayloadAttributesV3",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "ForkchoiceUpdatedResponseV1",
+      "errors": [
+        "-38002: Invalid forkchoice state",
+        "-38003: Invalid payload attributes",
+        "-32602: Invalid params",
+        "-38005: Unsupported fork",
+        "-38006: Too deep reorg"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/cancun.md#engine_forkchoiceupdatedv3",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_forkchoiceUpdatedV3 example",
+          "params": [
+            {
+              "name": "Forkchoice state",
+              "value": "{\"headBlockHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"safeBlockHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"finalizedBlockHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\"}"
+            },
+            {
+              "name": "Payload attributes",
+              "value": "{\"timestamp\":\"0x64e7785b\",\"prevRandao\":\"0xc130d5e63c61c935f6089e61140ca9136172677cf6aa5800dcc1cf0a02152a14\",\"suggestedFeeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"withdrawals\":[{\"index\":\"0xf0\",\"validatorIndex\":\"0xf0\",\"address\":\"0x00000000000000000000000000000000000010f0\",\"amount\":\"0x1\"},{\"index\":\"0xf1\",\"validatorIndex\":\"0xf1\",\"address\":\"0x0000\u2026"
+            }
+          ],
+          "result": "{\"payloadStatus\":{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null},\"payloadId\":\"0x0000000021f32cc1\"}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/forkchoice.yaml"
+    },
+    "engine_forkchoiceUpdatedV4": {
+      "name": "engine_forkchoiceUpdatedV4",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Updates the forkchoice state",
+      "description": "",
+      "params": [
+        {
+          "name": "Forkchoice state",
+          "required": true,
+          "schema": "ForkchoiceStateV1",
+          "enum": []
+        },
+        {
+          "name": "Payload attributes",
+          "required": false,
+          "schema": "PayloadAttributesV4",
+          "enum": []
+        },
+        {
+          "name": "Custody columns",
+          "required": false,
+          "schema": "bytes16 | null",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "ForkchoiceUpdatedResponseV1",
+      "errors": [
+        "-38002: Invalid forkchoice state",
+        "-38003: Invalid payload attributes",
+        "-32602: Invalid params",
+        "-38005: Unsupported fork",
+        "-38006: Too deep reorg"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/amsterdam.md#engine_forkchoiceupdatedv4",
+      "external_docs": "Method specification",
+      "examples": [],
+      "source": "src/engine/openrpc/methods/forkchoice.yaml"
+    },
+    "engine_forkchoiceUpdatedV5": {
+      "name": "engine_forkchoiceUpdatedV5",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Updates the forkchoice state",
+      "description": "",
+      "params": [
+        {
+          "name": "Forkchoice state",
+          "required": true,
+          "schema": "ForkchoiceStateV1",
+          "enum": []
+        },
+        {
+          "name": "Payload attributes",
+          "required": false,
+          "schema": "PayloadAttributesV5",
+          "enum": []
+        },
+        {
+          "name": "Custody columns",
+          "required": false,
+          "schema": "bytes16 | null",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "ForkchoiceUpdatedResponseV2",
+      "errors": [
+        "-38002: Invalid forkchoice state",
+        "-38003: Invalid payload attributes",
+        "-32602: Invalid params",
+        "-38005: Unsupported fork",
+        "-38006: Too deep reorg"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/bogota.md#engine_forkchoiceupdatedv5",
+      "external_docs": "Method specification",
+      "examples": [],
+      "source": "src/engine/openrpc/methods/forkchoice.yaml"
+    },
+    "engine_getInclusionListV1": {
+      "name": "engine_getInclusionListV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains an inclusion list based on the local view of the mempool",
+      "description": "",
+      "params": [],
+      "result_name": "Inclusion list transactions",
+      "result_schema": "array[bytes]",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/bogota.md#engine_getinclusionlistv1",
+      "external_docs": "Method specification",
+      "examples": [],
+      "source": "src/engine/openrpc/methods/inclusion_list.yaml"
+    },
+    "engine_newPayloadV1": {
+      "name": "engine_newPayloadV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Runs execution payload validation",
+      "description": "",
+      "params": [
+        {
+          "name": "Execution payload",
+          "required": true,
+          "schema": "ExecutionPayloadV1",
+          "enum": []
+        }
+      ],
+      "result_name": "Payload status",
+      "result_schema": "PayloadStatusV1",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_newpayloadv1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_newPayloadV1 example",
+          "params": [
+            {
+              "name": "Execution payload",
+              "value": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+            }
+          ],
+          "result": "{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null}"
+        },
+        {
+          "name": "engine_newPayloadV1 invalid example",
+          "params": [
+            {
+              "name": "Execution payload",
+              "value": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+            }
+          ],
+          "result": "{\"status\":\"INVALID\",\"latestValidHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"validationError\":\"New payload is invalid\"}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_newPayloadV2": {
+      "name": "engine_newPayloadV2",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Runs execution payload validation",
+      "description": "",
+      "params": [
+        {
+          "name": "Execution payload",
+          "required": true,
+          "schema": "ExecutionPayloadV1 | ExecutionPayloadV2",
+          "enum": []
+        }
+      ],
+      "result_name": "Payload status",
+      "result_schema": "PayloadStatusNoInvalidBlockHash",
+      "errors": [
+        "-32602: Invalid params",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#engine_newpayloadv2",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_newPayloadV2 example",
+          "params": [
+            {
+              "name": "Execution payload",
+              "value": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+            }
+          ],
+          "result": "{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_newPayloadV3": {
+      "name": "engine_newPayloadV3",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Runs execution payload validation",
+      "description": "",
+      "params": [
+        {
+          "name": "Execution payload",
+          "required": true,
+          "schema": "ExecutionPayloadV3",
+          "enum": []
+        },
+        {
+          "name": "Expected blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        },
+        {
+          "name": "Root of the parent beacon block",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        }
+      ],
+      "result_name": "Payload status",
+      "result_schema": "PayloadStatusNoInvalidBlockHash",
+      "errors": [
+        "-32602: Invalid params",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/cancun.md#engine_newpayloadv3",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_newPayloadV3 example",
+          "params": [
+            {
+              "name": "Execution payload",
+              "value": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+            },
+            {
+              "name": "Expected blob versioned hashes",
+              "value": "[\"0x000657f37554c781402a22917dee2f75def7ab966d7b770905398eba3c444014\"]"
+            },
+            {
+              "name": "Root of the parent beacon block",
+              "value": "\"0x169630f535b4a41330164c6e5c92b1224c0c407f582d407d0ac3d206cd32fd52\""
+            }
+          ],
+          "result": "{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_newPayloadV4": {
+      "name": "engine_newPayloadV4",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Runs execution payload validation",
+      "description": "",
+      "params": [
+        {
+          "name": "Execution payload",
+          "required": true,
+          "schema": "ExecutionPayloadV3",
+          "enum": []
+        },
+        {
+          "name": "Expected blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        },
+        {
+          "name": "Root of the parent beacon block",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "Execution requests",
+          "required": true,
+          "schema": "array[bytes]",
+          "enum": []
+        }
+      ],
+      "result_name": "Payload status",
+      "result_schema": "PayloadStatusNoInvalidBlockHash",
+      "errors": [
+        "-32602: Invalid params",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/prague.md#engine_newpayloadv4",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_newPayloadV4 example",
+          "params": [
+            {
+              "name": "Execution payload",
+              "value": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+            },
+            {
+              "name": "Expected blob versioned hashes",
+              "value": "[\"0x000657f37554c781402a22917dee2f75def7ab966d7b770905398eba3c444014\"]"
+            },
+            {
+              "name": "Root of the parent beacon block",
+              "value": "\"0x169630f535b4a41330164c6e5c92b1224c0c407f582d407d0ac3d206cd32fd52\""
+            },
+            {
+              "name": "Execution requests",
+              "value": "[\"0x96a96086cff07df17668f35f7418ef8798079167e3f4f9b72ecde17b28226137cf454ab1dd20ef5d924786ab3483c2f9003f5102dabe0a27b1746098d1dc17a5d3fbd478759fea9287e4e419b3c3cef20100000000000000b1acdb2c4d3df3f1b8d3bfd33421660df358d84d78d16c4603551935f4b67643373e7eb63dcb16ec359be0ec41fee33b03a16e80745f2374ff1d3c352508ac5d857c6476d3c3bcf7e6ca37427c9209f17be3af5264c0e2132b3d\u2026"
+            }
+          ],
+          "result": "{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadV1": {
+      "name": "engine_getPayloadV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains execution payload from payload build process",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload id",
+          "required": true,
+          "schema": "bytes8",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution payload",
+      "result_schema": "ExecutionPayloadV1",
+      "errors": [
+        "-38001: Unknown payload"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_getpayloadv1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadV1 example",
+          "params": [
+            {
+              "name": "Payload id",
+              "value": "\"0x0000000021f32cc1\""
+            }
+          ],
+          "result": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadV2": {
+      "name": "engine_getPayloadV2",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains execution payload from payload build process",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload id",
+          "required": true,
+          "schema": "bytes8",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "object",
+      "errors": [
+        "-38001: Unknown payload",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#engine_getpayloadv2",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadV2 example",
+          "params": [
+            {
+              "name": "Payload id",
+              "value": "\"0x0000000038fa5dd\""
+            }
+          ],
+          "result": "{\"executionPayload\":{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x00000000000000000\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadV3": {
+      "name": "engine_getPayloadV3",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains execution payload from payload build process",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload id",
+          "required": true,
+          "schema": "bytes8",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "object",
+      "errors": [
+        "-38001: Unknown payload",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/cancun.md#engine_getpayloadv3",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadV3 example",
+          "params": [
+            {
+              "name": "Payload id",
+              "value": "\"0x0000000038fa5dd\""
+            }
+          ],
+          "result": "{\"executionPayload\":{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x00000000000000000\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadV4": {
+      "name": "engine_getPayloadV4",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains execution payload from payload build process",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload id",
+          "required": true,
+          "schema": "bytes8",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "object",
+      "errors": [
+        "-38001: Unknown payload",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/prague.md#engine_getpayloadv4",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadV4 example",
+          "params": [
+            {
+              "name": "Payload id",
+              "value": "\"0x0000000038fa5dd\""
+            }
+          ],
+          "result": "{\"executionPayload\":{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x00000000000000000\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadV5": {
+      "name": "engine_getPayloadV5",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains execution payload from payload build process",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload id",
+          "required": true,
+          "schema": "bytes8",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "object",
+      "errors": [
+        "-38001: Unknown payload",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/osaka.md#engine_getpayloadv5",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadV5 example",
+          "params": [
+            {
+              "name": "Payload id",
+              "value": "\"0x0000000038fa5dd\""
+            }
+          ],
+          "result": "{\"executionPayload\":{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x00000000000000000\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadBodiesByHashV1": {
+      "name": "engine_getPayloadBodiesByHashV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Given block hashes returns bodies of the corresponding execution payloads",
+      "description": "",
+      "params": [
+        {
+          "name": "Array of block hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution payload bodies",
+      "result_schema": "array[ExecutionPayloadBodyV1]",
+      "errors": [
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#engine_getpayloadbodiesbyhashv1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadBodiesByHashV1 example",
+          "params": [
+            {
+              "name": "Array of block hashes",
+              "value": "[\"0xd5f1812548be429cbdc6376b29611fc49e06f1359758c4ceaaa3b393e2239f9c\",\"0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553\"]"
+            }
+          ],
+          "result": "[{\"transactions\":[\"0xf865808506fc23ac00830124f8940101010101010101010101010101010101010101018031a02c4d88bfdc2f6dbf82c33d235c4e785e9fc23b2d0fc7b9d20fc5e9674f1f9d15a016d6d69b925cf26128683ab4a096e196fbb1142d6c6d4e8d3481b9bef1bd0f65\",\"0x02f86c0701843b9aca008506fc23ac00830124f89402020202020202020202020202020202020202020180c080a039409b4e5603dd8c3cf38232348661a8e99a\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadBodiesByRangeV1": {
+      "name": "engine_getPayloadBodiesByRangeV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Given a range of block numbers returns bodies of the corresponding execution payloads",
+      "description": "",
+      "params": [
+        {
+          "name": "Starting block number",
+          "required": true,
+          "schema": "uint64",
+          "enum": []
+        },
+        {
+          "name": "Number of blocks to return",
+          "required": true,
+          "schema": "uint64",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution payload bodies",
+      "result_schema": "array[ExecutionPayloadBodyV1]",
+      "errors": [
+        "-32602: Invalid params",
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/shanghai.md#engine_getpayloadbodiesbyrangev1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadBodiesByRangeV1 example",
+          "params": [
+            {
+              "name": "Starting block number",
+              "value": "\"0x20\""
+            },
+            {
+              "name": "Number of blocks to return",
+              "value": "\"0x2\""
+            }
+          ],
+          "result": "[{\"transactions\":[\"0xf865808506fc23ac00830124f8940101010101010101010101010101010101010101018031a02c4d88bfdc2f6dbf82c33d235c4e785e9fc23b2d0fc7b9d20fc5e9674f1f9d15a016d6d69b925cf26128683ab4a096e196fbb1142d6c6d4e8d3481b9bef1bd0f65\",\"0x02f86c0701843b9aca008506fc23ac00830124f89402020202020202020202020202020202020202020180c080a039409b4e5603dd8c3cf38232348661a8e99a\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadBodiesByHashV2": {
+      "name": "engine_getPayloadBodiesByHashV2",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Given block hashes returns bodies of the corresponding execution payloads including block access lists",
+      "description": "",
+      "params": [
+        {
+          "name": "Array of block hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution payload bodies",
+      "result_schema": "array[ExecutionPayloadBodyV2]",
+      "errors": [
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/amsterdam.md#engine_getpayloadbodiesbyhashv2",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadBodiesByHashV2 example",
+          "params": [
+            {
+              "name": "Array of block hashes",
+              "value": "[\"0xd5f1812548be429cbdc6376b29611fc49e06f1359758c4ceaaa3b393e2239f9c\",\"0xfe88c94d860f01a17f961bf4bdfb6e0c6cd10d3fda5cc861e805ca1240c58553\"]"
+            }
+          ],
+          "result": "[{\"transactions\":[\"0xf865808506fc23ac00830124f8940101010101010101010101010101010101010101018031a02c4d88bfdc2f6dbf82c33d235c4e785e9fc23b2d0fc7b9d20fc5e9674f1f9d15a016d6d69b925cf26128683ab4a096e196fbb1142d6c6d4e8d3481b9bef1bd0f65\"],\"withdrawals\":[{\"index\":\"0xf0\",\"validatorIndex\":\"0xf0\",\"address\":\"0x00000000000000000000000000000000000010f0\",\"amount\":\"0x1\"}],\"bl\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadBodiesByRangeV2": {
+      "name": "engine_getPayloadBodiesByRangeV2",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Given a range of block numbers returns bodies of the corresponding execution payloads including block access lists",
+      "description": "",
+      "params": [
+        {
+          "name": "Starting block number",
+          "required": true,
+          "schema": "uint64",
+          "enum": []
+        },
+        {
+          "name": "Number of blocks to return",
+          "required": true,
+          "schema": "uint64",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution payload bodies",
+      "result_schema": "array[ExecutionPayloadBodyV2]",
+      "errors": [
+        "-32602: Invalid params",
+        "-38004: Too large request"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/amsterdam.md#engine_getpayloadbodiesbyrangev2",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadBodiesByRangeV2 example",
+          "params": [
+            {
+              "name": "Starting block number",
+              "value": "\"0x20\""
+            },
+            {
+              "name": "Number of blocks to return",
+              "value": "\"0x2\""
+            }
+          ],
+          "result": "[{\"transactions\":[\"0xf865808506fc23ac00830124f8940101010101010101010101010101010101010101018031a02c4d88bfdc2f6dbf82c33d235c4e785e9fc23b2d0fc7b9d20fc5e9674f1f9d15a016d6d69b925cf26128683ab4a096e196fbb1142d6c6d4e8d3481b9bef1bd0f65\"],\"withdrawals\":[{\"index\":\"0xf0\",\"validatorIndex\":\"0xf0\",\"address\":\"0x00000000000000000000000000000000000010f0\",\"amount\":\"0x1\"}],\"bl\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_newPayloadV5": {
+      "name": "engine_newPayloadV5",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Runs execution payload validation",
+      "description": "",
+      "params": [
+        {
+          "name": "Execution payload",
+          "required": true,
+          "schema": "ExecutionPayloadV4",
+          "enum": []
+        },
+        {
+          "name": "Expected blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        },
+        {
+          "name": "Parent beacon block root",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "Execution requests",
+          "required": true,
+          "schema": "array[bytes]",
+          "enum": []
+        }
+      ],
+      "result_name": "Payload status",
+      "result_schema": "PayloadStatusNoInvalidBlockHash",
+      "errors": [
+        "-32602: Invalid params",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/amsterdam.md#engine_newpayloadv5",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_newPayloadV5 example",
+          "params": [
+            {
+              "name": "Execution payload",
+              "value": "{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x0000000000000000000000000000000000000\u2026"
+            },
+            {
+              "name": "Expected blob versioned hashes",
+              "value": "[\"0x000657f37554c781402a22917dee2f75def7ab966d7b770905398eba3c444014\"]"
+            },
+            {
+              "name": "Parent beacon block root",
+              "value": "\"0x169630f535b4a41330164c6e5c92b1224c0c407f582d407d0ac3d206cd32fd52\""
+            },
+            {
+              "name": "Execution requests",
+              "value": "[\"0x96a96086cff07df17668f35f7418ef8798079167e3f4f9b72ecde17b28226137cf454ab1dd20ef5d924786ab3483c2f9003f5102dabe0a27b1746098d1dc17a5d3fbd478759fea9287e4e419b3c3cef20100000000000000b1acdb2c4d3df3f1b8d3bfd33421660df358d84d78d16c4603551935f4b67643373e7eb63dcb16ec359be0ec41fee33b03a16e80745f2374ff1d3c352508ac5d857c6476d3c3bcf7e6ca37427c9209f17be3af5264c0e2132b3d\u2026"
+            }
+          ],
+          "result": "{\"status\":\"VALID\",\"latestValidHash\":\"0x3559e851470f6e7bbed1db474980683e8c315bfce99b2a6ef47c057c04de7858\",\"validationError\":null}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_newPayloadV6": {
+      "name": "engine_newPayloadV6",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Runs execution payload validation",
+      "description": "",
+      "params": [
+        {
+          "name": "Execution payload",
+          "required": true,
+          "schema": "ExecutionPayloadV4",
+          "enum": []
+        },
+        {
+          "name": "Expected blob versioned hashes",
+          "required": true,
+          "schema": "array[hash32]",
+          "enum": []
+        },
+        {
+          "name": "Parent beacon block root",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "Execution requests",
+          "required": true,
+          "schema": "array[bytes]",
+          "enum": []
+        },
+        {
+          "name": "Inclusion list transactions",
+          "required": true,
+          "schema": "array[bytes]",
+          "enum": []
+        }
+      ],
+      "result_name": "Payload status",
+      "result_schema": "PayloadStatusV2",
+      "errors": [
+        "-32602: Invalid params",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/bogota.md#engine_newpayloadv6",
+      "external_docs": "Method specification",
+      "examples": [],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_getPayloadV6": {
+      "name": "engine_getPayloadV6",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Obtains execution payload from payload build process",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload id",
+          "required": true,
+          "schema": "bytes8",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "object",
+      "errors": [
+        "-38001: Unknown payload",
+        "-38005: Unsupported fork"
+      ],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/amsterdam.md#engine_getpayloadv6",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_getPayloadV6 example",
+          "params": [
+            {
+              "name": "Payload id",
+              "value": "\"0x0000000038fa5dd\""
+            }
+          ],
+          "result": "{\"executionPayload\":{\"parentHash\":\"0x3b8fb240d288781d4aac94d3fd16809ee413bc99294a085798a589dae51ddd4a\",\"feeRecipient\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x00000000000000000\u2026"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/payload.yaml"
+    },
+    "engine_exchangeTransitionConfigurationV1": {
+      "name": "engine_exchangeTransitionConfigurationV1",
+      "namespace": "engine",
+      "kind": "engine",
+      "summary": "Exchanges transition configuration",
+      "description": "",
+      "params": [
+        {
+          "name": "Consensus client configuration",
+          "required": true,
+          "schema": "TransitionConfigurationV1",
+          "enum": []
+        }
+      ],
+      "result_name": "Execution client configuration",
+      "result_schema": "TransitionConfigurationV1",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "https://github.com/ethereum/execution-apis/blob/main/src/engine/paris.md#engine_exchangetransitionconfigurationv1",
+      "external_docs": "Method specification",
+      "examples": [
+        {
+          "name": "engine_exchangeTransitionConfigurationV1 example",
+          "params": [
+            {
+              "name": "Consensus client configuration",
+              "value": "{\"terminalTotalDifficulty\":\"0x0\",\"terminalBlockHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"terminalBlockNumber\":\"0x1\"}"
+            }
+          ],
+          "result": "{\"terminalTotalDifficulty\":\"0x0\",\"terminalBlockHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"terminalBlockNumber\":\"0x1\"}"
+        }
+      ],
+      "source": "src/engine/openrpc/methods/transition_configuration.yaml"
+    },
+    "eth_getBlockByHash": {
+      "name": "eth_getBlockByHash",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns information about a block by hash.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "Hydrated transactions",
+          "required": true,
+          "schema": "boolean",
+          "enum": []
+        }
+      ],
+      "result_name": "Block information",
+      "result_schema": "notFound | Block",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBlockByHash example",
+          "params": [
+            {
+              "name": "Block hash",
+              "value": "\"0xd5f1812548be429cbdc6376b29611fc49e06f1359758c4ceaaa3b393e2239f9c\""
+            },
+            {
+              "name": "Hydrated transactions",
+              "value": "false"
+            }
+          ],
+          "result": "{\"number\":\"0x68b3\",\"hash\":\"0xd5f1812548be429cbdc6376b29611fc49e06f1359758c4ceaaa3b393e2239f9c\",\"mixHash\":\"0x24900fb3da77674a861c428429dce0762707ecb6052325bbd9b3c64e74b5af9d\",\"parentHash\":\"0x1f68ac259155e2f38211ddad0f0a15394d55417b185a93923e2abe71bb7a4d6d\",\"nonce\":\"0x378da40ff335b070\",\"sha3Uncles\":\"0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d\u2026"
+        }
+      ],
+      "source": "src/eth/block.yaml"
+    },
+    "eth_getBlockByNumber": {
+      "name": "eth_getBlockByNumber",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns information about a block by number.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        },
+        {
+          "name": "Hydrated transactions",
+          "required": true,
+          "schema": "boolean",
+          "enum": []
+        }
+      ],
+      "result_name": "Block information",
+      "result_schema": "notFound | Block",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBlockByNumber example",
+          "params": [
+            {
+              "name": "block",
+              "value": "\"0x68b3\""
+            },
+            {
+              "name": "Hydrated transactions",
+              "value": "false"
+            }
+          ],
+          "result": "{\"number\":\"0x68b3\",\"hash\":\"0xd5f1812548be429cbdc6376b29611fc49e06f1359758c4ceaaa3b393e2239f9c\",\"mixHash\":\"0x24900fb3da77674a861c428429dce0762707ecb6052325bbd9b3c64e74b5af9d\",\"parentHash\":\"0x1f68ac259155e2f38211ddad0f0a15394d55417b185a93923e2abe71bb7a4d6d\",\"nonce\":\"0x378da40ff335b070\",\"sha3Uncles\":\"0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d\u2026"
+        }
+      ],
+      "source": "src/eth/block.yaml"
+    },
+    "eth_getBlockTransactionCountByHash": {
+      "name": "eth_getBlockTransactionCountByHash",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the number of transactions in a block from a block matching the given block hash.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block hash",
+          "required": false,
+          "schema": "hash32",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction count",
+      "result_schema": "notFound | uint",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBlockTransactionCountByHash example",
+          "params": [
+            {
+              "name": "Block hash",
+              "value": "\"0xb903239f8543d04b5dc1ba6579132b143087c68db1b2168786408fcbce568238\""
+            }
+          ],
+          "result": "\"0x8\""
+        }
+      ],
+      "source": "src/eth/block.yaml"
+    },
+    "eth_getBlockTransactionCountByNumber": {
+      "name": "eth_getBlockTransactionCountByNumber",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the number of transactions in a block matching the given block number.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction count",
+      "result_schema": "notFound | uint",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBlockTransactionCountByNumber example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"0xe8\""
+            }
+          ],
+          "result": "\"0x8\""
+        }
+      ],
+      "source": "src/eth/block.yaml"
+    },
+    "eth_getBlockReceipts": {
+      "name": "eth_getBlockReceipts",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the receipts of a block by number or hash.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Receipts information",
+      "result_schema": "notFound | array[ReceiptInfo]",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBlockReceipts example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "[{\"blockHash\":\"0x19514ce955c65e4dd2cd41f435a75a46a08535b8fc16bc660f8092b32590b182\",\"blockNumber\":\"0x6f55\",\"contractAddress\":null,\"cumulativeGasUsed\":\"0x18c36\",\"from\":\"0x22896bfc68814bfd855b1a167255ee497006e730\",\"gasUsed\":\"0x18c36\",\"blobGasUsed\":\"0x20000\",\"effectiveGasPrice\":\"0x9502f907\",\"blobGasPrice\":\"0x32\",\"logs\":[{\"address\":\"0xfd584430cafa2f451b4e2ebcf398\u2026"
+        }
+      ],
+      "source": "src/eth/block.yaml"
+    },
+    "eth_getBlockAccessList": {
+      "name": "eth_getBlockAccessList",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the block access list for a given block.",
+      "description": "Returns the EIP-7928 block access list of the given block, decoded into JSON. Every account entry contains all six fields, with empty change lists encoded as empty arrays, and entries follow the ordering of the canonical RLP encoding. The result is `null` if the block is unknown or the `pending` tag is requested. For blocks that predate the Amsterdam fork clients MUST return the `-32001: Resource not found` error, and for blocks whose access list has been pruned clients MUST return the `4444: Pruned history unavailable` error.",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Block access list",
+      "result_schema": "notFound | BlockAccessList",
+      "errors": [
+        "4444: Pruned history unavailable",
+        "-32001: Resource not found"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBlockAccessList example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "[{\"address\":\"0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b\",\"storageChanges\":[{\"key\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"changes\":[{\"index\":\"0x0\",\"value\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"},{\"index\":\"0x1\",\"value\":\"0x0000000000000000000000000000000000000000000000000000000000000100\"}]}],\"storageR\u2026"
+        }
+      ],
+      "source": "src/eth/block.yaml"
+    },
+    "eth_capabilities": {
+      "name": "eth_capabilities",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns effective capabilities for routing decisions.",
+      "description": "Returns information about the data available on this node, including the\ncurrent head block and retention policies for each resource type. This is\nuseful for RPC routers to determine which historical queries a node can serve.",
+      "params": [],
+      "result_name": "Capabilities",
+      "result_schema": "EthCapabilities",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_capabilities example",
+          "params": [],
+          "result": "{\"head\":{\"number\":\"0x13f8e3a\",\"hash\":\"0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3\"},\"state\":{\"disabled\":false,\"oldestBlock\":\"0x13e022a\",\"deleteStrategy\":{\"type\":\"window\",\"retentionBlocks\":\"0x15f90\"}},\"tx\":{\"disabled\":false,\"oldestBlock\":\"0x11b340a\",\"deleteStrategy\":{\"type\":\"window\",\"retentionBlocks\":\"0x23dbb0\"}},\"logs\":{\"disabled\":fals\u2026"
+        }
+      ],
+      "source": "src/eth/capabilities.yaml"
+    },
+    "eth_chainId": {
+      "name": "eth_chainId",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the chain ID of the current network.",
+      "description": "",
+      "params": [],
+      "result_name": "Chain ID",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_chainId example",
+          "params": [],
+          "result": "\"0x1\""
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "eth_syncing": {
+      "name": "eth_syncing",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns an object with data about the sync status or false.",
+      "description": "",
+      "params": [],
+      "result_name": "Syncing status",
+      "result_schema": "SyncingStatus",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_syncing example",
+          "params": [],
+          "result": "{\"startingBlock\":\"0x0\",\"currentBlock\":\"0x1518\",\"highestBlock\":\"0x9567a3\"}"
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "eth_coinbase": {
+      "name": "eth_coinbase",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the client coinbase address.",
+      "description": "",
+      "params": [],
+      "result_name": "Coinbase address",
+      "result_schema": "address",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_coinbase example",
+          "params": [],
+          "result": "\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\""
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "eth_accounts": {
+      "name": "eth_accounts",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns a list of addresses owned by client.",
+      "description": "",
+      "params": [],
+      "result_name": "Accounts",
+      "result_schema": "array[address]",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_accounts example",
+          "params": [],
+          "result": "[\"0xd1f5279be4b4dd94133a23dee1b23f5bfc0db1d0\"]"
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "eth_blockNumber": {
+      "name": "eth_blockNumber",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the number of most recent block.",
+      "description": "",
+      "params": [],
+      "result_name": "Block number",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_blockNumber example",
+          "params": [],
+          "result": "\"0x2377\""
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "eth_config": {
+      "name": "eth_config",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the client's current configuration including fork information.",
+      "description": "",
+      "params": [],
+      "result_name": "Configuration",
+      "result_schema": "ConfigurationResponse",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "https://eips.ethereum.org/EIPS/eip-7910",
+      "external_docs": "EIP-7910 specification",
+      "examples": [
+        {
+          "name": "eth_config example with no future fork scheduled",
+          "params": [],
+          "result": "{\"current\":{\"activationTime\":1746612311,\"blobSchedule\":{\"baseFeeUpdateFraction\":5007716,\"max\":9,\"target\":6},\"chainId\":\"0x1\",\"forkId\":\"0x3ff0e375\",\"precompiles\":{\"BLS12_G1ADD\":\"0x000000000000000000000000000000000000000b\",\"BLS12_G1MSM\":\"0x000000000000000000000000000000000000000c\",\"BLS12_G2ADD\":\"0x000000000000000000000000000000000000000d\",\"BLS12_G2MSM\":\"0x00000\u2026"
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "net_version": {
+      "name": "net_version",
+      "namespace": "net",
+      "kind": "read",
+      "summary": "Returns the current network ID. This is usually equivalent to the chainID, but may differ from it for some legacy networks or special testnets.",
+      "description": "",
+      "params": [],
+      "result_name": "Network ID",
+      "result_schema": "uintDecimal",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "net_version example",
+          "params": [],
+          "result": "\"1\""
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "net_listening": {
+      "name": "net_listening",
+      "namespace": "net",
+      "kind": "read",
+      "summary": "Returns true if the client is actively listening for network connections.",
+      "description": "",
+      "params": [],
+      "result_name": "Listening",
+      "result_schema": "boolean",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "net_listening example",
+          "params": [],
+          "result": "true"
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "net_peerCount": {
+      "name": "net_peerCount",
+      "namespace": "net",
+      "kind": "read",
+      "summary": "Returns the number of peers currently connected to the client.",
+      "description": "",
+      "params": [],
+      "result_name": "Peer count",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "net_peerCount example",
+          "params": [],
+          "result": "\"0x2\""
+        }
+      ],
+      "source": "src/eth/client.yaml"
+    },
+    "eth_call": {
+      "name": "eth_call",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Executes a new message call immediately without creating a transaction on the block chain.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "GenericTransaction",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Return data",
+      "result_schema": "bytes",
+      "errors": [
+        "3: execution reverted"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_call example",
+          "params": [
+            {
+              "name": "Transaction",
+              "value": "{\"to\":\"0x69498dd54bd25aa0c886cf1f8b8ae0856d55ff13\",\"value\":\"0x1\"}"
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "\"0x\""
+        }
+      ],
+      "source": "src/eth/execute.yaml"
+    },
+    "eth_estimateGas": {
+      "name": "eth_estimateGas",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Generates and returns an estimate of how much gas is necessary to allow the transaction to complete.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "GenericTransaction",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Gas used",
+      "result_schema": "uint",
+      "errors": [
+        "3: execution reverted"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_estimateGas example",
+          "params": [
+            {
+              "name": "Transaction",
+              "value": "{\"from\":\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\",\"to\":\"0x44aa93095d6749a706051658b970b941c72c1d53\",\"value\":\"0x1\"}"
+            }
+          ],
+          "result": "\"0x5208\""
+        }
+      ],
+      "source": "src/eth/execute.yaml"
+    },
+    "eth_createAccessList": {
+      "name": "eth_createAccessList",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Generates an access list for a transaction.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "GenericTransaction",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Gas used",
+      "result_schema": "Access list result",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_createAccessList example",
+          "params": [
+            {
+              "name": "Transaction",
+              "value": "{\"from\":\"0xaea8f8f781326bfe6a7683c2bd48dd6aa4d3ba63\",\"data\":\"0x608060806080608155\"}"
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "{\"accessList\":[{\"address\":\"0xa02457e5dfd32bda5fc7e1f1b008aa5979568150\",\"storageKeys\":[\"0x0000000000000000000000000000000000000000000000000000000000000081\"]}],\"gasUsed\":\"0x125f8\"}"
+        }
+      ],
+      "source": "src/eth/execute.yaml"
+    },
+    "eth_simulateV1": {
+      "name": "eth_simulateV1",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Executes a sequence of message calls building on each other's state without creating transactions on the block chain, optionally overriding block and state data",
+      "description": "",
+      "params": [
+        {
+          "name": "Payload",
+          "required": true,
+          "schema": "EthSimulatePayload",
+          "enum": []
+        },
+        {
+          "name": "Block tag",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Result of calls",
+      "result_schema": "EthSimulateResult",
+      "errors": [
+        "-32000: Invalid request",
+        "-32602: Missing or invalid parameters",
+        "-32005: Transactions maxFeePerGas is too low",
+        "-32015: Execution error",
+        "-32016: Timeout",
+        "-32603: The Ethereum node encountered an internal error",
+        "-38010: Transactions nonce is too low",
+        "-38011: Transactions nonce is too high",
+        "-38012: Transactions baseFeePerGas is too low",
+        "-38013: Not enough gas provided to pay for intrinsic gas for a transaction",
+        "-38014: Insufficient funds to pay for gas fees and value for a transaction",
+        "-38015: Block gas limit exceeded by the block's transactions",
+        "-38020: Block number in sequence did not increase",
+        "-38021: Block timestamp in sequence did not increase or stay the same",
+        "-38022: MovePrecompileToAddress referenced itself in replacement",
+        "-38023: Multiple MovePrecompileToAddress referencing the same address to replace",
+        "-38024: Sender is not an EOA",
+        "-38025: Max init code size exceeded",
+        "-38026: Client adjustable limit exceeded"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_simulateV1 simple transfer",
+          "params": [
+            {
+              "name": "Payload",
+              "value": "{\"blockStateCalls\":[{\"stateOverrides\":{\"0xc000000000000000000000000000000000000000\":{\"balance\":\"0x3e8\"}},\"calls\":[{\"from\":\"0xc000000000000000000000000000000000000000\",\"to\":\"0xc100000000000000000000000000000000000000\",\"value\":\"0x3e8\"},{\"from\":\"0xc100000000000000000000000000000000000000\",\"to\":\"0xc200000000000000000000000000000000000000\",\"value\":\"0x3e8\"}]}]}"
+            },
+            {
+              "name": "Block tag",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "[{\"baseFeePerGas\":\"0x0\",\"blobGasUsed\":\"0x0\",\"calls\":[{\"returnData\":\"0x\",\"logs\":[],\"gasUsed\":\"0x5208\",\"maxUsedGas\":\"0x5208\",\"status\":\"0x1\"},{\"returnData\":\"0x\",\"logs\":[],\"gasUsed\":\"0x5208\",\"maxUsedGas\":\"0x5208\",\"status\":\"0x1\"}],\"difficulty\":\"0x0\",\"excessBlobGas\":\"0x0\",\"extraData\":\"0x\",\"gasLimit\":\"0xbebc200\",\"gasUsed\":\"0xa410\",\"hash\":\"0xdb785f2444d7f68bc2bc0486\u2026"
+        }
+      ],
+      "source": "src/eth/execute.yaml"
+    },
+    "eth_gasPrice": {
+      "name": "eth_gasPrice",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the current price per gas in wei.",
+      "description": "",
+      "params": [],
+      "result_name": "Gas price",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_gasPrice example",
+          "params": [],
+          "result": "\"0x3e8\""
+        }
+      ],
+      "source": "src/eth/fee_market.yaml"
+    },
+    "eth_baseFee": {
+      "name": "eth_baseFee",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the base fee per gas of the next block in wei.",
+      "description": "",
+      "params": [],
+      "result_name": "Base fee",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_baseFee example",
+          "params": [],
+          "result": "\"0x3b9aca00\""
+        }
+      ],
+      "source": "src/eth/fee_market.yaml"
+    },
+    "eth_blobBaseFee": {
+      "name": "eth_blobBaseFee",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the base fee per blob gas in wei.",
+      "description": "",
+      "params": [],
+      "result_name": "Blob gas base fee",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_blobBaseFee example",
+          "params": [],
+          "result": "\"0x3f5694c1f\""
+        }
+      ],
+      "source": "src/eth/fee_market.yaml"
+    },
+    "eth_maxPriorityFeePerGas": {
+      "name": "eth_maxPriorityFeePerGas",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the current maxPriorityFeePerGas per gas in wei.",
+      "description": "",
+      "params": [],
+      "result_name": "Max priority fee per gas",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_maxPriorityFeePerGas example",
+          "params": [],
+          "result": "\"0x773c23ba\""
+        }
+      ],
+      "source": "src/eth/fee_market.yaml"
+    },
+    "eth_feeHistory": {
+      "name": "eth_feeHistory",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Transaction fee history",
+      "description": "Returns transaction base fee per gas and effective priority fee per gas for the requested/supported block range.",
+      "params": [
+        {
+          "name": "blockCount",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        },
+        {
+          "name": "newestBlock",
+          "required": true,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        },
+        {
+          "name": "rewardPercentiles",
+          "required": true,
+          "schema": "array[number]",
+          "enum": []
+        }
+      ],
+      "result_name": "Fee history result",
+      "result_schema": "feeHistoryResults",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_feeHistory example",
+          "params": [
+            {
+              "name": "blockCount",
+              "value": "\"0x5\""
+            },
+            {
+              "name": "newestblock",
+              "value": "\"latest\""
+            },
+            {
+              "name": "rewardPercentiles",
+              "value": "[20,30]"
+            }
+          ],
+          "result": "{\"oldestblock\":\"0x10b52f\",\"baseFeePerGas\":[\"0x3fa63a3f\",\"0x37f999ee\",\"0x3e36f20a\",\"0x4099f79a\",\"0x430d532d\",\"0x46fcd4a4\"],\"baseFeePerBlobGas\":[\"0x7b7609c19\",\"0x6dbe41789\",\"0x7223341d4\",\"0x6574a002c\",\"0x7223341d4\",\"0x6574a002c\"],\"gasUsedRatio\":[0.017712333333333333,0.9458865666666667,0.6534561,0.6517375666666667,0.7347769666666667],\"blobGasUsedRatio\":[0.0,0.6\u2026"
+        }
+      ],
+      "source": "src/eth/fee_market.yaml"
+    },
+    "eth_fillTransaction": {
+      "name": "eth_fillTransaction",
+      "namespace": "eth",
+      "kind": "write",
+      "summary": "Fills in missing transaction fields to be signed and submitted.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "GenericTransaction",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction result",
+      "result_schema": "FillTransactionResult",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [],
+      "source": "src/eth/fill.yaml"
+    },
+    "eth_newFilter": {
+      "name": "eth_newFilter",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Install a log filter in the server, allowing for later polling. Registers client interest in logs matching the filter, and returns an identifier.",
+      "description": "",
+      "params": [
+        {
+          "name": "Filter",
+          "required": true,
+          "schema": "Filter",
+          "enum": []
+        }
+      ],
+      "result_name": "Filter identifier",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_newFilter example",
+          "params": [
+            {
+              "name": "Filter",
+              "value": "{\"fromBlock\":\"0x137d3c2\",\"toBlock\":\"0x137d3c3\",\"address\":\"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2\",\"topics\":[]}"
+            }
+          ],
+          "result": "\"0x01\""
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_newBlockFilter": {
+      "name": "eth_newBlockFilter",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Creates a filter in the node, allowing for later polling. Registers client interest in new blocks, and returns an identifier.",
+      "description": "",
+      "params": [],
+      "result_name": "Filter identifier",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_newBlockFilter example",
+          "params": [],
+          "result": "\"0x01\""
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_newPendingTransactionFilter": {
+      "name": "eth_newPendingTransactionFilter",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Creates a filter in the node, allowing for later polling. Registers client interest in new transactions, and returns an identifier.",
+      "description": "",
+      "params": [],
+      "result_name": "Filter identifier",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_newPendingTransactionFilter example",
+          "params": [],
+          "result": "\"0x01\""
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_uninstallFilter": {
+      "name": "eth_uninstallFilter",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Uninstalls a filter with given id.",
+      "description": "",
+      "params": [
+        {
+          "name": "Filter identifier",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        }
+      ],
+      "result_name": "Success",
+      "result_schema": "boolean",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_uninstallFilter example",
+          "params": [
+            {
+              "name": "Filter identifier",
+              "value": "\"0x01\""
+            }
+          ],
+          "result": "true"
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_getFilterChanges": {
+      "name": "eth_getFilterChanges",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Polling method for the filter with the given ID (created using `eth_newFilter`). Returns an array of logs, block hashes, or transaction hashes since last poll, depending on the installed filter.",
+      "description": "",
+      "params": [
+        {
+          "name": "Filter identifier",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        }
+      ],
+      "result_name": "Log objects",
+      "result_schema": "FilterResults",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getFilterChanges example",
+          "params": [
+            {
+              "name": "Filter identifier",
+              "value": "\"0x01\""
+            }
+          ],
+          "result": "[{\"logIndex\":\"0x0\",\"removed\":false,\"blockNumber\":\"0x233\",\"blockHash\":\"0xfc139f5e2edee9e9c888d8df9a2d2226133a9bd87c88ccbd9c930d3d4c9f9ef5\",\"blockTimestamp\":\"0x11\",\"transactionHash\":\"0x66e7a140c8fa27fe98fde923defea7562c3ca2d6bb89798aabec65782c08f63d\",\"transactionIndex\":\"0x0\",\"address\":\"0x42699a7612a82f1d9c36148af9c77354759b210b\",\"data\":\"0x000000000000000000000\u2026"
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_getFilterLogs": {
+      "name": "eth_getFilterLogs",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns an array of all logs matching the filter with the given ID (created using `eth_newFilter`).",
+      "description": "",
+      "params": [
+        {
+          "name": "Filter identifier",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        }
+      ],
+      "result_name": "Log objects",
+      "result_schema": "FilterResults",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getFilterLogs example",
+          "params": [
+            {
+              "name": "Filter identifier",
+              "value": "\"0x01\""
+            }
+          ],
+          "result": "[{\"logIndex\":\"0x0\",\"removed\":false,\"blockNumber\":\"0x233\",\"blockTimestamp\":\"0x11\",\"blockHash\":\"0xfc139f5e2edee9e9c888d8df9a2d2226133a9bd87c88ccbd9c930d3d4c9f9ef5\",\"transactionHash\":\"0x66e7a140c8fa27fe98fde923defea7562c3ca2d6bb89798aabec65782c08f63d\",\"transactionIndex\":\"0x0\",\"address\":\"0x42699a7612a82f1d9c36148af9c77354759b210b\",\"data\":\"0x000000000000000000000\u2026"
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_getLogs": {
+      "name": "eth_getLogs",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns an array of all logs matching the specified filter.",
+      "description": "Returns all logs that match the given filter. `fromBlock` and `toBlock` bound an inclusive block range; block tags resolve against the current head block. If either bound resolves to a block number greater than the current head block, or if `fromBlock` resolves to a block number greater than `toBlock`, clients MUST return the `-32602: Invalid params` error. Clients MUST NOT clamp the range to the head block or return a partial result.",
+      "params": [
+        {
+          "name": "Filter",
+          "required": true,
+          "schema": "Filter",
+          "enum": []
+        }
+      ],
+      "result_name": "Log objects",
+      "result_schema": "FilterResults",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getLogs example",
+          "params": [
+            {
+              "name": "Filter",
+              "value": "{\"fromBlock\":\"0x137d3c2\",\"toBlock\":\"0x137d3c3\",\"address\":\"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2\",\"topics\":[]}"
+            }
+          ],
+          "result": "[{\"logIndex\":\"0x0\",\"removed\":false,\"blockNumber\":\"0x233\",\"blockTimestamp\":\"0x11\",\"blockHash\":\"0xfc139f5e2edee9e9c888d8df9a2d2226133a9bd87c88ccbd9c930d3d4c9f9ef5\",\"transactionHash\":\"0x66e7a140c8fa27fe98fde923defea7562c3ca2d6bb89798aabec65782c08f63d\",\"transactionIndex\":\"0x0\",\"address\":\"0x42699a7612a82f1d9c36148af9c77354759b210b\",\"data\":\"0x000000000000000000000\u2026"
+        }
+      ],
+      "source": "src/eth/filter.yaml"
+    },
+    "eth_sign": {
+      "name": "eth_sign",
+      "namespace": "eth",
+      "kind": "write",
+      "summary": "Returns an EIP-191 signature over the provided data.",
+      "description": "",
+      "params": [
+        {
+          "name": "Address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        },
+        {
+          "name": "Message",
+          "required": true,
+          "schema": "bytes",
+          "enum": []
+        }
+      ],
+      "result_name": "Signature",
+      "result_schema": "bytes65",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_sign example",
+          "params": [
+            {
+              "name": "Address",
+              "value": "\"0x9b2055d370f73ec7d8a03e965129118dc8f5bf83\""
+            },
+            {
+              "name": "Message",
+              "value": "\"0xdeadbeaf\""
+            }
+          ],
+          "result": "\"0xa3f20717a250c2b0b729b7e5becbff67fdaef7e0699da4de7ca5895b02a170a12d887fd3b17bfdce3481f10bea41f45ba9f709d39ce8325427b57afcfc994cee1b\""
+        }
+      ],
+      "source": "src/eth/sign.yaml"
+    },
+    "eth_signTransaction": {
+      "name": "eth_signTransaction",
+      "namespace": "eth",
+      "kind": "write",
+      "summary": "Returns an RLP encoded transaction signed by the specified account.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "GenericTransaction",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction result",
+      "result_schema": "SignTransactionResult",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_signTransaction example",
+          "params": [
+            {
+              "name": "Transaction",
+              "value": "{\"from\":\"0x9d8a62f656a8d1615c1294fd71e9cfb3e4855a4f\",\"nonce\":\"0x9\",\"to\":\"0xd46e8dd67c5d32be8058bb8eb970870f07244567\",\"gas\":\"0x76c0\",\"gasPrice\":\"0x9184e72a000\",\"value\":\"0x9184e72a\",\"input\":\"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675\"}"
+            }
+          ],
+          "result": "{\"raw\":\"0xf892098609184e72a0008276c094d46e8dd67c5d32be8058bb8eb970870f07244567849184e72aa9d46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f07244567526a0839ebaab7774ffdae60d418fc8b4192d2cb861ac31acbb5fef26027d1b8f10aea015396a78493395691c10fccc33ec13f2eeb96a3ba2b4ca1652c91bb2b348d12b\",\"tx\":{\"type\":\"0x0\",\"chainId\":\"0x1\",\"nonce\":\"0x9\",\"to\u2026"
+        }
+      ],
+      "source": "src/eth/sign.yaml"
+    },
+    "eth_getBalance": {
+      "name": "eth_getBalance",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the balance of the account of given address.",
+      "description": "",
+      "params": [
+        {
+          "name": "Address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Balance",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getBalance example",
+          "params": [
+            {
+              "name": "Address",
+              "value": "\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\""
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "\"0x1cfe56f3795885980000\""
+        }
+      ],
+      "source": "src/eth/state.yaml"
+    },
+    "eth_getStorageAt": {
+      "name": "eth_getStorageAt",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the value from a storage position at a given address.",
+      "description": "",
+      "params": [
+        {
+          "name": "Address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        },
+        {
+          "name": "Storage slot",
+          "required": true,
+          "schema": "bytesMax32",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Value",
+      "result_schema": "bytes",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getStorageAt example",
+          "params": [
+            {
+              "name": "Address",
+              "value": "\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\""
+            },
+            {
+              "name": "Storage slot",
+              "value": "\"0x0\""
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "\"0x0000000000000000000000000000000000000000000000000000000000000000\""
+        }
+      ],
+      "source": "src/eth/state.yaml"
+    },
+    "eth_getStorageValues": {
+      "name": "eth_getStorageValues",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the values of multiple storage slots for multiple accounts in a single request.",
+      "description": "",
+      "params": [
+        {
+          "name": "Requests",
+          "required": true,
+          "schema": "Storage requests",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Values",
+      "result_schema": "Storage values",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getStorageValues example",
+          "params": [
+            {
+              "name": "Requests",
+              "value": "{\"0xdAC17F958D2ee523a2206206994597C13D831ec7\":[\"0x0000000000000000000000000000000000000000000000000000000000000002\",\"0x0000000000000000000000000000000000000000000000000000000000000006\"],\"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48\":[\"0x0000000000000000000000000000000000000000000000000000000000000003\"]}"
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "{\"0xdAC17F958D2ee523a2206206994597C13D831ec7\":[\"0x00000000000000000000000000000000000000000000000000000000000f4240\",\"0x0000000000000000000000000000000000000000000000000000000000000012\"],\"0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48\":[\"0x0000000000000000000000000000000000000000000000000000000000000001\"]}"
+        }
+      ],
+      "source": "src/eth/state.yaml"
+    },
+    "eth_getTransactionCount": {
+      "name": "eth_getTransactionCount",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the nonce of an account in the state. NOTE: The name eth_getTransactionCount reflects the historical fact that an account's nonce and sent transaction count were the same. After the Pectra fork, with the inclusion of EIP-7702, this is no longer true.",
+      "description": "",
+      "params": [
+        {
+          "name": "Address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Account nonce",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getTransactionCount example",
+          "params": [
+            {
+              "name": "Address",
+              "value": "\"0xc94770007dda54cF92009BFF0dE90c06F603a09f\""
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "\"0x1\""
+        }
+      ],
+      "source": "src/eth/state.yaml"
+    },
+    "eth_getCode": {
+      "name": "eth_getCode",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns code at a given address.",
+      "description": "",
+      "params": [
+        {
+          "name": "Address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Bytecode",
+      "result_schema": "bytes",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getCode example",
+          "params": [
+            {
+              "name": "Address",
+              "value": "\"0xa50a51c09a5c451c52bb714527e1974b686d8e77\""
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "\"0x60806040526004361060485763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416633fa4f2458114604d57806355241077146071575b600080fd5b348015605857600080fd5b50605f6088565b60408051918252519081900360200190f35b348015607c57600080fd5b506086600435608e565b005b60005481565b60008190556040805182815290517f199cd93e851e4c78c437891155e2112093f8f1539\u2026"
+        }
+      ],
+      "source": "src/eth/state.yaml"
+    },
+    "eth_getProof": {
+      "name": "eth_getProof",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the merkle proof for a given account and optionally some storage keys.",
+      "description": "",
+      "params": [
+        {
+          "name": "Address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        },
+        {
+          "name": "StorageKeys",
+          "required": true,
+          "schema": "array[bytesMax32]",
+          "enum": []
+        },
+        {
+          "name": "Block",
+          "required": false,
+          "schema": "BlockNumberOrTagOrHash",
+          "enum": []
+        }
+      ],
+      "result_name": "Account",
+      "result_schema": "AccountProof",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getProof example",
+          "params": [
+            {
+              "name": "Address",
+              "value": "\"0xe5cB067E90D5Cd1F8052B83562Ae670bA4A211a8\""
+            },
+            {
+              "name": "StorageKeys",
+              "value": "[\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\"]"
+            },
+            {
+              "name": "Block",
+              "value": "\"latest\""
+            }
+          ],
+          "result": "{\"address\":\"0xe5cB067E90D5Cd1F8052B83562Ae670bA4A211a8\",\"accountProof\":[\"0xf90211a06a718c2c9da77c253b12d7b2569657901e37bb691718f5dda1b86157ab1dd5eda0e7f19ed5e21bccc8d3260236b24f80ad88b3634f5d005f37b838881f0e12f1bda0abb301291704e4d92686c0f5f8ebb1734185321559b8d717ffdca95c99591976a0d0c2026bfab65c3b95276bfa82af9dec860b485f8857f293c148d63a2182128fa0c98044ec9a127\u2026"
+        }
+      ],
+      "source": "src/eth/state.yaml"
+    },
+    "eth_sendTransaction": {
+      "name": "eth_sendTransaction",
+      "namespace": "eth",
+      "kind": "write",
+      "summary": "Signs and submits a transaction.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "GenericTransaction",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction hash",
+      "result_schema": "hash32",
+      "errors": [],
+      "error_groups": [
+        "JSONRPCStandardErrors",
+        "JSONRPCNonStandardErrors",
+        "GasErrors",
+        "ExecutionErrors",
+        "TxPoolErrors"
+      ],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_sendTransaction example",
+          "params": [
+            {
+              "name": "Transaction",
+              "value": "{\"from\":\"0xb60e8dd61c5d32be8058bb8eb970870f07233155\",\"to\":\"0xd46e8dd67c5d32be8058bb8eb970870f07244567\",\"gas\":\"0x76c0\",\"gasPrice\":\"0x9184e72a000\",\"value\":\"0x9184e72a\",\"input\":\"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675\"}"
+            }
+          ],
+          "result": "\"0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331\""
+        }
+      ],
+      "source": "src/eth/submit.yaml"
+    },
+    "eth_sendRawTransaction": {
+      "name": "eth_sendRawTransaction",
+      "namespace": "eth",
+      "kind": "write",
+      "summary": "Submits a raw transaction. You can create and sign a transaction externally using a library such as [web3.js](https://web3js.readthedocs.io/) or [ethers.js](https://docs.ethers.org/). For [EIP-4844](https://eips.ethereum.org/EIPS/eip-4844) transactions, the raw form must be the network form. This means it includes the blobs, KZG commitments, and KZG proofs. For [EIP-7594](https://eips.ethereum.org/EIPS/eip-7594) transactions, the raw format must be the network form. This means it includes the blobs, KZG commitments, and cell proofs. The logic for handling the new transaction during fork boundaries are 1. When receiving an encoded transaction with cell proofs before the PeerDAS fork activates, we reject it. Only blob proofs are accepted into the pool. 2. At the time of fork activation, the implementer could (not mandatory) - Drop all old-format transactions - Convert old proofs to new format (computationally expensive) - Convert only when including in a locally produced block 3. After the fork has activated, only txs with cell proofs are accepted via p2p relay. 4. On RPC (eth_sendRawTransaction), txs with blob proofs may still be accepted and will be auto-converted by the node. At implementer discretion, this facility can be deprecated later when users have switched to new client libraries that can create cell proofs.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction",
+          "required": true,
+          "schema": "bytes",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction hash",
+      "result_schema": "hash32",
+      "errors": [],
+      "error_groups": [
+        "JSONRPCStandardErrors",
+        "JSONRPCNonStandardErrors",
+        "GasErrors",
+        "ExecutionErrors",
+        "TxPoolErrors"
+      ],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_sendRawTransaction example",
+          "params": [
+            {
+              "name": "Transaction",
+              "value": "\"0xf869018203e882520894f17f52151ebef6c7334fad080c5704d77216b732881bc16d674ec80000801ba02da1c48b670996dcb1f447ef9ef00b33033c48a4fe938f420bec3e56bfd24071a062e0aa78a81bf0290afbc3a9d8e9a068e6d74caa66c5e0fa8a46deaae96b0833\""
+            }
+          ],
+          "result": "\"0xe670ec64341771606e55d6b4ca35a1a6b75ee3d5145a99d05921026d1527331\""
+        }
+      ],
+      "source": "src/eth/submit.yaml"
+    },
+    "eth_subscribe": {
+      "name": "eth_subscribe",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Subscribes to events on the node.",
+      "description": "Creates a subscription. The first parameter selects the subscription kind and\ndetermines which optional second-parameter shape applies and what notification\ndata is pushed to the client. Returns a subscription ID that can later be\npassed to `eth_unsubscribe` to cancel the subscription.\n\nSubscription notifications are delivered as JSON-RPC notifications with method\n`eth_subscription` and `params` of the form `{ \"subscription\": <id>, \"result\": <data> }`,\nwhere `<data>` depends on the kind:\n\n- `newHeads`: a block header (same shape as a Block object, without `transactions`,\n  `withdrawals`, `uncles`, or `size`). No second parameter.\n- `logs`: a Log object matching the supplied Filter (same shape as the filter\n  accepted by `eth_getLogs`). Removed logs (due to chain reorgs) are pushed with\n  `removed: true`.\n- `newPendingTransactions`: a transaction hash by default, or a full transaction\n  object if the optional boolean second parameter is `true`.\n- `transactionReceipts`: an array of receipt objects (same shape as\n  `eth_getTransactionReceipt`) for transactions included in the latest imported\n  block. If the optional `{ transactionHashes: [...] }` filter is provided,\n  only receipts fo\u2026",
+      "params": [
+        {
+          "name": "kind",
+          "required": true,
+          "schema": "string",
+          "enum": [
+            "newHeads",
+            "logs",
+            "newPendingTransactions",
+            "transactionReceipts"
+          ]
+        },
+        {
+          "name": "arg",
+          "required": false,
+          "schema": "Filter | boolean | Transaction receipts filter (for `transactionReceipts`)",
+          "enum": []
+        }
+      ],
+      "result_name": "Subscription ID",
+      "result_schema": "uint",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_subscribe newHeads example",
+          "params": [
+            {
+              "name": "kind",
+              "value": "\"newHeads\""
+            }
+          ],
+          "result": "\"0x9cef478923ff08bf67fde6c64013158d\""
+        },
+        {
+          "name": "eth_subscribe logs example",
+          "params": [
+            {
+              "name": "kind",
+              "value": "\"logs\""
+            },
+            {
+              "name": "arg",
+              "value": "{\"address\":\"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2\",\"topics\":[\"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef\"]}"
+            }
+          ],
+          "result": "\"0x4a8a4c0517381924f9838102c5a4dcb7\""
+        }
+      ],
+      "source": "src/eth/subscribe.yaml"
+    },
+    "eth_unsubscribe": {
+      "name": "eth_unsubscribe",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Cancels an existing subscription created with `eth_subscribe`.",
+      "description": "",
+      "params": [
+        {
+          "name": "Subscription ID",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        }
+      ],
+      "result_name": "Success",
+      "result_schema": "boolean",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_unsubscribe example",
+          "params": [
+            {
+              "name": "Subscription ID",
+              "value": "\"0x9cef478923ff08bf67fde6c64013158d\""
+            }
+          ],
+          "result": "true"
+        }
+      ],
+      "source": "src/eth/subscribe.yaml"
+    },
+    "eth_getTransactionByHash": {
+      "name": "eth_getTransactionByHash",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the information about a transaction requested by transaction hash.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction information",
+      "result_schema": "notFound | TransactionInfo",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getTransactionByHash example",
+          "params": [
+            {
+              "name": "Transaction hash",
+              "value": "\"0xa52be92809541220ee0aaaede6047d9a6c5d0cd96a517c854d944ee70a0ebb44\""
+            }
+          ],
+          "result": "{\"blockHash\":\"0x510efccf44a192e6e34bcb439a1947e24b86244280762cbb006858c237093fda\",\"blockNumber\":\"0x422\",\"chainId\":\"0x7e2\",\"from\":\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\",\"gas\":\"0x5208\",\"gasPrice\":\"0x3b9aca00\",\"hash\":\"0xa52be92809541220ee0aaaede6047d9a6c5d0cd96a517c854d944ee70a0ebb44\",\"input\":\"0x\",\"nonce\":\"0x1\",\"to\":\"0x627306090abab3a6e1400e9345bc60c78a8b\u2026"
+        }
+      ],
+      "source": "src/eth/transaction.yaml"
+    },
+    "eth_getTransactionByBlockHashAndIndex": {
+      "name": "eth_getTransactionByBlockHashAndIndex",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns information about a transaction by block hash and transaction index position.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "Transaction index",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction information",
+      "result_schema": "notFound | TransactionInfo",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getTransactionByBlockHashAndIndex example",
+          "params": [
+            {
+              "name": "Block hash",
+              "value": "\"0xbf137c3a7a1ebdfac21252765e5d7f40d115c2757e4a4abee929be88c624fdb7\""
+            },
+            {
+              "name": "Transaction index",
+              "value": "\"0x2\""
+            }
+          ],
+          "result": "{\"blockHash\":\"0x510efccf44a192e6e34bcb439a1947e24b86244280762cbb006858c237093fda\",\"blockNumber\":\"0x422\",\"chainId\":\"0x7e2\",\"from\":\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\",\"gas\":\"0x5208\",\"gasPrice\":\"0x3b9aca00\",\"hash\":\"0xa52be92809541220ee0aaaede6047d9a6c5d0cd96a517c854d944ee70a0ebb44\",\"input\":\"0x\",\"nonce\":\"0x1\",\"to\":\"0x627306090abab3a6e1400e9345bc60c78a8b\u2026"
+        }
+      ],
+      "source": "src/eth/transaction.yaml"
+    },
+    "eth_getTransactionByBlockNumberAndIndex": {
+      "name": "eth_getTransactionByBlockNumberAndIndex",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns information about a transaction by block number and transaction index position.",
+      "description": "",
+      "params": [
+        {
+          "name": "Block",
+          "required": true,
+          "schema": "BlockNumberOrTag",
+          "enum": []
+        },
+        {
+          "name": "Transaction index",
+          "required": true,
+          "schema": "uint",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction information",
+      "result_schema": "notFound | TransactionInfo",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getTransactionByBlockNumberAndIndex example",
+          "params": [
+            {
+              "name": "Block",
+              "value": "\"0x1442e\""
+            },
+            {
+              "name": "Transaction index",
+              "value": "\"0x2\""
+            }
+          ],
+          "result": "{\"blockHash\":\"0x510efccf44a192e6e34bcb439a1947e24b86244280762cbb006858c237093fda\",\"blockNumber\":\"0x422\",\"chainId\":\"0x7e2\",\"from\":\"0xfe3b557e8fb62b89f4916b721be55ceb828dbd73\",\"gas\":\"0x5208\",\"gasPrice\":\"0x3b9aca00\",\"hash\":\"0xa52be92809541220ee0aaaede6047d9a6c5d0cd96a517c854d944ee70a0ebb44\",\"input\":\"0x\",\"nonce\":\"0x1\",\"to\":\"0x627306090abab3a6e1400e9345bc60c78a8b\u2026"
+        }
+      ],
+      "source": "src/eth/transaction.yaml"
+    },
+    "eth_getTransactionReceipt": {
+      "name": "eth_getTransactionReceipt",
+      "namespace": "eth",
+      "kind": "read",
+      "summary": "Returns the receipt of a transaction by transaction hash.",
+      "description": "",
+      "params": [
+        {
+          "name": "Transaction hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        }
+      ],
+      "result_name": "Receipt information",
+      "result_schema": "notFound | ReceiptInfo",
+      "errors": [
+        "4444: Pruned history unavailable"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "eth_getTransactionReceipt example",
+          "params": [
+            {
+              "name": "Transaction hash",
+              "value": "\"0x504ce587a65bdbdb6414a0c6c16d86a04dd79bfcc4f2950eec9634b30ce5370f\""
+            }
+          ],
+          "result": "{\"blockHash\":\"0xe7212a92cfb9b06addc80dec2a0dfae9ea94fd344efeb157c41e12994fcad60a\",\"blockNumber\":\"0x50\",\"contractAddress\":null,\"cumulativeGasUsed\":\"0x5208\",\"from\":\"0x627306090abab3a6e1400e9345bc60c78a8bef57\",\"gasUsed\":\"0x5208\",\"blobGasUsed\":\"0x20000\",\"effectiveGasPrice\":\"0x1\",\"blobGasPrice\":\"0x3\",\"logs\":[],\"logsBloom\":\"0x00000000000000000000000000000000000000\u2026"
+        }
+      ],
+      "source": "src/eth/transaction.yaml"
+    },
+    "testing_buildBlockV1": {
+      "name": "testing_buildBlockV1",
+      "namespace": "testing",
+      "kind": "testing",
+      "summary": "Builds a block on top of a given parentHash using the provided parameters. This is a testing-only method for generating test fixtures.",
+      "description": "This method is a debugging and testing tool that simplifies the block production process into a single call.\n\n**Specification:**\n- The client MUST build a new execution payload using the block specified by `parentBlockHash` as its parent.\n- The client MUST use the provided `payloadAttributes` to define the context of the new block.\n- If the `transactions` parameter is an empty array `[]`, the client MUST build an empty block (no transactions).\n- If the `transactions` parameter is JSON `null`, the client MAY build a block from its local transaction pool (mempool).\n- If the `transactions` parameter is a non-empty array, the client MUST include all transactions from the array on the block's transaction list, in the order they were provided, and MUST NOT include any transactions from its local transaction pool.\n- If `extraData` is provided, the client MUST set the `extraData` field of the resulting payload to this value.\n- This method MUST NOT modify the client's canonical chain or head block. It is a read-only method for payload generation.\n\n**Security Considerations:**\n- This method is intended for testing environments ONLY and MUST NOT be exposed on public-facing RPC APIs.\n- It is s\u2026",
+      "params": [
+        {
+          "name": "Parent block hash",
+          "required": true,
+          "schema": "hash32",
+          "enum": []
+        },
+        {
+          "name": "Payload attributes",
+          "required": true,
+          "schema": "PayloadAttributesV3",
+          "enum": []
+        },
+        {
+          "name": "Transactions",
+          "required": true,
+          "schema": "array[bytes] | null",
+          "enum": []
+        },
+        {
+          "name": "Extra data",
+          "required": false,
+          "schema": "bytes | null",
+          "enum": []
+        }
+      ],
+      "result_name": "Response object",
+      "result_schema": "Response object",
+      "errors": [
+        "-32602: Invalid parameters",
+        "-32603: Internal error"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "testing_buildBlockV1 example",
+          "params": [
+            {
+              "name": "Parent block hash",
+              "value": "\"0xe27a3e81bd7cfe2aec2cc9e832c73a17c93e7efcf659cf4b39883b96c48708c2\""
+            },
+            {
+              "name": "Payload attributes",
+              "value": "{\"timestamp\":\"0x1ce\",\"prevRandao\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"suggestedFeeRecipient\":\"0x0000000000000000000000000000000000000000\",\"withdrawals\":[],\"parentBeaconBlockRoot\":\"0xcf8e0d4e9587369b2301d0790347320302cc0943d5a1884365149a42212e8822\"}"
+            },
+            {
+              "name": "Transactions",
+              "value": "[]"
+            },
+            {
+              "name": "Extra data",
+              "value": "null"
+            }
+          ],
+          "result": "{\"executionPayload\":{\"parentHash\":\"0xe27a3e81bd7cfe2aec2cc9e832c73a17c93e7efcf659cf4b39883b96c48708c2\",\"feeRecipient\":\"0x0000000000000000000000000000000000000000\",\"stateRoot\":\"0xca3149fa9e37db08d1cd49c9061db1002ef1cd58db2210f2115c8c989b2bdf45\",\"receiptsRoot\":\"0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421\",\"logsBloom\":\"0x00000000000000000\u2026"
+        }
+      ],
+      "source": "src/testing/testing_buildBlockV1.yaml"
+    },
+    "testing_commitBlockV1": {
+      "name": "testing_commitBlockV1",
+      "namespace": "testing",
+      "kind": "testing",
+      "summary": "Builds a block from the provided parameters, inserts it into the chain, and sets it as the canonical head. This is a testing-only method for advancing a chain deterministically.",
+      "description": "This method is a testing tool that combines block production and canonical head advancement into a single call. It is the writing equivalent of [`testing_buildBlockV1`](./testing_buildBlockV1.yaml): it produces the same block, but additionally inserts it into the chain and sets it as the new canonical head, skipping the `engine_newPayload` + `engine_forkchoiceUpdated` round-trip and the associated payload serialization overhead.\n\n**Specification:**\n- The client MUST build a new execution payload on top of its current canonical head.\n- The client MUST use the provided `payloadAttributes` to define the context of the new block.\n- If the `transactions` parameter is an empty array `[]`, the client MUST build an empty block (no transactions).\n- If the `transactions` parameter is JSON `null`, the client MAY build a block from its local transaction pool (mempool).\n- If the `transactions` parameter is a non-empty array, the client MUST include all transactions from the array on the block's transaction list, in the order they were provided, and MUST NOT include any transactions from its local transaction pool.\n- If `extraData` is provided, the client MUST set the `extraData` field of the re\u2026",
+      "params": [
+        {
+          "name": "Payload attributes",
+          "required": true,
+          "schema": "PayloadAttributesV3",
+          "enum": []
+        },
+        {
+          "name": "Transactions",
+          "required": true,
+          "schema": "array[bytes] | null",
+          "enum": []
+        },
+        {
+          "name": "Extra data",
+          "required": false,
+          "schema": "bytes | null",
+          "enum": []
+        }
+      ],
+      "result_name": "Block hash",
+      "result_schema": "hash32",
+      "errors": [
+        "-32602: Invalid parameters",
+        "-32603: Internal error"
+      ],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "testing_commitBlockV1 example",
+          "params": [
+            {
+              "name": "Payload attributes",
+              "value": "{\"timestamp\":\"0x1ce\",\"prevRandao\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"suggestedFeeRecipient\":\"0x0000000000000000000000000000000000000000\",\"withdrawals\":[],\"parentBeaconBlockRoot\":\"0xcf8e0d4e9587369b2301d0790347320302cc0943d5a1884365149a42212e8822\"}"
+            },
+            {
+              "name": "Transactions",
+              "value": "[]"
+            },
+            {
+              "name": "Extra data",
+              "value": "null"
+            }
+          ],
+          "result": "\"0x1234567890123456789012345678901234567890123456789012345678901234\""
+        }
+      ],
+      "source": "src/testing/testing_commitBlockV1.yaml"
+    },
+    "txpool_status": {
+      "name": "txpool_status",
+      "namespace": "txpool",
+      "kind": "read",
+      "summary": "Returns the number of pending and queued transactions in the pool.",
+      "description": "Returns an object containing the count of transactions currently pending for\ninclusion in the next block(s), as well as ones that are scheduled for future\nexecution (transactions with nonce gaps).",
+      "params": [],
+      "result_name": "Transaction pool status",
+      "result_schema": "TxpoolStatus",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "txpool_status example",
+          "params": [],
+          "result": "{\"pending\":\"0xa\",\"queued\":\"0x7\"}"
+        }
+      ],
+      "source": "src/txpool/pool.yaml"
+    },
+    "txpool_content": {
+      "name": "txpool_content",
+      "namespace": "txpool",
+      "kind": "read",
+      "summary": "Returns the contents of the transaction pool.",
+      "description": "Returns an object containing all pending and queued transactions in the pool,\ngrouped by origin address and sorted by nonce. Pending transactions are ready\nfor inclusion in the next block(s). Queued transactions have nonce gaps and\nare scheduled for future execution.",
+      "params": [],
+      "result_name": "Transaction pool content",
+      "result_schema": "TxpoolContent",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "txpool_content example",
+          "params": [],
+          "result": "{\"pending\":{\"0x0216d5032f356960cd3749c31ab34eeff21b3395\":{\"806\":{\"blockHash\":null,\"blockNumber\":null,\"from\":\"0x0216d5032f356960cd3749c31ab34eeff21b3395\",\"gas\":\"0x5208\",\"gasPrice\":\"0xba43b7400\",\"hash\":\"0xaf953a2d01f55cfe080c0c94150a60105e8ac3d51153058a1f03dd239dd08586\",\"input\":\"0x\",\"nonce\":\"0x326\",\"to\":\"0x7f69a91a3cf4be60020fb58b893b7cbb65376db8\",\"transaction\u2026"
+        }
+      ],
+      "source": "src/txpool/pool.yaml"
+    },
+    "txpool_contentFrom": {
+      "name": "txpool_contentFrom",
+      "namespace": "txpool",
+      "kind": "read",
+      "summary": "Returns the transactions in the pool from a specific address.",
+      "description": "Returns an object containing pending and queued transactions from the specified\naddress, grouped by nonce. This is a filtered version of txpool_content.",
+      "params": [
+        {
+          "name": "address",
+          "required": true,
+          "schema": "address",
+          "enum": []
+        }
+      ],
+      "result_name": "Transaction pool content from address",
+      "result_schema": "TxpoolContentFromResult",
+      "errors": [],
+      "error_groups": [],
+      "external_docs_url": "",
+      "external_docs": "",
+      "examples": [
+        {
+          "name": "txpool_contentFrom example",
+          "params": [
+            {
+              "name": "address",
+              "value": "\"0x0216d5032f356960cd3749c31ab34eeff21b3395\""
+            }
+          ],
+          "result": "{\"pending\":{\"806\":{\"blockHash\":null,\"blockNumber\":null,\"from\":\"0x0216d5032f356960cd3749c31ab34eeff21b3395\",\"gas\":\"0x5208\",\"gasPrice\":\"0xba43b7400\",\"hash\":\"0xaf953a2d01f55cfe080c0c94150a60105e8ac3d51153058a1f03dd239dd08586\",\"input\":\"0x\",\"nonce\":\"0x326\",\"to\":\"0x7f69a91a3cf4be60020fb58b893b7cbb65376db8\",\"transactionIndex\":null,\"value\":\"0x19a99f0cf456000\"}},\"que\u2026"
+        }
+      ],
+      "source": "src/txpool/pool.yaml"
+    }
+  },
+  "graphql": {
+    "query": [
+      {
+        "name": "block",
+        "args": "number, hash",
+        "description": "Block fetches an Ethereum block by number or by hash. If neither is"
+      },
+      {
+        "name": "blocks",
+        "args": "from, to",
+        "description": "Blocks returns all the blocks between two numbers, inclusive. If"
+      },
+      {
+        "name": "pending",
+        "args": "",
+        "description": "Pending returns the current pending state."
+      },
+      {
+        "name": "transaction",
+        "args": "hash",
+        "description": "Transaction returns a transaction specified by its hash."
+      },
+      {
+        "name": "logs",
+        "args": "filter",
+        "description": "Logs returns log entries matching the provided filter."
+      },
+      {
+        "name": "gasPrice",
+        "args": "",
+        "description": "GasPrice returns the node's estimate of a gas price sufficient to"
+      },
+      {
+        "name": "maxPriorityFeePerGas",
+        "args": "",
+        "description": "MaxPriorityFeePerGas returns the node's estimate of a gas tip sufficient"
+      },
+      {
+        "name": "syncing",
+        "args": "",
+        "description": "Syncing returns information on the current synchronisation state."
+      },
+      {
+        "name": "chainID",
+        "args": "",
+        "description": "ChainID returns the current chain ID for transaction replay protection."
+      }
+    ],
+    "mutation": [
+      {
+        "name": "sendRawTransaction",
+        "args": "data",
+        "description": "SendRawTransaction sends an RLP-encoded transaction to the network."
+      }
+    ]
+  }
+}

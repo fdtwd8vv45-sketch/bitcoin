@@ -151,6 +151,12 @@ else
   note "phantom CLI unset — Phantom Connect overview still works; install with: npm install -g @phantom/cli"
 fi
 
+if [[ -f "$APP/data/execution_apis_index.json" ]]; then
+  pass "bundled Ethereum Execution APIs index present (spec lookup, no node)"
+else
+  note "execution_apis_index.json missing — run: python3 $APP/generate_execution_apis_index.py"
+fi
+
 say
 say "Summary: $ok ok, $warn optional/missing for AWS, $fail blocking"
 say "Next: python3 $APP/local_cli.py"

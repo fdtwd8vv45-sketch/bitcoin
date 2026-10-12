@@ -15,7 +15,9 @@ is not attached here because it includes write tools. Read-only
 `libbndl` tools inspect, extract, save (BND2 PC), and fetch Criterion/EA
 BUNDLE files, pinned to Bo98/libbndl@2b88eff. APKO smoke tools plan a
 catalog matrix and run the factory@b87283a8 Docker preflight (actions
-pin `7eaff21e`).
+pin `7eaff21e`). Read-only Ethereum Execution APIs spec lookup
+(OpenRPC JSON-RPC + EIP-1767 GraphQL) pinned to
+ethereum/execution-apis@34151926. Never calls a node.
 
 To use the tools with no AWS account:
 
@@ -27,6 +29,7 @@ python3 local_cli.py coinstats coin bitcoin
 python3 local_cli.py libbndl inspect path/to/file.BNDL
 python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
 python3 local_cli.py apko plan path/to/images.apko.json
+python3 local_cli.py execution eth_blockNumber
 ```
 
 `../../scripts/doctor.sh` lists what is still needed for `agentcore dev` / deploy.
@@ -83,6 +86,9 @@ See `../../LIBBNDL.md`.
 
 `apko_*` plans `images.apko.json` smoke legs and can preflight/run them
 on a local Docker daemon. See `../../APKO.md`.
+
+`execution_apis_*` looks up the bundled Ethereum Execution APIs OpenRPC
+spec (and EIP-1767 GraphQL fields). See `../../EXECUTION_APIS.md`.
 
 # Developing locally
 

@@ -12,6 +12,8 @@
     python3 local_cli.py libbndl inspect path/to/file.BNDL
     python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
     python3 local_cli.py apko plan path/to/images.apko.json
+    python3 local_cli.py execution
+    python3 local_cli.py execution eth_blockNumber
     python3 local_cli.py          # interactive prompt
 """
 
@@ -48,6 +50,12 @@ from coinstats import (
     coinstats_wallet,
 )
 from libbndl import libbndl_from_arg, libbndl_overview
+from execution_apis import (
+    NAMESPACES as EXECUTION_NAMESPACES,
+    execution_apis_method,
+    execution_apis_overview,
+    execution_from_arg,
+)
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
 from receive_check import check_receive, classify_payment_id
@@ -58,7 +66,7 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | libbndl | apko
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | libbndl | apko | execution
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
@@ -66,6 +74,7 @@ _HELP = """Commands (no AWS required):
   coinstats [coin|markets|portfolio|wallet|status]  CoinStats MCP/REST overview, prices, portfolio, wallet
   libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
   apko [plan|status|preflight|run]  APKO smoke plan / Docker preflight (actions@7eaff21e)
+  execution [method|list|graphql|contribute]  Ethereum Execution APIs spec (OpenRPC JSON-RPC + GraphQL)
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -219,6 +228,26 @@ def _looks_like_apko(lower: str) -> bool:
     return bool(
         re.search(
             r"\b(apko|melange|ubuntu-slim|smoke test|smoke_test|images\.apko)\b",
+            lower,
+        )
+    )
+
+
+_EXECUTION_METHOD = re.compile(
+    r"\b((?:eth|engine|debug|txpool|net|testing|web3)_[A-Za-z0-9]+)\b",
+    re.I,
+)
+
+
+def _looks_like_execution(lower: str) -> bool:
+    if _EXECUTION_METHOD.search(lower):
+        return True
+    return bool(
+        re.search(
+            r"\b(execution-apis|execution apis|execution api|"
+            r"ethereum json-rpc|ethereum rpc|openrpc|"
+            r"engine api|eip-1767|hive rpc-compat|"
+            r"ethereum\.github\.io/execution-apis)\b",
             lower,
         )
     )
@@ -386,6 +415,10 @@ def route_query(text: str) -> str:
         "bnd2": lambda: libbndl_from_arg(arg),
         "apko": lambda: apko_from_arg(arg),
         "melange": lambda: apko_from_arg(arg),
+        "execution": lambda: execution_from_arg(arg),
+        "execution-apis": lambda: execution_from_arg(arg),
+        "executionapis": lambda: execution_from_arg(arg),
+        "ethrpc": lambda: execution_from_arg(arg),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -458,6 +491,23 @@ def route_query(text: str) -> str:
         ):
             return apko_from_arg(rest)
         return apko_smoke_overview()
+    if cmd.split("_", 1)[0] in EXECUTION_NAMESPACES and "_" in cmd:
+        return execution_apis_method(raw)
+    if _looks_like_execution(lower):
+        rest = re.sub(
+            r"\b(execution-apis|execution apis|execution api|execution|"
+            r"ethereum json-rpc|ethereum rpc|openrpc|"
+            r"engine api)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        token = _EXECUTION_METHOD.search(raw)
+        if token and not re.search(r"\b(list|graphql|contribute|quickstart)\b", rest, re.I):
+            return execution_apis_method(token.group(1))
+        if rest.strip() or token:
+            return execution_from_arg(rest)
+        return execution_apis_overview()
     if _looks_like_into_wallet(lower) and not _TXID.search(raw):
         return developer_howto("receive")
     if _looks_like_receive(lower):
@@ -507,6 +557,10 @@ def route_query(text: str) -> str:
         "apko": "apko",
         "melange": "apko",
         "ubuntu-slim": "apko",
+        "execution": "execution",
+        "execution-apis": "execution",
+        "openrpc": "execution",
+        "engine-api": "execution",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):
