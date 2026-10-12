@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, execution.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -289,7 +289,8 @@ def developer_howto(topic: str) -> str:
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
-            "agentic, jupiter, phantom, coinstats, libbndl, apko, remember, notes\n"
+            "agentic, jupiter, phantom, coinstats, libbndl, apko, execution, "
+            "remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -421,6 +422,24 @@ def developer_howto(topic: str) -> str:
             "apko preflight alpine:3.20 amd64\n"
             "See BitcoinAgent/APKO.md."
         ),
+        "execution": (
+            "Ethereum Execution APIs are the canonical JSON-RPC (OpenRPC) plus "
+            "GraphQL interface every execution client implements.\n"
+            "This agent is read-only spec lookup pinned to "
+            "ethereum/execution-apis@34151926. It does not connect to a node, "
+            "sign, send, or call engine_* (JWT on 8551).\n"
+            "Docs: https://ethereum.github.io/execution-apis/\n"
+            "Quickstart: https://ethereum.github.io/execution-apis/docs/quickstart/\n"
+            "Source: https://github.com/ethereum/execution-apis\n"
+            "Compile upstream: make build  (writes openrpc.json)\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "execution eth_blockNumber\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "execution list eth\n"
+            "Not Bitcoin Core RPC — that stays on `rpc` / lookup_rpc.\n"
+            "See BitcoinAgent/EXECUTION_APIS.md."
+        ),
     }
     if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
         key = "agentic"
@@ -446,11 +465,23 @@ def developer_howto(topic: str) -> str:
         key = "libbndl"
     if key in {"melange", "ubuntu-slim", "apko-smoke", "smoke-test"}:
         key = "apko"
+    if key in {
+        "execution-apis",
+        "executionapis",
+        "ethereum-rpc",
+        "ethereum-json-rpc",
+        "openrpc",
+        "engine-api",
+        "engine-apis",
+        "eth-rpc",
+    }:
+        key = "execution"
     if key in guides:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko.\n"
+        "receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, "
+        "execution.\n"
         "You can also call search_docs with a free-text query."
     )
 

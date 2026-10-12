@@ -47,6 +47,13 @@ from libbndl import (
     libbndl_replace,
     libbndl_types,
 )
+from execution_apis import (
+    execution_apis_contribute,
+    execution_apis_graphql,
+    execution_apis_list,
+    execution_apis_method,
+    execution_apis_overview,
+)
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
@@ -75,7 +82,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/libbndl/apko topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/libbndl/apko/execution topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -129,6 +136,13 @@ Guidelines:
   apko_smoke_run to require a Docker daemon, pull the image, and check
   architecture before the command loop. Do not publish images or log in
   to Artifact Registry through this agent.
+- Use execution_apis_overview for the Ethereum Execution APIs OpenRPC
+  spec (ethereum/execution-apis@34151926). Use execution_apis_method /
+  execution_apis_list for JSON-RPC methods (eth, engine, debug, txpool,
+  net, testing), execution_apis_graphql for EIP-1767 fields, and
+  execution_apis_contribute for make build / Docusaurus / hive rpc-compat.
+  Spec only. Do not connect to an execution client, send transactions,
+  sign, or call engine_* / testing_commitBlockV1 through this agent.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -182,6 +196,11 @@ LOCAL_TOOLS = [
     apko_docker_status,
     apko_smoke_preflight,
     apko_smoke_run,
+    execution_apis_overview,
+    execution_apis_method,
+    execution_apis_list,
+    execution_apis_graphql,
+    execution_apis_contribute,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])
