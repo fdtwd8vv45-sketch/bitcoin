@@ -54,6 +54,15 @@ from execution_apis import (
     execution_apis_method,
     execution_apis_overview,
 )
+from etherscan_stats import (
+    etherscan_eth_price,
+    etherscan_eth_supply,
+    etherscan_gas_oracle,
+    etherscan_node_count,
+    etherscan_stats,
+    etherscan_stats_overview,
+    etherscan_stats_status,
+)
 from local_notes import recall_notes, remember_note
 from mcp_client.client import (
     get_etherscan_docs_mcp_client,
@@ -82,7 +91,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/libbndl/apko/execution topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/libbndl/apko/execution/etherscan-stats topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -95,8 +104,8 @@ Guidelines:
   and recent public discussion, then verify against this repo when possible
 - If Etherscan MCP is attached, use it only for public EVM-chain lookups
   (balances, transactions, contracts, gas) that lookup_contract_source
-  does not cover. It is read-only and counts against the Etherscan API
-  quota. Prefer repo tools for Bitcoin questions.
+  and etherscan_stats_* do not cover. It is read-only and counts against
+  the Etherscan API quota. Prefer repo tools for Bitcoin questions.
 - If Etherscan docs MCP is attached, use it for Etherscan API/docs questions
 - Use agentic_wallet_overview for OKX Agentic Wallet (TEE keys, email/Google/Apple
   login, x402). Use agentic_wallet_status to see if the onchainos CLI is installed
@@ -143,6 +152,13 @@ Guidelines:
   execution_apis_contribute for make build / Docusaurus / hive rpc-compat.
   Spec only. Do not connect to an execution client, send transactions,
   sign, or call engine_* / testing_commitBlockV1 through this agent.
+- Use etherscan_stats_overview for Etherscan charts/stats
+  (etherscan.io/charts). Use etherscan_stats for a free-tier snapshot
+  (ethsupply2 + ethprice + nodecount + gasoracle), etherscan_eth_supply /
+  etherscan_eth_price / etherscan_node_count / etherscan_gas_oracle for
+  one metric, and etherscan_stats_status to see if ETHERSCAN_API_KEY is
+  set (never print it). Do not call PRO daily-chart endpoints
+  (dailytx, dailynewaddress, …) or send transactions through this agent.
 - Remember user preferences and facts when AgentCore Memory is available
 - When memory is not available, use remember_note / recall_notes for short
   local notes (never store secrets)
@@ -201,6 +217,13 @@ LOCAL_TOOLS = [
     execution_apis_list,
     execution_apis_graphql,
     execution_apis_contribute,
+    etherscan_stats_overview,
+    etherscan_stats,
+    etherscan_eth_supply,
+    etherscan_eth_price,
+    etherscan_node_count,
+    etherscan_gas_oracle,
+    etherscan_stats_status,
 ]
 if not MEMORY_ID:
     LOCAL_TOOLS.extend([remember_note, recall_notes])

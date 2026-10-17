@@ -31,6 +31,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py apko plan path/to/images.apko.json
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py execution eth_blockNumber
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py etherscan-stats
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py etherscan-stats snapshot
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py   # interactive prompt
 ```
 
@@ -69,7 +71,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `libbndl`, `apko`, `execution` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `libbndl`, `apko`, `execution`, `etherscan-stats` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -85,6 +87,7 @@ web search, online evals. This environment cannot deploy those.
 | `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
 | `apko_smoke_overview` / `plan` / `status` / `preflight` / `run` | APKO smoke contract pinned to ethereum-optimism/actions@7eaff21e (factory@b87283a8: Docker daemon + pull/arch preflight) |
 | `execution_apis_overview` / `method` / `list` / `graphql` / `contribute` | Ethereum Execution APIs spec pinned to ethereum/execution-apis@34151926 (OpenRPC JSON-RPC + EIP-1767 GraphQL; never calls a node) |
+| `etherscan_stats_overview` / `etherscan_stats` / `etherscan_eth_supply` / `etherscan_eth_price` / `etherscan_node_count` / `etherscan_gas_oracle` / `etherscan_stats_status` | Free Etherscan charts/stats (`ethsupply2`, `ethprice`, `nodecount`, `gasoracle`); never calls PRO daily endpoints |
 | Gateway `WebSearch` | After deploy: search BIPs and public discussion |
 | Etherscan MCP | Optional. Set `ETHERSCAN_API_KEY` for official EVM data + docs MCP |
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
@@ -127,13 +130,17 @@ Official Etherscan MCP servers are configured for Cursor in
 [`.cursor/mcp.json`](../.cursor/mcp.json). The same key also enables the
 local `source` / `lookup_contract_source` tool, which calls Etherscan API
 v2 `module=contract&action=getsourcecode` on `api.etherscan.io` (allowlisted
-HTTPS GET). Create a key at https://etherscan.io/apidashboard and export it
-before starting Cursor, the local CLI, or the live agent:
+HTTPS GET), and the free `etherscan-stats` tools (`ethsupply2`,
+`ethprice`, `nodecount`, `gasoracle`). Create a key at
+https://etherscan.io/apidashboard and export it before starting Cursor,
+the local CLI, or the live agent:
 
 ```bash
 export ETHERSCAN_API_KEY=your_key
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py source 0xdAC17F958D2ee523a2206206994597C13D831ec7
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py source 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 arbitrum
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py etherscan-stats snapshot
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py etherscan-stats supply
 ```
 
 Pass a numeric `chainid` or a name such as `ethereum`, `arbitrum`, or `base`
@@ -152,6 +159,8 @@ BitcoinAgent attaches the same servers when `ETHERSCAN_API_KEY` is set
 key to an MCP target, so the runtime talks to Etherscan directly. The
 tools are read-only and count against your Etherscan quota. Docs:
 https://docs.etherscan.io/api-reference/endpoint/getsourcecode
+and https://docs.etherscan.io/endpoint-showcase/charts-and-stats.
+See [ETHERSCAN_STATS.md](ETHERSCAN_STATS.md).
 
 ## Jupiter (optional)
 

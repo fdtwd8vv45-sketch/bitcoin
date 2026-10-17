@@ -2,7 +2,8 @@ This is BitcoinAgent, a Strands + AgentCore assistant for this Bitcoin Core
 tree. `main.py` exposes repo tools, public mempool.space lookups, optional
 AgentCore Memory, BitcoinGateway web-search after deploy, optional official
 Etherscan MCP servers when `ETHERSCAN_API_KEY` is set, a local
-`lookup_contract_source` tool (Etherscan `getsourcecode`), a read-only OKX
+`lookup_contract_source` tool (Etherscan `getsourcecode`), free-tier
+Etherscan charts/stats (`etherscan_stats_*`), a read-only OKX
 Agentic Wallet overview / `onchainos` CLI status check, and read-only Jupiter
 Price / Tokens lookups plus optional Jupiter docs MCP. Express
 Verification is eligibility-only (`check-eligibility`); this agent does
@@ -30,6 +31,7 @@ python3 local_cli.py libbndl inspect path/to/file.BNDL
 python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
 python3 local_cli.py apko plan path/to/images.apko.json
 python3 local_cli.py execution eth_blockNumber
+python3 local_cli.py etherscan-stats snapshot
 ```
 
 `../../scripts/doctor.sh` lists what is still needed for `agentcore dev` / deploy.
@@ -60,7 +62,7 @@ invoking the agent.
 | Variable | Required | Description |
 | --- | --- | --- |
 | `LOCAL_DEV` | No | Set to `1` to use `.env.local` instead of AgentCore Identity |
-| `ETHERSCAN_API_KEY` | No | Enables `lookup_contract_source`, official Etherscan data MCP (`mcp.etherscan.io`), and docs MCP |
+| `ETHERSCAN_API_KEY` | No | Enables `lookup_contract_source`, free `etherscan_stats_*` tools, official Etherscan data MCP (`mcp.etherscan.io`), and docs MCP |
 | `ETHERSCAN_DOCS_MCP` | No | Set to `1` to attach Etherscan docs MCP without a data API key |
 | `JUPITER_API_KEY` | No | Optional `x-api-key` for higher Jupiter Price/Tokens/eligibility rate limits; also attaches Jupiter docs MCP |
 | `JUPITER_DOCS_MCP` | No | Set to `1` to attach Jupiter docs MCP (`developers.jup.ag/docs/mcp`) without an API key |
@@ -89,6 +91,9 @@ on a local Docker daemon. See `../../APKO.md`.
 
 `execution_apis_*` looks up the bundled Ethereum Execution APIs OpenRPC
 spec (and EIP-1767 GraphQL fields). See `../../EXECUTION_APIS.md`.
+
+`etherscan_stats_*` reads free Etherscan charts/stats (`ethsupply2`,
+`ethprice`, `nodecount`, `gasoracle`). See `../../ETHERSCAN_STATS.md`.
 
 # Developing locally
 
