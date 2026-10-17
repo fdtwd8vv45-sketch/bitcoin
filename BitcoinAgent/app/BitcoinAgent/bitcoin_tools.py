@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, execution.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, execution, etherscan-stats.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -290,7 +290,7 @@ def developer_howto(topic: str) -> str:
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
             "agentic, jupiter, phantom, coinstats, libbndl, apko, execution, "
-            "remember, notes\n"
+            "etherscan-stats, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
         ),
@@ -440,6 +440,27 @@ def developer_howto(topic: str) -> str:
             "Not Bitcoin Core RPC — that stays on `rpc` / lookup_rpc.\n"
             "See BitcoinAgent/EXECUTION_APIS.md."
         ),
+        "etherscan-stats": (
+            "Etherscan charts and statistics are API v2 module=stats "
+            "(plus gastracker/gasoracle), the numbers behind "
+            "etherscan.io/charts.\n"
+            "This agent is read-only and free-tier only: supply "
+            "(ethsupply2), price (ethprice), nodes (nodecount), gas "
+            "oracle, and a snapshot of those four. It does not call PRO "
+            "daily endpoints (dailytx, dailynewaddress, …).\n"
+            "Needs ETHERSCAN_API_KEY from https://etherscan.io/apidashboard\n"
+            "Docs: https://docs.etherscan.io/endpoint-showcase/charts-and-stats\n"
+            "Build with AI: https://docs.etherscan.io/build-with-ai/introduction\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "etherscan-stats\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "etherscan-stats snapshot\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "etherscan-stats supply\n"
+            "Not Bitcoin Core chain stats — those stay on fees / tip / "
+            "difficulty. Contract source stays on `source`.\n"
+            "See BitcoinAgent/ETHERSCAN_STATS.md."
+        ),
     }
     if key in {"agentic-wallet", "agenticwallet", "okx-wallet"}:
         key = "agentic"
@@ -476,12 +497,22 @@ def developer_howto(topic: str) -> str:
         "eth-rpc",
     }:
         key = "execution"
+    if key in {
+        "ethstats",
+        "etherscan-statistics",
+        "etherscan-charts",
+        "ethsupply",
+        "ethsupply2",
+        "ethprice",
+        "nodecount",
+    }:
+        key = "etherscan-stats"
     if key in guides:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
         "receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, "
-        "execution.\n"
+        "execution, etherscan-stats.\n"
         "You can also call search_docs with a free-text query."
     )
 

@@ -68,6 +68,7 @@ class BitcoinToolsTests(unittest.TestCase):
         self.assertIn("2b88eff", developer_howto("libbndl"))
         self.assertIn("7eaff21", developer_howto("apko"))
         self.assertIn("34151926", developer_howto("execution"))
+        self.assertIn("etherscan.io/charts", developer_howto("etherscan-stats"))
         self.assertIn("Unknown topic", developer_howto("spaceships"))
 
     def test_strip_trailing_tool_use(self) -> None:

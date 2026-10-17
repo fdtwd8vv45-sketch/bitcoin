@@ -14,6 +14,8 @@
     python3 local_cli.py apko plan path/to/images.apko.json
     python3 local_cli.py execution
     python3 local_cli.py execution eth_blockNumber
+    python3 local_cli.py etherscan-stats
+    python3 local_cli.py etherscan-stats snapshot
     python3 local_cli.py          # interactive prompt
 """
 
@@ -56,6 +58,7 @@ from execution_apis import (
     execution_apis_overview,
     execution_from_arg,
 )
+from etherscan_stats import etherscan_stats_from_arg
 from local_notes import recall_notes, remember_note
 from network_tools import chain_tip_height, difficulty_adjustment, lookup_transaction, recommended_fees
 from receive_check import check_receive, classify_payment_id
@@ -66,7 +69,7 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | libbndl | apko | execution
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | libbndl | apko | execution | etherscan-stats
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
@@ -75,6 +78,7 @@ _HELP = """Commands (no AWS required):
   libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
   apko [plan|status|preflight|run]  APKO smoke plan / Docker preflight (actions@7eaff21e)
   execution [method|list|graphql|contribute]  Ethereum Execution APIs spec (OpenRPC JSON-RPC + GraphQL)
+  etherscan-stats [snapshot|supply|price|nodes|gas|status]  Etherscan charts/stats (needs ETHERSCAN_API_KEY)
   fees                Recommended fees from mempool.space
   tip                 Current chain tip height
   difficulty          Difficulty-adjustment estimate
@@ -237,6 +241,29 @@ _EXECUTION_METHOD = re.compile(
     r"\b((?:eth|engine|debug|txpool|net|testing|web3)_[A-Za-z0-9]+)\b",
     re.I,
 )
+
+
+def _looks_like_etherscan_stats(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(etherscan-stats|ethstats|etherscan stats|"
+            r"etherscan\.io/charts|etherscan\.io/statscharts|"
+            r"ethsupply2?|ethprice|nodecount|gasoracle)\b",
+            lower,
+        )
+    ) or bool(
+        re.search(r"\betherscan\b", lower)
+        and re.search(r"\b(stat|chart|supply|price|nodes?|gas|oracle)\b", lower)
+    )
+
+
+def _etherscan_command(arg: str) -> str:
+    raw = (arg or "").strip()
+    if _ETH.search(raw):
+        return _contract_source_from_arg(raw)
+    if re.search(r"\b(source|getsourcecode|contract)\b", raw, re.I):
+        return _contract_source_from_arg(raw)
+    return etherscan_stats_from_arg(raw)
 
 
 def _looks_like_execution(lower: str) -> bool:
@@ -419,6 +446,9 @@ def route_query(text: str) -> str:
         "execution-apis": lambda: execution_from_arg(arg),
         "executionapis": lambda: execution_from_arg(arg),
         "ethrpc": lambda: execution_from_arg(arg),
+        "etherscan-stats": lambda: etherscan_stats_from_arg(arg),
+        "ethstats": lambda: etherscan_stats_from_arg(arg),
+        "etherscan": lambda: _etherscan_command(arg),
         "fees": recommended_fees,
         "tip": chain_tip_height,
         "height": chain_tip_height,
@@ -493,6 +523,15 @@ def route_query(text: str) -> str:
         return apko_smoke_overview()
     if cmd.split("_", 1)[0] in EXECUTION_NAMESPACES and "_" in cmd:
         return execution_apis_method(raw)
+    if _looks_like_etherscan_stats(lower):
+        rest = re.sub(
+            r"\b(etherscan-stats|ethstats|etherscan stats|etherscan|"
+            r"etherscan\.io/charts|etherscan\.io/statscharts)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return etherscan_stats_from_arg(rest)
     if _looks_like_execution(lower):
         rest = re.sub(
             r"\b(execution-apis|execution apis|execution api|execution|"
@@ -561,6 +600,9 @@ def route_query(text: str) -> str:
         "execution-apis": "execution",
         "openrpc": "execution",
         "engine-api": "execution",
+        "etherscan-stats": "etherscan-stats",
+        "ethstats": "etherscan-stats",
+        "etherscan-statistics": "etherscan-stats",
     }
     for needle, topic in howto_topics.items():
         if needle in lower and re.search(r"\b(how|build|run|test|contribute|start)\b", lower):
