@@ -24,6 +24,8 @@ python3 BitcoinAgent/app/BitcoinAgent/local_cli.py phantom packages
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats coin bitcoin
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py coinstats portfolio
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py cubic
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py cubic status
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl inspect path/to/file.BNDL
 python3 BitcoinAgent/app/BitcoinAgent/local_cli.py libbndl extract path/to/file.BNDL hello.txt
@@ -71,7 +73,7 @@ web search, online evals. This environment cannot deploy those.
 | `lookup_rpc` | Explain a JSON-RPC method from the C++ source / bundled index |
 | `list_rpc_methods` | List methods, optionally by category |
 | `search_docs` | Search Bitcoin Core markdown docs |
-| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `libbndl`, `apko`, `execution`, `etherscan-stats` |
+| `developer_howto` | Short guides for `build`, `test`, `contribute`, `rpc`, `agent`, `local`, `receive`, `wallet`, `agentic`, `jupiter`, `phantom`, `coinstats`, `cubic`, `libbndl`, `apko`, `execution`, `etherscan-stats` |
 | `recommended_fees` | Live fee estimates from mempool.space |
 | `chain_tip_height` | Current Bitcoin tip height |
 | `difficulty_adjustment` | Difficulty-adjustment estimate |
@@ -84,6 +86,7 @@ web search, online evals. This environment cannot deploy those.
 | `jupiter_overview` / `jupiter_price` / `jupiter_token_search` / `jupiter_verify_eligibility` / `jupiter_cli_status` | Jupiter docs overview, USD prices, token search, VRFD Express eligibility, read-only `jup --version` |
 | `phantom_connect_overview` / `phantom_connect_packages` / `phantom_connect_cli_status` | Phantom Connect SDK overview, npm latest versions, read-only `phantom --version` |
 | `coinstats_overview` / `coinstats_coin` / `coinstats_markets` / `coinstats_portfolio_list` / `coinstats_portfolio` / `coinstats_wallet` / `coinstats_status` | CoinStats MCP overview, prices, global market, portfolio list/coins + PnL, one-chain wallet balance |
+| `cubic_overview` / `cubic_status` | cubic hosted MCP overview + OAuth / CLI status (never prints `CUBIC_API_KEY`) |
 | `libbndl_overview` / `inspect` / `lookup` / `types` / `extract` / `create` / `add` / `replace` / `fetch` | Criterion/EA BUNDLE tools pinned to Bo98/libbndl@2b88eff (inspect, GetBinary extract, BND2 save, http(s) fetch) |
 | `apko_smoke_overview` / `plan` / `status` / `preflight` / `run` | APKO smoke contract pinned to ethereum-optimism/actions@7eaff21e (factory@b87283a8: Docker daemon + pull/arch preflight) |
 | `execution_apis_overview` / `method` / `list` / `graphql` / `contribute` | Ethereum Execution APIs spec pinned to ethereum/execution-apis@34151926 (OpenRPC JSON-RPC + EIP-1767 GraphQL; never calls a node) |
@@ -93,6 +96,7 @@ web search, online evals. This environment cannot deploy those.
 | Jupiter docs MCP | Optional. Set `JUPITER_DOCS_MCP=1` (or `JUPITER_API_KEY`) for Jupiter docs MCP |
 | Phantom docs MCP | Optional. Set `PHANTOM_DOCS_MCP=1` for Phantom Connect SDK docs MCP |
 | CoinStats MCP | Optional. Cursor OAuth at `mcp.coinstats.app`; REST needs `COINSTATS_API_KEY` |
+| cubic MCP | Optional. Cursor OAuth at `www.cubic.dev/api/mcp`; write tools are not attached |
 
 Refresh the bundled index after RPC changes:
 
@@ -257,6 +261,29 @@ BitcoinAgent does not attach the hosted MCP at runtime because those
 tools can mutate portfolios. The runtime talks to `api.coinstats.app`
 directly when `COINSTATS_API_KEY` is set.
 
+## cubic (optional)
+
+[cubic](https://www.cubic.dev) is an AI code-review platform. The hosted
+MCP at `https://www.cubic.dev/api/mcp` (Streamable HTTP + OAuth) exposes
+PR review issues, wikis, scans, learnings, billing, and team tools.
+BitcoinAgent only explains the endpoint. It does not attach the server,
+start reviews, change issue state, or manage seats. See
+[CUBIC.md](CUBIC.md).
+
+```bash
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py cubic
+python3 BitcoinAgent/app/BitcoinAgent/local_cli.py cubic status
+```
+
+| Server | URL | Auth |
+| --- | --- | --- |
+| `cubic` | `https://www.cubic.dev/api/mcp` | OAuth (Cursor) |
+
+Cursor is already wired in [`.cursor/mcp.json`](../.cursor/mcp.json).
+Use the exact `www.cubic.dev` URL. BitcoinAgent does not attach the
+hosted MCP at runtime because those tools can trigger reviews, update
+issues, change billing, and upload secrets.
+
 ## libbndl (optional)
 
 [libbndl](https://github.com/Bo98/libbndl) reads and writes Criterion/EA
@@ -406,6 +433,7 @@ agentcore deploy
 - [Jupiter](JUPITER.md) — Jupiter APIs, docs MCP, Price/Tokens, VRFD eligibility (read-only in this agent)
 - [Phantom Connect](PHANTOM.md) — Phantom Connect SDKs, docs MCP, npm versions (read-only in this agent)
 - [CoinStats](COINSTATS.md) — CoinStats MCP (Cursor OAuth) + read-only prices / portfolio / wallet
+- [cubic](CUBIC.md) — cubic MCP (Cursor OAuth); write tools are not attached
 - [libbndl](LIBBNDL.md) — Criterion/EA BUNDLE inspect/lookup, pinned to Bo98/libbndl@2b88eff
 - [APKO](APKO.md) — APKO smoke plan/preflight, pinned to ethereum-optimism/actions@7eaff21e
 - [Execution APIs](EXECUTION_APIS.md) — Ethereum JSON-RPC OpenRPC + GraphQL spec lookup, pinned to ethereum/execution-apis@34151926

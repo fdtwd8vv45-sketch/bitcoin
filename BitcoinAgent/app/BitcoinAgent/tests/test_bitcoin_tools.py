@@ -65,6 +65,7 @@ class BitcoinToolsTests(unittest.TestCase):
         self.assertIn("npm i -g @jup-ag/cli", developer_howto("jupiter"))
         self.assertIn("github.com/phantom/phantom-connect-sdk", developer_howto("phantom"))
         self.assertIn("mcp.coinstats.app", developer_howto("coinstats"))
+        self.assertIn("www.cubic.dev/api/mcp", developer_howto("cubic"))
         self.assertIn("2b88eff", developer_howto("libbndl"))
         self.assertIn("7eaff21", developer_howto("apko"))
         self.assertIn("34151926", developer_howto("execution"))

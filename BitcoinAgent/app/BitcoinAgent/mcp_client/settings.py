@@ -1,8 +1,9 @@
-"""Official Etherscan, Jupiter, Phantom, and CoinStats MCP endpoints and flags.
+"""Official Etherscan, Jupiter, Phantom, CoinStats, and cubic MCP endpoints and flags.
 
 AgentCore Gateway MCP targets cannot attach an API key or complete a
 browser OAuth flow, so BitcoinAgent talks to REST APIs from agent code
-when the env vars are set. Never log or persist API keys.
+when the env vars are set. Never log or persist API keys. cubic stays
+Cursor-OAuth only; CUBIC_API_KEY is detected, never sent.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ ETHERSCAN_DOCS_MCP_URL = "https://docs.etherscan.io/mcp"
 JUPITER_DOCS_MCP_URL = "https://developers.jup.ag/docs/mcp"
 PHANTOM_DOCS_MCP_URL = "https://docs.phantom.com/mcp"
 COINSTATS_MCP_URL = "https://mcp.coinstats.app/mcp"
+CUBIC_MCP_URL = "https://www.cubic.dev/api/mcp"
 
 _TRUTHY = {"1", "true", "yes", "on"}
 
@@ -66,3 +68,13 @@ def coinstats_api_key() -> str | None:
 
 def coinstats_api_key_set() -> bool:
     return coinstats_api_key() is not None
+
+
+def cubic_api_key() -> str | None:
+    """Personal cubic key if set. Callers must not print or send the value."""
+    key = os.getenv("CUBIC_API_KEY", "").strip()
+    return key or None
+
+
+def cubic_api_key_set() -> bool:
+    return cubic_api_key() is not None

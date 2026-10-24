@@ -247,7 +247,7 @@ def search_docs(query: str) -> str:
 def developer_howto(topic: str) -> str:
     """Return a short Bitcoin Core developer how-to for a common topic.
 
-    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, execution, etherscan-stats.
+    Supported topics: build, test, contribute, rpc, agent, local, receive, wallet, agentic, jupiter, phantom, coinstats, cubic, libbndl, apko, execution, etherscan-stats.
 
     The local CLI also has `source <0xaddress> [chain]` for verified EVM
     contract source via Etherscan getsourcecode (needs ETHERSCAN_API_KEY).
@@ -289,7 +289,7 @@ def developer_howto(topic: str) -> str:
             "Use the tools without Bedrock or AWS:\n"
             "1. python3 BitcoinAgent/app/BitcoinAgent/local_cli.py\n"
             "2. Commands: rpc, list, docs, howto, fees, tip, tx, source, receive, "
-            "agentic, jupiter, phantom, coinstats, libbndl, apko, execution, "
+            "agentic, jupiter, phantom, coinstats, cubic, libbndl, apko, execution, "
             "etherscan-stats, remember, notes\n"
             "3. ./BitcoinAgent/scripts/doctor.sh explains what is still needed "
             "for agentcore dev / deploy."
@@ -392,6 +392,23 @@ def developer_howto(topic: str) -> str:
             "coinstats portfolio\n"
             "See BitcoinAgent/COINSTATS.md."
         ),
+        "cubic": (
+            "cubic hosted MCP (www.cubic.dev/api/mcp) is PR review issues, "
+            "wikis, scans, learnings, billing, and team tools over "
+            "Streamable HTTP + OAuth.\n"
+            "This agent is read-only: overview and status. It does not "
+            "start reviews, change issue state, update seats or "
+            "subscriptions, or upload repository secrets.\n"
+            "Cursor MCP is already in .cursor/mcp.json (cubic, type http).\n"
+            "Use the exact URL https://www.cubic.dev/api/mcp — not cubic.dev.\n"
+            "Connect: https://docs.cubic.dev/ide/mcp-server\n"
+            "CLI (on a machine you control): curl -fsSL https://cubic.dev/install | bash\n"
+            "         then: cubic review\n"
+            "Local: python3 BitcoinAgent/app/BitcoinAgent/local_cli.py cubic\n"
+            "         python3 BitcoinAgent/app/BitcoinAgent/local_cli.py "
+            "cubic status\n"
+            "See BitcoinAgent/CUBIC.md."
+        ),
         "libbndl": (
             "libbndl reads Criterion/EA BUNDLE archives (Burnout Paradise and "
             "related titles). This agent pins Bo98/libbndl@2b88eff "
@@ -482,6 +499,14 @@ def developer_howto(topic: str) -> str:
         "mcp.coinstats",
     }:
         key = "coinstats"
+    if key in {
+        "cubic-mcp",
+        "cubic.dev",
+        "www.cubic.dev",
+        "cubic-review",
+        "cubic-cli",
+    }:
+        key = "cubic"
     if key in {"bndl", "bnd2", "bundle", "libapt2"}:
         key = "libbndl"
     if key in {"melange", "ubuntu-slim", "apko-smoke", "smoke-test"}:
@@ -511,7 +536,7 @@ def developer_howto(topic: str) -> str:
         return guides[key]
     return (
         "Unknown topic. Use one of: build, test, contribute, rpc, agent, local, "
-        "receive, wallet, agentic, jupiter, phantom, coinstats, libbndl, apko, "
+        "receive, wallet, agentic, jupiter, phantom, coinstats, cubic, libbndl, apko, "
         "execution, etherscan-stats.\n"
         "You can also call search_docs with a free-text query."
     )

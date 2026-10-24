@@ -40,6 +40,7 @@ do not have to mint session IDs by hand.
 - [x] Phantom CLI status is `phantom --version` only; `PHANTOM_APP_ID` is never printed
 - [x] CoinStats REST calls are allowlisted HTTPS GET to `api.coinstats.app` only (`/v1/coins`, `/v1/coins/{id}`, `/v1/markets`, `/v1/portfolio/list`, `/v1/portfolio/coins`, `/v1/wallet/balance`); `COINSTATS_API_KEY` is an `X-API-KEY` header and is not logged
 - [x] CoinStats hosted MCP (`mcp.coinstats.app`) is Cursor OAuth only; write tools (`add-portfolio-transaction`, `connect-portfolio-*`, `sync-portfolio`, `delete-portfolio`) are not attached and this agent does not mutate portfolios or send `all`/`forceall` wallet queries
+- [x] cubic hosted MCP (`www.cubic.dev/api/mcp`) is Cursor OAuth only; write tools (`trigger_pr_review`, `update_pr_issue_status`, `set_pr_auto_fix`, `update_issue_status`, `update_member_seat`, `update_subscription`, `update_flex_capacity`, `update_session_environment`, `create_secrets_upload`) are not attached and this agent does not send `CUBIC_API_KEY`
 - [x] Execution APIs lookup is the bundled OpenRPC/GraphQL spec at ethereum/execution-apis@34151926; this agent does not connect to an execution client, send `eth_sendRawTransaction`, sign, or call `engine_*` / `testing_commitBlockV1`
 - [ ] Register any future private API keys with `agentcore add credential` (never runtime env vars)
 

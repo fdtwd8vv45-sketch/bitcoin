@@ -17,6 +17,10 @@
     },
     "coinstats": {
       "url": "https://mcp.coinstats.app/mcp"
+    },
+    "cubic": {
+      "type": "http",
+      "url": "https://www.cubic.dev/api/mcp"
     }
   }
 }
