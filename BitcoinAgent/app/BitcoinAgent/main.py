@@ -36,6 +36,7 @@ from coinstats import (
     coinstats_status,
     coinstats_wallet,
 )
+from cubic import cubic_overview, cubic_status
 from libbndl import (
     libbndl_add,
     libbndl_create,
@@ -91,7 +92,7 @@ from a real mistake using check_receive. Never ask for secrets.
 Guidelines:
 - Use lookup_rpc or list_rpc_methods for RPC questions
 - Use search_docs for documentation and developer-notes questions
-- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/libbndl/apko/execution/etherscan-stats topics
+- Use developer_howto for common build/test/contribute/rpc/agent/local/receive/wallet/agentic/jupiter/phantom/coinstats/cubic/libbndl/apko/execution/etherscan-stats topics
 - Use check_receive when the user is waiting on a payment or worries they
   copied the wrong address. Prefer an address or txid; never a seed phrase
 - Use recommended_fees, chain_tip_height, difficulty_adjustment,
@@ -132,6 +133,11 @@ Guidelines:
   COINSTATS_API_KEY is set (never print it). Needs the key for REST. Do not
   add transactions, connect wallets/exchanges, sync, or delete portfolios.
   Do not attach the hosted CoinStats MCP write tools through this agent.
+- Use cubic_overview for the cubic hosted MCP (www.cubic.dev/api/mcp,
+  OAuth in Cursor). Use cubic_status to see if CUBIC_API_KEY is set
+  (never print it) and whether the cubic CLI is on PATH. Do not attach
+  the hosted cubic MCP. Do not start reviews, change issue state, update
+  seats or subscriptions, or upload repository secrets through this agent.
 - Use libbndl_overview for Criterion/EA BUNDLE archives (libbndl pinned to
   Bo98/libbndl@2b88eff, non-Xbox BNDL + v3/v4). Use libbndl_inspect /
   libbndl_types / libbndl_lookup to list resources, libbndl_extract to write
@@ -198,6 +204,8 @@ LOCAL_TOOLS = [
     coinstats_portfolio,
     coinstats_wallet,
     coinstats_status,
+    cubic_overview,
+    cubic_status,
     libbndl_overview,
     libbndl_inspect,
     libbndl_lookup,

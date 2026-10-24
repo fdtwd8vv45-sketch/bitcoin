@@ -78,3 +78,8 @@ def get_phantom_docs_mcp_client() -> MCPClient | None:
 # only. It is not attached here: AgentCore Gateway cannot complete
 # browser OAuth, and the catalog includes write tools (add / connect /
 # sync / delete portfolio). BitcoinAgent uses allowlisted REST GETs.
+#
+# cubic hosted MCP (https://www.cubic.dev/api/mcp) is Cursor OAuth only.
+# It is not attached here: Gateway cannot complete browser OAuth, and
+# the catalog includes write tools (trigger review, update issues,
+# billing, secrets). BitcoinAgent only explains the endpoint.

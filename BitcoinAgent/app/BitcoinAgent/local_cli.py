@@ -9,6 +9,8 @@
     python3 local_cli.py phantom
     python3 local_cli.py phantom packages
     python3 local_cli.py coinstats coin bitcoin
+    python3 local_cli.py cubic
+    python3 local_cli.py cubic status
     python3 local_cli.py libbndl inspect path/to/file.BNDL
     python3 local_cli.py libbndl extract path/to/file.BNDL hello.txt
     python3 local_cli.py apko plan path/to/images.apko.json
@@ -51,6 +53,7 @@ from coinstats import (
     coinstats_status,
     coinstats_wallet,
 )
+from cubic import cubic_overview, cubic_status
 from libbndl import libbndl_from_arg, libbndl_overview
 from execution_apis import (
     NAMESPACES as EXECUTION_NAMESPACES,
@@ -69,12 +72,13 @@ _HELP = """Commands (no AWS required):
   rpc <name>          Look up a JSON-RPC method
   list [category]     List RPC methods
   docs <query>        Search Bitcoin Core markdown docs
-  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | libbndl | apko | execution | etherscan-stats
+  howto <topic>       build | test | contribute | rpc | agent | local | receive | wallet | agentic | jupiter | phantom | coinstats | cubic | libbndl | apko | execution | etherscan-stats
   wallet              How a payment arrives in a Bitcoin wallet
   agentic [status]    OKX Agentic Wallet overview, or onchainos CLI status
   jupiter [price|token|verify|status]  Jupiter overview, prices, search, VRFD eligibility, or jup CLI
   phantom [packages|status]  Phantom Connect SDK overview, npm versions, or phantom CLI
   coinstats [coin|markets|portfolio|wallet|status]  CoinStats MCP/REST overview, prices, portfolio, wallet
+  cubic [status]      cubic hosted MCP overview, or OAuth / CLI status
   libbndl [inspect|lookup|types|extract|create|add|replace|fetch]  BUNDLE inspect/extract/save/fetch
   apko [plan|status|preflight|run]  APKO smoke plan / Docker preflight (actions@7eaff21e)
   execution [method|list|graphql|contribute]  Ethereum Execution APIs spec (OpenRPC JSON-RPC + GraphQL)
@@ -157,6 +161,28 @@ def _looks_like_coinstats(lower: str) -> bool:
             lower,
         )
     )
+
+
+def _looks_like_cubic(lower: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(cubic\.dev|www\.cubic\.dev|cubic mcp|cubic-mcp|"
+            r"cubic review|@cubic-dev-ai|cubic-dev-ai)\b",
+            lower,
+        )
+    )
+
+
+def _cubic_from_arg(text: str) -> str:
+    raw = (text or "").strip()
+    lower = raw.lower()
+    if re.search(r"^(status|key|auth|cli|version)\b", lower):
+        return cubic_status()
+    if re.search(r"\b(status|api key|apikey|cli|version)\b", lower) and not re.search(
+        r"\b(how|what|docs|overview)\b", lower
+    ):
+        return cubic_status()
+    return cubic_overview()
 
 
 def _coinstats_from_arg(text: str) -> str:
@@ -437,6 +463,8 @@ def route_query(text: str) -> str:
         "phantom-connect": lambda: _phantom_from_arg(arg),
         "coinstats": lambda: _coinstats_from_arg(arg),
         "coin-stats": lambda: _coinstats_from_arg(arg),
+        "cubic": lambda: _cubic_from_arg(arg),
+        "cubic-mcp": lambda: _cubic_from_arg(arg),
         "libbndl": lambda: libbndl_from_arg(arg),
         "bndl": lambda: libbndl_from_arg(arg),
         "bnd2": lambda: libbndl_from_arg(arg),
@@ -502,6 +530,15 @@ def route_query(text: str) -> str:
             flags=re.I,
         )
         return _coinstats_from_arg(rest)
+    if _looks_like_cubic(lower):
+        rest = re.sub(
+            r"\b(cubic\.dev|www\.cubic\.dev|cubic mcp|cubic-mcp|"
+            r"cubic review|@cubic-dev-ai|cubic-dev-ai|cubic)\b",
+            " ",
+            raw,
+            flags=re.I,
+        )
+        return _cubic_from_arg(rest)
     if _looks_like_libbndl(lower):
         rest = re.sub(
             r"\b(libbndl|libapt2|bundle archive|burnout paradise)\b",
@@ -590,6 +627,9 @@ def route_query(text: str) -> str:
         "phantom-connect": "phantom",
         "coinstats": "coinstats",
         "coin-stats": "coinstats",
+        "cubic": "cubic",
+        "cubic-mcp": "cubic",
+        "cubic.dev": "cubic",
         "libbndl": "libbndl",
         "bndl": "libbndl",
         "bundle": "libbndl",

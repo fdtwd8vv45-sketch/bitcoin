@@ -133,6 +133,12 @@ else
   note "COINSTATS_API_KEY unset — CoinStats overview still works; Cursor OAuth MCP is in .cursor/mcp.json"
 fi
 
+if [[ -n "${CUBIC_API_KEY:-}" ]]; then
+  pass "CUBIC_API_KEY is set (not printed; official cubic CLI in CI only; MCP stays off)"
+else
+  note "CUBIC_API_KEY unset — cubic overview still works; Cursor OAuth MCP is in .cursor/mcp.json"
+fi
+
 if have jup; then
   pass "jup CLI on PATH (Jupiter version check available)"
 else
@@ -149,6 +155,12 @@ if have phantom; then
   pass "phantom CLI on PATH (Phantom Connect version check available)"
 else
   note "phantom CLI unset — Phantom Connect overview still works; install with: npm install -g @phantom/cli"
+fi
+
+if have cubic; then
+  pass "cubic CLI on PATH (version check available; reviews stay off)"
+else
+  note "cubic CLI unset — cubic overview still works; install with: curl -fsSL https://cubic.dev/install | bash"
 fi
 
 if [[ -f "$APP/data/execution_apis_index.json" ]]; then
